@@ -1,1 +1,2 @@
-# Multiplayer_Project
+# ThesisFPS
+Multiplayer roguelike FPS game
