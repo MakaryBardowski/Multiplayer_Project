@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 public class Hotbar {
+
     private final Item[] items;
 
     @Setter
@@ -58,6 +59,7 @@ public class Hotbar {
 
     public synchronized void removeItemAt(int index){
         items[index] = null;
+
         if(inventoryGui != null){
             inventoryGui.updateHotbarButton(index);
         }

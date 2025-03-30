@@ -3,7 +3,7 @@ package game.items.weapons;
 import FirstPersonHands.FirstPersonHandAnimationData;
 import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import projectiles.controls.BulletTracerControl;
@@ -30,7 +30,7 @@ import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.items.AmmoPack;
 import game.items.Holdable;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
@@ -113,8 +113,25 @@ public class Rifle extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new RecoilControl(.2f, -0.1f, .0f, .00f, 30, 3);
-            camRecoil = new NewGunRecoilControl(4, 0.85f, .35f, 60, 0.f);
+            var defaultStats = ((ItemTemplates.RangedWeaponTemplate) template).getDefaultStats();
+            gunRecoil = new RecoilControl(
+                    .2f,
+                    defaultStats.getGunRecoilMaxRotation().getX(),
+                    defaultStats.getGunRecoilMaxRotation().getY(),
+                    defaultStats.getGunRecoilMaxRotation().getZ(),
+                    30,
+                    defaultStats.getGunRecoilMaxPosition().getX(),
+                    defaultStats.getGunRecoilMaxPosition().getY(),
+                    defaultStats.getGunRecoilMaxPosition().getZ()
+            );
+
+            camRecoil = new NewGunRecoilControl(
+                    defaultStats.getCameraVerticalRecoil(),
+                    defaultStats.getCameraHorizontalRecoil(),
+                    defaultStats.getCameraRollRecoil(),
+                    defaultStats.getCameraRecoilSnapiness(),
+                    defaultStats.getCameraBackRecoil()
+            );
 
             model.addControl(firerateControl);
             p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);
@@ -159,12 +176,12 @@ public class Rifle extends RangedWeapon {
     }
 
     private void shoot(Player p) {
-        var cp = hitscan(p);
+        var cd = hitscan(p);
         var cs = ClientGameAppState.getInstance();
-        createBullet(muzzleNode.getWorldTranslation(), cp);
+        createBullet(muzzleNode.getWorldTranslation(), cd.getFirst());
 
         int hostedConnectionId = cs.getClient().getId();
-        HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp, hostedConnectionId);
+        HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cd.getFirst(),cd.getSecond(), hostedConnectionId, cd.getThird());
         cs.getClient().send(trailMessage);
 
         recoilFire();

@@ -13,7 +13,7 @@ import game.entities.grenades.ServerThrownGrenadeControl;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.grenades.ThrownSmokeGrenade;
 import game.entities.mobs.HumanMob;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import game.items.weapons.Grenade;
 import lombok.Getter;
 import lombok.Setter;

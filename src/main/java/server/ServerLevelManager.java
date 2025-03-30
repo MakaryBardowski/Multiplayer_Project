@@ -14,6 +14,9 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import data.jumpToLevelData.BaseJumpToLevelData;
+import events.EventSubscriber;
+import events.GameEvent;
+import events.NewLevelEnteredEvent;
 import game.entities.*;
 import game.entities.factories.AllMobFactory;
 import game.entities.factories.DecorationFactory;
@@ -24,7 +27,7 @@ import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import game.items.AmmoPack;
 import game.items.Item;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import game.items.armor.Armor;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
@@ -64,6 +67,8 @@ import statusEffects.StatusEffect;
 import static server.ServerGameAppState.MAX_PLAYERS;
 
 public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
+    private final ArrayList<EventSubscriber> subscribers = new ArrayList<>();
+
     private final Server server;
 
     @Getter
@@ -179,19 +184,24 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
 
     @Override
     public final void jumpToLevel(BaseJumpToLevelData jumpToLevelData) {
-        var levelIndex = jumpToLevelData.getLevelIndex();
+        var newLevelIndex = jumpToLevelData.getLevelIndex();
         var newLevelSeed = jumpToLevelData.getLevelSeed();
         var newLevelType = jumpToLevelData.getLevelType();
 
         clearEntities();
+        currentLevelIndex = newLevelIndex;
 
-        if(levelIndex == 3 || levelIndex == 5){
+        if(newLevelIndex == 3 || newLevelIndex == 5){
             var hostsByPlayerId = ServerGameAppState.getInstance().getHostsByPlayerId();
 
             var cardSession = new CardChoiceSession(cardChoiceSessions.size());
             cardChoiceSessions.add(cardSession);
 
             for(var player : players){
+                if(player.isDead()){
+                    continue;
+                }
+
                 var cardIdsChosenByPlayer = new HashSet<Integer>();
 
                 for(int i = 0; i < cardChoiceSessions.size()-1; i++) {
@@ -216,18 +226,18 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
             }
         }
 
-        currentLevelIndex = levelIndex;
-        if (levelIndexOutOfBounds(levelIndex)) {
-            System.err.println(LEVEL_INDEX_OUT_OF_BOUNDS_MESSAGE + levelIndex);
+
+        if (levelIndexOutOfBounds(newLevelIndex)) {
+            System.err.println(LEVEL_INDEX_OUT_OF_BOUNDS_MESSAGE + newLevelIndex);
         }
 
-        if (levelIndex == 0) {
+        if (newLevelIndex == 0) {
             initializeCollisionGrid();
         }
 
         Main.getInstance().enqueue(() -> {
             try {
-                var levelGenerator = new ServerLevelGenerator(newLevelSeed,newLevelType,levelIndex);
+                var levelGenerator = new ServerLevelGenerator(newLevelSeed,newLevelType,newLevelIndex);
                 var levelGenerationResult = levelGenerator.generateLevel(MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
                 this.map = levelGenerationResult.getLogicMap();
 
@@ -243,9 +253,8 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 EntitySpawner mg = new EntitySpawner(newLevelSeed, BLOCK_SIZE);
                 mg.spawnNewLevelEntities(levelGenerationResult.getEntitySpawnData());
                 notifyPlayersAboutNewLevelEntities();
-
                 server.broadcast(new NextLevelMessage(currentLevelIndex,newLevelSeed,newLevelType,spawnpointsByPlayerId));
-
+                notifyEventSubscribers(new NewLevelEnteredEvent(currentLevelIndex));
             }catch (IOException exception){
                 System.err.println("Server could not load level of type "+newLevelType +" with seed "+newLevelSeed+". Reason: "+exception.getMessage());
                 server.getConnections().forEach(hostedConnection -> hostedConnection.close("Server failed to load next level no. "+currentLevelIndex+" seed "+newLevelSeed));
@@ -711,7 +720,14 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
 
     public Item registerItemLocal(ItemTemplates.ItemTemplate template, boolean droppable) {
         ItemFactory ifa = new ItemFactory();
-        Item item = ifa.createItem(currentMaxId++, template, droppable);
+        Item item = ifa.createItem(getAndIncreaseNextEntityId(), template, droppable);
+        for(var itemEffect : template.getServerSideEffects()){
+            item.addEffect(EffectFactory.createEffect(itemEffect,getAndIncreaseNextEntityId(),null));
+            if(template.isServerGameEventListener()){
+                System.out.println("adding "+item.getName()+" to subscribers!");
+                addEventSubscriber(item);
+            }
+        }
         return registerEntityLocal(item);
     }
 
@@ -736,4 +752,19 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     public void clearBroadcastEntitiesOnNextLevel(){
         entitiesBroadcastedAtNextLevel.clear();
     }
+
+    public final void addEventSubscriber(EventSubscriber eventSubscriber){
+        subscribers.add(eventSubscriber);
+    }
+
+    public void removeEventSubscriber(EventSubscriber eventSubscriber){
+        subscribers.remove(eventSubscriber);
+    }
+
+    public void notifyEventSubscribers(GameEvent gameEvent){
+        for(var subscriber : subscribers){
+            subscriber.receiveEventNotification(gameEvent);
+        }
+    }
+
 }

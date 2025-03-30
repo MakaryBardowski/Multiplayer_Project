@@ -76,7 +76,8 @@ public class NewGunRecoilControl extends AbstractControl {
                         getRandomNumber(-FastMath.DEG_TO_RAD * horizontalRecoil, FastMath.DEG_TO_RAD * horizontalRecoil), 
                         getRandomNumber(-FastMath.DEG_TO_RAD * rollRecoil, FastMath.DEG_TO_RAD * rollRecoil))
         );
-        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0, 0, -backRecoil));
+//        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(0, 0, -backRecoil));
+        targetVectorRecoil = targetVectorRecoil.subtract(0, 0, -backRecoil);
     }
 
     public float getRandomNumber(float min, float max) {

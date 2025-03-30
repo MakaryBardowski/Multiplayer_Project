@@ -1,5 +1,6 @@
-package cards;
+package cards.tier1;
 
+import cards.AugmentCardTemplate;
 import game.entities.StatusEffectContainer;
 import server.ServerGameAppState;
 import statusEffects.EffectTemplates;

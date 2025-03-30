@@ -63,7 +63,6 @@ public class EquipmentButton extends DraggableButton {
         }
 
         if (dragTarget == null) {
-            lemurPlayerEquipment.getPlayer().getEquipment().removeItem(draggedItemIndexInEquipment);
             var miim = new MobItemInteractionMessage(item.getId(), lemurPlayerEquipment.getPlayer().getId(), MobItemInteractionMessage.ItemInteractionType.DROP);
             ClientGameAppState.getInstance().getClient().send(miim);
             return;

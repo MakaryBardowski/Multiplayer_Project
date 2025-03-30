@@ -1,7 +1,7 @@
 package game.items.weapons;
 
 import com.jme3.scene.Node;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 
 public abstract class ThrowableWeapon extends Weapon{
     

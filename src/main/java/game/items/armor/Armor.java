@@ -3,7 +3,7 @@ package game.items.armor;
 import game.items.Equippable;
 import game.items.Item;
 import com.jme3.scene.Node;
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
 import lombok.Getter;
 import lombok.Setter;
 

@@ -1,4 +1,4 @@
-package game.items;
+package itemSystem;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

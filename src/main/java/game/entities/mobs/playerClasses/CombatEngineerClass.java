@@ -1,7 +1,7 @@
 package game.entities.mobs.playerClasses;
 
-import game.items.ItemTemplates;
-import static game.items.ItemTemplates.*;
+import itemSystem.ItemTemplates;
+import static itemSystem.ItemTemplates.*;
 import java.util.List;
 
 public class CombatEngineerClass extends PlayerClass{

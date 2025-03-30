@@ -1,13 +1,14 @@
-package cards;
+package cards.tier1;
 
+import cards.AugmentCardTemplate;
 import game.entities.StatusEffectContainer;
 import server.ServerGameAppState;
 import statusEffects.EffectTemplates;
 
-public class GoodLuckProtectionCard extends AugmentCardTemplate {
+public class BadLuckProtectionCard extends AugmentCardTemplate {
 
-    public GoodLuckProtectionCard() {
-        super(3,"Good Luck\nProtection", "All damage you deal has \na random multiplier of \n\\#FF0000#85\\#FFFFFF#%-\\#FF0000#120\\#FFFFFF#%.","Textures/GUI/Cards/cutdown.png");
+    public BadLuckProtectionCard() {
+        super(3,"Bad Luck\nProtection", "All damage you deal is \nincreased by \\#FF0000#10\\#FFFFFF#%.","Textures/GUI/Cards/cutdown.png");
     }
 
     @Override

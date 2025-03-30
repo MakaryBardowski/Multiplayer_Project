@@ -9,12 +9,11 @@ import statusEffects.EffectProcType;
 
 import java.util.Random;
 
-public class GoodLuckProtectionCardEffect extends OnHitEffect{
-    private static final float MAX_MULTIPLIER = 1.2f;
-    private static final float MIN_MULTIPLIER = 0.85f;
+public class BadLuckProtectionCardEffect extends OnHitEffect{
+    private static final float DAMAGE_MULTIPLIER = 1.1f;
     private final Random random = new Random();
 
-    public GoodLuckProtectionCardEffect(int id, String name, StatusEffectContainer target, EffectProcType procType) {
+    public BadLuckProtectionCardEffect(int id, String name, StatusEffectContainer target, EffectProcType procType) {
         super(id, name, target, procType);
     }
 
@@ -23,7 +22,7 @@ public class GoodLuckProtectionCardEffect extends OnHitEffect{
         var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
         var victim = (Destructible) serverLevelManager.getEntitiesById().get(input.getVictimId());
 
-        input.setRawDamage(input.getRawDamage()*random.nextFloat(MIN_MULTIPLIER,MAX_MULTIPLIER));
+        input.setRawDamage(input.getRawDamage()*DAMAGE_MULTIPLIER);
         return input;
     }
 

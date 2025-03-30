@@ -69,7 +69,6 @@ public class PlayerFactory extends MobFactory {
 
         var regenEffect = serverLevelManager.createAndRegisterStatusEffect(EffectTemplates.DEFAULT_REGENERATION,p);
         p.addEffect(regenEffect);
-
         return p;
     }
 
@@ -102,12 +101,15 @@ public class PlayerFactory extends MobFactory {
     }
 
     private void setupMainCamera(Player p) {
-        CameraNode playerCameraNode = new CameraNode("Main Camera Node" + p.getId(), mainCamera);
+        CameraNode playerCameraNode = new CameraNode("Main Camera Node" + p.getId(), mainCamera); // rotated by recoil
+        Node playerCameraOnHitCameraNode = new Node(); // rotated when hit
         p.getRotationNode().setName("player " + p.getId() + " rotation node");
-        p.getRotationNode().attachChild(playerCameraNode);
+        p.getRotationNode().attachChild(playerCameraOnHitCameraNode);
+        playerCameraOnHitCameraNode.attachChild(playerCameraNode);
         p.getNode().attachChild(p.getRotationNode());
         p.getRotationNode().setLocalTranslation(0, PLAYER_HEIGHT, 0);
         p.setMainCameraNode(playerCameraNode);
+        p.setCameraOnHitNode(playerCameraOnHitCameraNode);
     }
 
     private void setupHandsCamera(Player p) {

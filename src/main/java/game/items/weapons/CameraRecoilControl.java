@@ -9,16 +9,16 @@ public class CameraRecoilControl extends RecoilControl {
     private float xperlin = 6;
     private float yperlin = 6;
     private float shakeStrength;
-    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ) {
-        super(kickback, recoilX, recoilY, recoilZ, 20);
+    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, float sideRecoil, float upRecoil, float backRecoil) {
+        super(kickback, recoilX, recoilY, recoilZ, 20, sideRecoil, upRecoil, backRecoil);
     }
 
-    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap) {
-        super(kickback, recoilX, recoilY, recoilZ, snap);
+    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap, float sideRecoil, float upRecoil, float backRecoil) {
+        super(kickback, recoilX, recoilY, recoilZ, snap, sideRecoil, upRecoil, backRecoil);
     }
 
-    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap,float shakeStrength) {
-        super(kickback, recoilX, recoilY, recoilZ, snap);
+    public CameraRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap,float shakeStrength, float sideRecoil, float upRecoil, float backRecoil) {
+        super(kickback, recoilX, recoilY, recoilZ, snap, sideRecoil, upRecoil, backRecoil);
         this.shakeStrength = shakeStrength;
     }
 
@@ -38,25 +38,25 @@ public class CameraRecoilControl extends RecoilControl {
     @Override
     public void recoilFire() {
 
-        recoilX = FastMath.PI / (40 + random.nextFloat(10));
+        rotationRecoilX = FastMath.PI / (40 + random.nextFloat(10));
 
-        recoilY = (float) ImprovedNoise.noise(xperlin, yperlin);
-        recoilZ = (float) ImprovedNoise.noise(xperlin, yperlin);
+        rotationRecoilY = (float) ImprovedNoise.noise(xperlin, yperlin);
+        rotationRecoilZ = (float) ImprovedNoise.noise(xperlin, yperlin);
 
         xperlin = random.nextFloat(-1, 1) * 30;
         yperlin = random.nextFloat(-1, 1) * 30;
 
         float scale = 0.05f;
-        recoilY = recoilY * scale * shakeStrength; // left right
-        recoilX = recoilX * shakeStrength;
+        rotationRecoilY = rotationRecoilY * scale * shakeStrength; // left right
+        rotationRecoilX = rotationRecoilX * shakeStrength;
 //        recoilZ = recoilZ * 0.005f; // rotates head 
 
 //        targetRotationRecoil.addLocal((new Quaternion()).fromAngleAxis(FastMath.PI / (20-kickback), new Vector3f(recoilX*4, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ))));
         targetRotationRecoil.addLocal(
                 (new Quaternion()).fromAngleAxis(
-                        -recoilX,
-                        new Vector3f(recoilX,
-                                recoilY,
+                        -rotationRecoilX,
+                        new Vector3f(rotationRecoilX,
+                                rotationRecoilY,
                                 0
                         )));
 

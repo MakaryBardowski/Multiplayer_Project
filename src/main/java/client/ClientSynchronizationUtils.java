@@ -1,10 +1,12 @@
 package client;
 
+import client.appStates.ClientGameAppState;
 import game.entities.mobs.Mob;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.HumanMob;
+import game.entities.mobs.player.Player;
 
 public class ClientSynchronizationUtils {
 
@@ -19,6 +21,8 @@ public class ClientSynchronizationUtils {
         if (mob instanceof HumanMob hm && newPos.equals(mob.getServerLocation())) {
             hm.getModelComposer().setCurrentAction("Idle", "Legs");
         }
+
+
 
         mob.getNode().setLocalTranslation(newPos);
 

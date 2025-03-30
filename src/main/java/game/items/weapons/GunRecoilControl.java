@@ -14,16 +14,16 @@ public class GunRecoilControl extends RecoilControl {
    
     private float shakeStrength = 1;
 
-    public GunRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ) {
-        super(kickback, recoilX, recoilY, recoilZ, 20);
+    public GunRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, float sideRecoil, float upRecoil, float backRecoil) {
+        super(kickback, recoilX, recoilY, recoilZ, 20, sideRecoil, upRecoil, backRecoil);
     }
 
-    public GunRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap) {
-        super(kickback, recoilX, recoilY, recoilZ, snap);
+    public GunRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap, float sideRecoil, float upRecoil, float backRecoil) {
+        super(kickback, recoilX, recoilY, recoilZ, snap, sideRecoil, upRecoil, backRecoil);
     }
 
-    public GunRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap, float shakeStrength) {
-        super(kickback, recoilX, recoilY, recoilZ, snap);
+    public GunRecoilControl(float kickback, float recoilX, float recoilY, float recoilZ, int snap, float shakeStrength, float sideRecoil, float upRecoil, float backRecoil) {
+        super(kickback, recoilX, recoilY, recoilZ, snap, sideRecoil, upRecoil, backRecoil);
         this.shakeStrength = shakeStrength;
     }
 
@@ -55,12 +55,12 @@ public class GunRecoilControl extends RecoilControl {
 
         targetRotationRecoil = targetRotationRecoil.add(
                 
-                (new Quaternion()).fromAngleAxis(FastMath.PI / (6 - kickback), new Vector3f(recoilX, getRandomNumber(-recoilY, recoilY), getRandomNumber(-recoilZ, recoilZ)))
+                (new Quaternion()).fromAngleAxis(FastMath.PI / (6 - kickback), new Vector3f(rotationRecoilX, getRandomNumber(-rotationRecoilY, rotationRecoilY), getRandomNumber(-rotationRecoilZ, rotationRecoilZ)))
         
         );
         
         
-        targetVectorRecoil = targetVectorRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(xOffset, yOffset, -backRecoil));
+        targetPositionRecoil = targetPositionRecoil.subtract(targetRotationRecoil.getRotationColumn(2).subtract(xOffset, yOffset, -backRecoil));
 
     }
 

@@ -14,7 +14,7 @@ import com.jme3.scene.VertexBuffer;
 
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
-import game.items.ItemTemplates.GlovesTemplate;
+import itemSystem.ItemTemplates.GlovesTemplate;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
 import messages.items.MobItemInteractionMessage;

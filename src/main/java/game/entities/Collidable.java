@@ -22,6 +22,7 @@ public abstract class Collidable extends Movable {
     private static final Spatial.CullHint HITBOX_CULLING = Spatial.CullHint.Always;
     protected CollisionShape collisionShape;
     protected Node hitboxNode = new Node(); // hitbox center is at this node
+    @Getter
     protected Geometry hitboxDebug;
 
     public Collidable(int id, String name, Node node) {

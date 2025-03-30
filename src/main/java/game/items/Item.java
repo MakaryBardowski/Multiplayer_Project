@@ -14,15 +14,23 @@ import game.effects.ParticleUtils;
 
 import static game.entities.DestructibleUtils.setupModelShootability;
 
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
 import lombok.Getter;
+import statusEffects.StatusEffect;
+import statusEffects.onDamagedEffects.OnDamagedEffect;
+import statusEffects.onEnterLevelEffects.OnEnterLevelEffect;
+import statusEffects.onHitEffects.OnHitEffect;
 
+import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 @Getter
 public abstract class Item extends AttachedEntity {
+    protected HashSet<OnHitEffect> onDealDamageEffects;
+    protected HashSet<OnDamagedEffect> onDamageReceivedEffects;
+    protected HashSet<OnEnterLevelEffect> onEnterLevelEffects;
 
     protected boolean droppable;
     protected String description;
@@ -137,4 +145,22 @@ public abstract class Item extends AttachedEntity {
         return droppedOnServer.get();
     }
 
+    public void addEffect(StatusEffect effect) {
+        if (effect instanceof OnHitEffect onHitEffect){
+            if(onDealDamageEffects == null){
+                onDealDamageEffects = new HashSet<>(1);
+            }
+            onDealDamageEffects.add(onHitEffect);
+        } else if (effect instanceof OnDamagedEffect onDamagedEffect){
+            if(onDamageReceivedEffects == null){
+                onDamageReceivedEffects = new HashSet<>(1);
+            }
+            onDamageReceivedEffects.add(onDamagedEffect);
+        } else if (effect instanceof OnEnterLevelEffect onEnterLevelEffect){
+            if(onEnterLevelEffects == null){
+                onEnterLevelEffects = new HashSet<>(1);
+            }
+            onEnterLevelEffects.add(onEnterLevelEffect);
+        }
+    }
 }

@@ -4,6 +4,8 @@ import client.appStates.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.map.collision.RectangleAABB;
+
 import java.util.Random;
 import static game.effects.DecalProjector.projectFromTo;
 
@@ -15,7 +17,7 @@ public class GoreParticle extends ParticleMovementStrategy {
     private static final float GRAVITY = 13.81f;//9.81f;
 
     public GoreParticle(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY) {
-        super(node);
+        super(node,new RectangleAABB(node.getWorldTranslation(),0.25f,0.25f,0.25f));
         this.velocity = velocity;
         this.rotationVelocity = rotationVelocity;
         this.finalY = finalY;

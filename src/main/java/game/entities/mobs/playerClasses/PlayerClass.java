@@ -1,6 +1,6 @@
 package game.entities.mobs.playerClasses;
 
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import java.util.List;
 
 public abstract class PlayerClass {

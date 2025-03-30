@@ -3,6 +3,7 @@ package statusEffects;
 import game.entities.StatusEffectContainer;
 import server.ServerGameAppState;
 import statusEffects.onDamagedEffects.HardnessCardEffect;
+import statusEffects.onEnterLevelEffects.CornucopiaEffect;
 import statusEffects.onHitEffects.*;
 import statusEffects.temporaryEffects.DamageOverTimeEffect;
 import statusEffects.temporaryEffects.HealOverTimeEffect;
@@ -21,9 +22,11 @@ public class EffectFactory {
         } else if (effectTemplate == EffectTemplates.HARDNESS_CARD_ARMOR){
             return createHardnessEffect(newEffectId,"Hardness card effect",target);
         } else if (effectTemplate == EffectTemplates.GOOD_LUCK_PROTECTION){
-            return createGoodLuckProtectionEffect(newEffectId,"Good Luck Protection card effect",target);
+            return createBadLuckProtectionEffect(newEffectId,"Good Luck Protection card effect",target);
         } else if (effectTemplate == EffectTemplates.OVERFED_HEALTH_STACK){
             return createOverfedHealthStackEffect(newEffectId, "Overfed card effect", target);
+        } else if (effectTemplate == EffectTemplates.ITEM_CORNUCOPIA_ITEM_SPAWN){
+            return createCornucopiaItemEffect(newEffectId, "Cornucopia item effect", target);
         }
 
         throw new IllegalArgumentException(String.format(INVALID_EFFECT_ID_PROVIDED,effectTemplate));
@@ -56,8 +59,11 @@ public class EffectFactory {
         return dot;
     }
 
-    private static StatusEffect createGoodLuckProtectionEffect(int id, String name, StatusEffectContainer target) {
-        return new GoodLuckProtectionCardEffect(id,name, target, EffectProcType.ON_HIT);
+    private static StatusEffect createBadLuckProtectionEffect(int id, String name, StatusEffectContainer target) {
+        return new BadLuckProtectionCardEffect(id,name, target, EffectProcType.ON_HIT);
+    }
 
+    private static StatusEffect createCornucopiaItemEffect(int id, String name, StatusEffectContainer target) {
+        return new CornucopiaEffect(id,name,target,EffectProcType.ON_ENTER_LEVEL);
     }
 }

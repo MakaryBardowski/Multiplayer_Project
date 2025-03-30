@@ -3,7 +3,7 @@ package game.items.weapons;
 import FirstPersonHands.FirstPersonHandAnimationData;
 import game.effects.GradientParticleEmitter;
 import game.effects.GradientParticleMesh;
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import projectiles.controls.BulletTracerControl;
@@ -28,7 +28,7 @@ import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.items.AmmoPack;
 import game.items.Holdable;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
@@ -108,9 +108,9 @@ public class LightMachineGun extends RangedWeapon {
             muzzleNode = skinningControl.getAttachmentsNode("muzzleAttachmentBone");
 
             firerateControl = new FirerateControl(this);
-            gunRecoil = new GunRecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 30, 1f);
+            gunRecoil = new GunRecoilControl(-6f, -0.07f, 0.0425f, 0.04f, 30, 1f,0,0,0);
 
-            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 30, 0.3f);
+            camRecoil = new CameraRecoilControl(0.3f, -.05f, .1f, .05f, 30, 0.3f,0,0,0);
 
             model.addControl(firerateControl);
             p.getFirstPersonHands().getHandsNode().addControl(gunRecoil);
@@ -154,12 +154,12 @@ public class LightMachineGun extends RangedWeapon {
     }
 
     private void shoot(Player p) {
-        var cp = hitscan(p);
+        var cd = hitscan(p);
         var cs = ClientGameAppState.getInstance();
-        createBullet(muzzleNode.getWorldTranslation(), cp);
+        createBullet(muzzleNode.getWorldTranslation(), cd.getFirst());
 
         int hostedConnectionId = cs.getClient().getId();
-        HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cp, hostedConnectionId);
+        HitscanTrailMessage trailMessage = new HitscanTrailMessage(p.getId(), cd.getFirst(),cd.getSecond(), hostedConnectionId, cd.getThird());
         cs.getClient().send(trailMessage);
 
         recoilFire();

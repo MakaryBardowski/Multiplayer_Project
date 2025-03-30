@@ -11,7 +11,7 @@ import com.jme3.scene.Node;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import lombok.Getter;
 import messages.GrenadeThrownMessage;
 import messages.items.MobItemInteractionMessage;

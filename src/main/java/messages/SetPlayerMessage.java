@@ -1,5 +1,6 @@
 package messages;
 
+import game.items.weapons.NewGunRecoilControl;
 import guiComponents.LemurPlayerInventoryGui;
 import guiComponents.LemurPlayerHealthbar;
 import client.appStates.ClientGameAppState;
@@ -62,6 +63,15 @@ public class SetPlayerMessage extends TwoWayMessage {
 
     private void createMyPlayer(SetPlayerMessage nmsg) {
         Player p = registerMyPlayer(nmsg);
+
+        p.setCameraControl(new NewGunRecoilControl(
+                -3,
+                3,
+                0,
+                20,
+                0
+        ));
+
         ClientGameAppState.getInstance().setPlayer(p);
         placeMyPlayer(nmsg, p);
         addInputListeners();

@@ -9,7 +9,7 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
-import game.items.ItemTemplates.VestTemplate;
+import itemSystem.ItemTemplates.VestTemplate;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewVestMessage;
 

@@ -55,6 +55,7 @@ public class CardChoiceMenuState implements MenuState {
             player.setBackward(false);
             player.setLeft(false);
             player.setRight(false);
+            player.setHoldsTrigger(false);
         }
 
         float cardMarginSide = resolutionX*0.15f;

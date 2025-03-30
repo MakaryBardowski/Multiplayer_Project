@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
+import game.map.blocks.BlockType;
 import game.map.blocks.Map;
 import jme3utilities.math.Vector3i;
 
@@ -61,10 +62,10 @@ public class RandomMapGenerator extends MapGenerator{
                 for (int x = roomPosX; x < roomPosX + roomSizeX; x++) {
                     for (int y = roomPosY; y < roomPosY + roomSizeY; y++) {
                         for (int z = roomPosZ; z < roomPosZ + roomSizeZ; z++) {
-                            logicMap.setBlockIdAtPosition(x,y,z,(byte)1);
+                            logicMap.setBlockIdAtPosition(x,y,z,BlockType.STONE.blockId);
                             // hardcode dla podlogi
                             if (y == 0) {
-                                logicMap.setBlockIdAtPosition(x,y,z,(byte)2);
+                                logicMap.setBlockIdAtPosition(x,y,z,BlockType.DIRT.blockId);
                             }
                             // hardcode dla podlogi
 
@@ -81,8 +82,8 @@ public class RandomMapGenerator extends MapGenerator{
                     }
                 }
                 // drill the room out 
-                return new Room(roomPosX, roomPosY, roomPosZ,
-                        roomPosX + roomSizeX, roomPosY + roomSizeY, roomPosZ + roomSizeZ);
+                return new Room(roomPosX+1, roomPosY, roomPosZ+1,
+                        roomPosX + roomSizeX-1, roomPosY + roomSizeY, roomPosZ + roomSizeZ-1);
             }
             placementRetries--;
         }
@@ -125,24 +126,24 @@ public class RandomMapGenerator extends MapGenerator{
 
             if (startX <= endX) {
                 for (int x = startX; x <= endX; x++) {
-                    logicMap.setBlockIdAtPosition(x,0,startZ,(byte) 2);
+                    logicMap.setBlockIdAtPosition(x,0,startZ,BlockType.DIRT.blockId);
                     logicMap.setBlockIdAtPosition(x,1,startZ,(byte) 0);
                 }
             } else if (startX > endX) {
                 for (int x = endX; x <= startX; x++) {
-                    logicMap.setBlockIdAtPosition(x,0,startZ,(byte) 2);
+                    logicMap.setBlockIdAtPosition(x,0,startZ,BlockType.DIRT.blockId);
                     logicMap.setBlockIdAtPosition(x,1,startZ,(byte) 0);
                 }
             }
 
             if (startZ <= endZ) {
                 for (int z = startZ; z <= endZ; z++) {
-                    logicMap.setBlockIdAtPosition(endX,0,z,(byte)2);
+                    logicMap.setBlockIdAtPosition(endX,0,z,BlockType.DIRT.blockId);
                     logicMap.setBlockIdAtPosition(endX,1,z,(byte)0);
                 }
             } else if (endZ <= startZ) {
                 for (int z = endZ; z <= startZ; z++) {
-                    logicMap.setBlockIdAtPosition(endX,0,z,(byte)2);
+                    logicMap.setBlockIdAtPosition(endX,0,z, BlockType.DIRT.blockId);
                     logicMap.setBlockIdAtPosition(endX,1,z,(byte)0);
                 }
             }
@@ -151,9 +152,9 @@ public class RandomMapGenerator extends MapGenerator{
 
     public Vector3i getRandomConnectionPointForRoom(Room room) {
         return new Vector3i( // the +1 is so that it doesnt connect to the corner (wall)
-                random.nextInt(room.getStartX() + 1, room.getEndX() - 1),
+                random.nextInt(room.getStartX(), room.getEndX()),
                 room.getStartY(),
-                random.nextInt(room.getStartZ() + 1, room.getEndZ() - 1)
+                random.nextInt(room.getStartZ(), room.getEndZ())
         );
     }
 

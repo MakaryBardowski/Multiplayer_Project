@@ -11,7 +11,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class OverfedCardEffect extends OnHitEffect{
-    private static final float HEALTH_INCREASE = 10000.5f;
+    private static final float HEALTH_INCREASE = .5f;
 
     public OverfedCardEffect(int id, String name, StatusEffectContainer target, EffectProcType procType) {
         super(id, name, target, procType);

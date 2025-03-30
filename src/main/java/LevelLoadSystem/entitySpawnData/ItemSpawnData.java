@@ -2,7 +2,7 @@ package LevelLoadSystem.entitySpawnData;
 
 import com.jme3.math.Vector3f;
 import game.entities.Entity;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import server.ServerLevelManager;
 
 public class ItemSpawnData extends EntitySpawnData{

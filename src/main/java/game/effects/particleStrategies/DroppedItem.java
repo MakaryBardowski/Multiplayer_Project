@@ -1,9 +1,12 @@
 package game.effects.particleStrategies;
 
+import client.appStates.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import game.entities.mobs.Mob;
 import game.items.Item;
+import game.map.collision.RectangleAABB;
 
 public class DroppedItem extends ParticleMovementStrategy {
 
@@ -14,7 +17,7 @@ public class DroppedItem extends ParticleMovementStrategy {
     private static final float GRAVITY = 13.81f;//9.81f;
 
     public DroppedItem(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY, Item item) {
-        super(node);
+        super(node,new RectangleAABB(node.getWorldTranslation(),item.getTemplate().getDropData().getOffset().x,item.getTemplate().getDropData().getOffset().y,item.getTemplate().getDropData().getOffset().z));
         this.velocity = velocity;
         this.rotationVelocity = rotationVelocity;
         this.finalY = finalY;
@@ -37,12 +40,22 @@ public class DroppedItem extends ParticleMovementStrategy {
         startQ[0] = item.getTemplate().getDropData().getRotation().getX();
         startQ[2] = item.getTemplate().getDropData().getRotation().getZ();
         node.getChild(1).setLocalRotation(new Quaternion().fromAngles(startQ));
-        node.getWorldTranslation().setY(finalY).addLocal(item.getTemplate().getDropData().getOffset());
+//        node.getWorldTranslation().addLocal(item.getTemplate().getDropData().getOffset());
         removeControl();
     }
 
     @Override
     protected boolean hasNotHitGround() {
+//        var nearby = ClientGameAppState.getInstance().getGrid().getNearbyCollisionShapeAtPos(node.getWorldTranslation(), collisionShape);
+//        if(nearby == null){
+//            return false;
+//        }
+//        for(var cs : nearby){
+//            if(cs.getCollisionShape() instanceof RectangleAABB otherAABB && !(cs instanceof Mob) && collisionShape.wouldCollideAtPosition(cs.getCollisionShape(), node.getWorldTranslation())){
+//                return false;
+//            }
+//        }
+//        return true;
         return node.getLocalTranslation().getY() > finalY;
     }
 

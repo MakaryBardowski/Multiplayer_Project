@@ -8,7 +8,7 @@ import behaviorTree.context.SimpleHumanMobContext;
 import client.Main;
 import game.entities.Destructible;
 import game.entities.mobs.HumanMob;
-import game.items.ItemTemplates.MeleeWeaponTemplate;
+import itemSystem.ItemTemplates.MeleeWeaponTemplate;
 import game.items.weapons.MeleeWeapon;
 
 public class Attack extends NodeAction {

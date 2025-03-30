@@ -15,6 +15,7 @@ import com.jme3.scene.Node;
 import game.entities.Attribute;
 import game.entities.FloatAttribute;
 import FirstPersonHands.FirstPersonHands;
+import game.items.weapons.NewGunRecoilControl;
 import guiComponents.LemurPlayerInventoryGui;
 import guiComponents.LemurPlayerHealthbar;
 import static client.appStates.ClientGameAppState.removeEntityByIdClient;
@@ -87,6 +88,13 @@ public class Player extends HumanMob {
     @Getter
     private LemurPlayerInventoryGui playerinventoryGui;
 
+    @Getter
+    private NewGunRecoilControl cameraControl;
+
+    @Getter
+    @Setter
+    private Node cameraOnHitNode;
+
     @Override
     public void equip(Item item) {
         if (item instanceof Equippable equippableItem) {
@@ -150,6 +158,9 @@ public class Player extends HumanMob {
             float normalizedPercentHealth = getHealth() / getMaxHealth();
             float normalizedChange = (previousHealth - getHealth()) / getMaxHealth();
             playerHealthbar.setHealthbarParams(normalizedPercentHealth, normalizedChange);
+        }
+        if(cameraControl != null){
+            cameraControl.recoilFire();
         }
     }
 
@@ -342,6 +353,11 @@ public class Player extends HumanMob {
             node.removeFromParent();
         });
         removeEntityByIdClient(id);
+    }
+
+    public void setCameraControl(NewGunRecoilControl cameraControl) {
+        this.cameraControl = cameraControl;
+        getCameraOnHitNode().addControl(cameraControl);
     }
 
     public static synchronized void enablePlayerControls(){

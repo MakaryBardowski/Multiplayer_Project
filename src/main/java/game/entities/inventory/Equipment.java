@@ -1,5 +1,6 @@
 package game.entities.inventory;
 
+import game.items.Equippable;
 import guiComponents.LemurPlayerInventoryGui;
 import com.simsilica.lemur.component.IconComponent;
 import game.items.Item;
@@ -151,6 +152,27 @@ public class Equipment {
         // fail to add item, because all spots were populated
         return false;
     }
+
+
+    /***
+     *
+     * @param item to be check if present in equipment
+     * @return false if item is not present or null, true if present.
+     */
+    public synchronized boolean hasItem(Item item){
+        if(item == null){
+            return false;
+        }
+        for(int i = 0; i < items.length; i++){
+            if(items[i] != null && items[i].getId() == item.getId()){
+                return true;
+            }
+        }
+        return false;
+    }
+
+
+
 
     public synchronized void setInventoryGui(LemurPlayerInventoryGui gui){
         this.inventoryGui = gui;

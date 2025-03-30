@@ -5,20 +5,20 @@ import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import game.items.AmmoPack;
 import game.items.Item;
-import game.items.ItemTemplates;
-import game.items.ItemTemplates.HelmetTemplate;
-import game.items.ItemTemplates.ItemTemplate;
-import game.items.ItemTemplates.VestTemplate;
-import game.items.ItemTemplates.BootsTemplate;
-import game.items.ItemTemplates.GlovesTemplate;
-import game.items.ItemTemplates.MeleeWeaponTemplate;
-import game.items.ItemTemplates.RangedWeaponTemplate;
+import itemSystem.ItemTemplates;
+import itemSystem.ItemTemplates.HelmetTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.VestTemplate;
+import itemSystem.ItemTemplates.BootsTemplate;
+import itemSystem.ItemTemplates.GlovesTemplate;
+import itemSystem.ItemTemplates.MeleeWeaponTemplate;
+import itemSystem.ItemTemplates.RangedWeaponTemplate;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
 import game.items.armor.Vest;
 import game.items.consumable.Medpack;
-import game.items.misc.Report;
+import game.items.misc.MiscellaneousItem;
 import game.items.weapons.Axe;
 import game.items.weapons.Grenade;
 import game.items.weapons.Knife;
@@ -36,44 +36,67 @@ public class ItemFactory {
 
     public Item createItem(int id, ItemTemplate template, boolean droppable) {
         if (null != template.getType()) {
+            Item item = null;
             switch (template.getType()) {
                 case HELMET:
-                    return createHelmet(id, (HelmetTemplate) template, droppable);
+                    item = createHelmet(id, (HelmetTemplate) template, droppable);
+                    break;
                 case VEST:
-                    return createVest(id, (VestTemplate) template, droppable);
+                    item = createVest(id, (VestTemplate) template, droppable);
+                    break;
                 case GLOVES:
-                    return createGloves(id, (GlovesTemplate) template, droppable);
+                    item =  createGloves(id, (GlovesTemplate) template, droppable);
+                    break;
                 case BOOTS:
-                    return createBoots(id, (BootsTemplate) template, droppable);
+                    item = createBoots(id, (BootsTemplate) template, droppable);
+                    break;
                 case RIFLE:
-                    return createRifle(id, (RangedWeaponTemplate) template, droppable);
+                    item = createRifle(id, (RangedWeaponTemplate) template, droppable);
+                    break;
                 case PISTOL:
-                    return createPistol(id, (RangedWeaponTemplate)template, droppable);
+                    item = createPistol(id, (RangedWeaponTemplate)template, droppable);
+                    break;
                 case LMG:
-                    return createLmg(id, (RangedWeaponTemplate)template, droppable);
+                    item = createLmg(id, (RangedWeaponTemplate)template, droppable);
+                    break;
                 case GRENADE:
-                    return createGrenade(id, template, droppable);
+                    item = createGrenade(id, template, droppable);
+                    break;
                 case KNIFE:
-                    return createKnife(id, (MeleeWeaponTemplate)template, droppable);
+                    item = createKnife(id, (MeleeWeaponTemplate)template, droppable);
+                    break;
                 case AXE:
-                    return createAxe(id, (MeleeWeaponTemplate)template, droppable);
+                    item =  createAxe(id, (MeleeWeaponTemplate)template, droppable);
+                    break;
                 case PISTOL_AMMO:
-                    return createPistolAmmoPack(id, template, droppable);
+                    item = createPistolAmmoPack(id, template, droppable);
+                    break;
                 case RIFLE_AMMO:
-                    return createRifleAmmoPack(id, template, droppable);
+                    item =  createRifleAmmoPack(id, template, droppable);
+                    break;
                 case SMG_AMMO:
-                    return createSmgAmmoPack(id, template, droppable);
+                    item = createSmgAmmoPack(id, template, droppable);
+                    break;
                 case LMG_AMMO:
-                    return createLmgAmmoPack(id, template, droppable);
+                    item = createLmgAmmoPack(id, template, droppable);
+                    break;
                 case SHOTGUN_AMMO:
-                    return createShotgunAmmoPack(id, template, droppable);
+                    item = createShotgunAmmoPack(id, template, droppable);
+                    break;
                 case MEDPACK:
-                    return createMedpack(id, template, droppable);
+                    item = createMedpack(id, template, droppable);
+                    break;
                 case REPORT:
-                    return createReport(id,template,droppable);
+                    item = createReport(id,template,droppable);
+                    break;
+                case CORNUCOPIA:
+                    item = createCornucopia(id,template,droppable);
+                    break;
                 default:
                     break;
             }
+            item.setGameEventHandler(template.getServerGameEventHandler());
+            return item;
         }
         return null;
     }
@@ -186,8 +209,13 @@ public class ItemFactory {
 
     private Item createReport(int id, ItemTemplate template, boolean droppable) {
         Node dropNode = createItemDropNode(template);
-        Report report = new Report(id, template, template.getName(), dropNode, droppable);
+        MiscellaneousItem report = new MiscellaneousItem(id, template, template.getName(), dropNode, droppable);
         return report;
+    }
+
+    private Item createCornucopia(int id, ItemTemplate template, boolean droppable) {
+        Node dropNode = createItemDropNode(template);
+        return new MiscellaneousItem(id, template, template.getName(), dropNode, droppable);
     }
 
     /**

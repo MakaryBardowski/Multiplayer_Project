@@ -120,7 +120,6 @@ public class InputController {
                 if (!player.isDead() && isHotbarName(name) && !keyPressed) {
                     int hotbarIndex = Integer.parseInt(name);
                     Item equippedItem = player.getHotbar().getItemAt(hotbarIndex);
-                    player.equip(equippedItem);
                     PlayerHUDController.sendEquipMessageToServer(equippedItem);
                 }
 

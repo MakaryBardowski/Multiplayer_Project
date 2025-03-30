@@ -1,5 +1,7 @@
 package cards;
 
+import cards.tier1.*;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -11,12 +13,12 @@ public class AugmentCardsTemplateRegistry {
         var cutDown = new CutDownCard();
         var pinpoint = new PinpointCard();
         var hardness = new HardnessCard();
-        var goodLuckProtection = new GoodLuckProtectionCard();
+        var badLuckProtection = new BadLuckProtectionCard();
         var overfed = new OverfedCard();
         CARD_REGISTRY.put(cutDown.getCardId(), cutDown);
         CARD_REGISTRY.put(pinpoint.getCardId(), pinpoint);
         CARD_REGISTRY.put(hardness.getCardId(),hardness);
-        CARD_REGISTRY.put(goodLuckProtection.getCardId(),goodLuckProtection);
+        CARD_REGISTRY.put(badLuckProtection.getCardId(),badLuckProtection);
         CARD_REGISTRY.put(overfed.getCardId(),overfed);
     }
 

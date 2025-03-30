@@ -4,11 +4,10 @@ import LevelLoadSystem.entitySpawnData.EntitySpawnData;
 import LevelLoadSystem.entitySpawnData.IndestructibleDecorationSpawnData;
 import LevelLoadSystem.entitySpawnData.ItemSpawnData;
 import LevelLoadSystem.entitySpawnData.MobSpawnData;
-import Utils.GridUtils;
 import com.jme3.math.Vector3f;
 import data.ChanceEntry;
 import game.entities.factories.MobSpawnType;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import game.map.proceduralGeneration.Room;
 import generators.PercentageRandomGenerator;
 import jme3utilities.math.Vector3i;
@@ -30,13 +29,13 @@ public class EntitySpawnDataGenerator {
         mobsByChance.add(new ChanceEntry<>(0.25f, MobSpawnType.RED_HAND_1));
         mobsByChance.add(new ChanceEntry<>(0.25f, MobSpawnType.TRAINING_DUMMY));
 
-        itemsByChance.add(new ChanceEntry<>(8f, ItemTemplates.PISTOL_AMMO_PACK));
+        itemsByChance.add(new ChanceEntry<>(7.75f, ItemTemplates.PISTOL_AMMO_PACK));
         itemsByChance.add(new ChanceEntry<>(5f, ItemTemplates.MEDPACK));
         itemsByChance.add(new ChanceEntry<>(7f, ItemTemplates.RIFLE_AMMO_PACK));
         itemsByChance.add(new ChanceEntry<>(5f, ItemTemplates.PISTOL_C96));
-        itemsByChance.add(new ChanceEntry<>(1.25f, ItemTemplates.RIFLE_BORYSOV));
-        itemsByChance.add(new ChanceEntry<>(1.5f, ItemTemplates.RIFLE_MANNLICHER_95));
-        itemsByChance.add(new ChanceEntry<>(0.75f,ItemTemplates.LMG_HOTCHKISS));
+        itemsByChance.add(new ChanceEntry<>(1.75f, ItemTemplates.RIFLE_BORYSOV));
+        itemsByChance.add(new ChanceEntry<>(2f, ItemTemplates.RIFLE_MANNLICHER_95));
+        itemsByChance.add(new ChanceEntry<>(1f,ItemTemplates.LMG_HOTCHKISS));
 
         itemsByChance.add(new ChanceEntry<>(2.5f,ItemTemplates.LMG_AMMO_PACK));
 
@@ -45,9 +44,9 @@ public class EntitySpawnDataGenerator {
         itemsByChance.add(new ChanceEntry<>(5f, ItemTemplates.BOOTS_TRENCH));
         itemsByChance.add(new ChanceEntry<>(3f, ItemTemplates.TRENCH_HELMET));
 
-        itemsByChance.add(new ChanceEntry<>(39.25f, ItemTemplates.KNIFE));
+        itemsByChance.add(new ChanceEntry<>(37.25f, ItemTemplates.KNIFE));
         itemsByChance.add(new ChanceEntry<>(13.75f, ItemTemplates.AXE));
-
+        itemsByChance.add(new ChanceEntry<>(1f, ItemTemplates.ARTIFACT_CORNUCOPIA));
 
         mobSpawnTypeRandomGenerator = new PercentageRandomGenerator<>(mobsByChance);
         itemTemplateRandomGenerator = new PercentageRandomGenerator<>(itemsByChance);

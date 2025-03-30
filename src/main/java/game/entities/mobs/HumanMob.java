@@ -8,7 +8,9 @@ import behaviorTree.composite.ParallelNode;
 import behaviorTree.composite.SelectorNode;
 import behaviorTree.composite.SequenceNode;
 import behaviorTree.context.SimpleHumanMobContext;
-import game.effects.EmitterPooler;
+import debugging.CollisionShapeDebugControl;
+import events.*;
+import game.effects.Vfx;
 import game.entities.*;
 import game.entities.factories.MobSpawnType;
 import game.items.Equippable;
@@ -29,7 +31,6 @@ import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import data.DamageReceiveData;
-import events.DamageReceivedEvent;
 import game.effects.ParticleUtils;
 
 import game.items.armor.Boots;
@@ -49,7 +50,6 @@ import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public class HumanMob extends Mob {
-    private static final Random RANDOM = new Random();
     public static final String HUMAN_SKELETON_RIG_PATH = "Models/HumanSkeleton/HumanSkeleton.j3o";
     protected Holdable equippedRightHand;
     protected Holdable equippedLeftHand;
@@ -127,26 +127,17 @@ public class HumanMob extends Mob {
 
         cachedSpeed = 7.5f;
         attributes.put(SPEED_ATTRIBUTE_KEY, new FloatAttribute(cachedSpeed));
-        onInteract();
+//        onInteract();
 
 //        debugSkeleton(node);
     }
 
     @Override
     public void onInteract() {
-//        if (ServerMain.getInstance() == null) {
-//            return;
-//        }
-//        if (node.getControl(HumanPathDebugControl.class) == null) {
-//            node.addControl(new HumanPathDebugControl(this));
-//        }
-//        System.out.println(Arrays.toString(equipment));
-//
-//        System.out.println("helmet: " + helmet);
-//        System.out.println("Armor: " + vest);
-//        System.out.println("Gloves: " + gloves);
-//        System.out.println("boots: " + boots);
 
+        if (node.getControl(CollisionShapeDebugControl.class) == null) {
+            node.addControl(new CollisionShapeDebugControl(this));
+        }
         System.out.println(name + " says hi! Im being debugged!");
     }
 
@@ -211,18 +202,18 @@ public class HumanMob extends Mob {
 
         setHealth(getHealth()-calculateDamage(damageData.getRawDamage()));
         var notMe = this != ClientGameAppState.getInstance().getPlayer();
-        ParticleEmitter blood = EmitterPooler.getBlood();
-        Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
-        blood.setLocalTranslation(bloodPos);
+//        ParticleEmitter blood = Vfx.getBlood();
+//        Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 2, 0);
+//        blood.setLocalTranslation(bloodPos);
         if (getHealth() <= 0) {
             if (notMe) {
-                blood.emitParticles(RANDOM.nextInt(30,50));
+//                blood.emitParticles(RANDOM.nextInt(30,50));
             }
             die();
             destroyClient();
             onDeathClient();
         } else if (notMe) {
-            blood.emitParticles(RANDOM.nextInt(4,10));
+//            blood.emitParticles(RANDOM.nextInt(4,10));
         }
 
     }

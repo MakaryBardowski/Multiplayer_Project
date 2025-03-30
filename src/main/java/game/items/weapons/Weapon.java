@@ -6,7 +6,7 @@ import game.entities.FloatAttribute;
 import game.entities.mobs.HumanMob;
 import game.items.Holdable;
 import game.items.Item;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import lombok.Getter;
 import lombok.Setter;
 

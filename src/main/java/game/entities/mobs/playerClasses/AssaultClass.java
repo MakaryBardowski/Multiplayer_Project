@@ -1,7 +1,7 @@
 package game.entities.mobs.playerClasses;
 
-import game.items.ItemTemplates;
-import static game.items.ItemTemplates.*;
+import itemSystem.ItemTemplates;
+import static itemSystem.ItemTemplates.*;
 import java.util.List;
 
 public class AssaultClass extends PlayerClass {
@@ -19,6 +19,7 @@ public class AssaultClass extends PlayerClass {
     public List<ItemTemplates.ItemTemplate> getStartingEquipmentTemplates() {
         return List.of(
                 KNIFE,
+                RIFLE_BORYSOV,
                 RIFLE_MANNLICHER_95,
                 RIFLE_AMMO_PACK,
                 SMOKE_GRENADE,

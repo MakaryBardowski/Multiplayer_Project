@@ -10,7 +10,7 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
-import game.items.ItemTemplates.HelmetTemplate;
+import itemSystem.ItemTemplates.HelmetTemplate;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewHelmetMessage;
 

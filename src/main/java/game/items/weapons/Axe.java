@@ -1,7 +1,7 @@
 package game.items.weapons;
 
 import FirstPersonHands.FirstPersonHandAnimationData;
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import client.appStates.ClientGameAppState;
@@ -23,7 +23,7 @@ import game.entities.Destructible;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import game.items.Holdable;
-import game.items.ItemTemplates;
+import itemSystem.ItemTemplates;
 import game.map.collision.RectangleOBB;
 import java.util.ArrayList;
 import messages.AnimationPlayedMessage;

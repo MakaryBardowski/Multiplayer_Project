@@ -3,17 +3,28 @@ package game.entities;
 import com.jme3.network.AbstractMessage;
 import events.EventPublisher;
 
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
+import events.EventSubscriber;
+import events.GameEvent;
 import lombok.Getter;
 import lombok.Setter;
 import messages.*;
 import server.ServerGameAppState;
 
 @Getter
-public abstract class Entity extends EventPublisher {
+public abstract class Entity implements EventPublisher, EventSubscriber{
+    private final ArrayList<EventSubscriber> subscribers = new ArrayList<>(1);
+
     private static final DeleteEntityMessage dem = new DeleteEntityMessage();
+
+    @Getter
+    @Setter
+    private BiConsumer<GameEvent,Entity> gameEventHandler;
 
     @Getter
     protected ConcurrentHashMap<Integer, Attribute> attributes = new ConcurrentHashMap<>(0);
@@ -102,5 +113,25 @@ public abstract class Entity extends EventPublisher {
     public int hashCode() {
         return id;
     }
-    
+
+    public final void addEventSubscriber(EventSubscriber eventSubscriber){
+        subscribers.add(eventSubscriber);
+    }
+
+    public void removeEventSubscriber(EventSubscriber eventSubscriber){
+        subscribers.remove(eventSubscriber);
+    }
+
+    public void notifyEventSubscribers(GameEvent gameEvent){
+        for(var subscriber : subscribers){
+            subscriber.receiveEventNotification(gameEvent);
+        }
+    }
+
+    @Override
+    public void receiveEventNotification(GameEvent gameEvent) {
+        if(gameEventHandler != null){
+            gameEventHandler.accept(gameEvent,this);
+        }
+    }
 }

@@ -67,7 +67,7 @@ public abstract class Mob extends StatusEffectContainer implements MobInterface,
 
     public boolean doesNotCollideWithEntitiesAtPositionServer(Vector3f newPos, WorldGrid grid, ArrayList<Collidable> solidCollidables) {
         for (Collidable m : solidCollidables) {
-            if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
+            if (this.getClass() != m.getClass() && this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), newPos)) {
                 return false;
             }
         }

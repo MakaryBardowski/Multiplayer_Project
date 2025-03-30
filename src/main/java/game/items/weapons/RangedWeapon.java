@@ -1,5 +1,6 @@
 package game.items.weapons;
 
+import Utils.Triple;
 import client.appStates.ClientGameAppState;
 import com.jme3.collision.CollisionResult;
 import com.jme3.collision.CollisionResults;
@@ -7,13 +8,15 @@ import com.jme3.math.Ray;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.controls.label.LabelControl;
+import game.effects.Vfx;
+import game.effects.VfxType;
 import game.entities.Attribute;
 import game.entities.Destructible;
 import game.entities.IntegerAttribute;
 import game.entities.Entity;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates.ItemTemplate;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -61,7 +64,7 @@ public abstract class RangedWeapon extends Weapon {
 
     public abstract void reload(Mob wielder);
 
-    protected Vector3f hitscan(Player p) {
+    protected final Triple<Vector3f, Vector3f, VfxType> hitscan(Player p) {
         var cs = ClientGameAppState.getInstance();
         CollisionResults results = new CollisionResults();
         Vector3f shotDirection = p.getMainCamera().getDirection();
@@ -69,11 +72,11 @@ public abstract class RangedWeapon extends Weapon {
         Ray ray = new Ray(shotOrigin, shotDirection);
         float distanceToFirstWall = Float.MAX_VALUE;
 
-        Vector3f cp = null;
-
+        CollisionResult cr = null;
+        var hitMob = false;
         if (cs.getMapNode().collideWith(ray, results) > 0) {
             distanceToFirstWall = results.getClosestCollision().getDistance();
-            cp = results.getClosestCollision().getContactPoint();
+            cr = results.getClosestCollision();
 
         }
 
@@ -82,19 +85,29 @@ public abstract class RangedWeapon extends Weapon {
 
         if (results.size() > 0) {
             CollisionResult closest = results.getClosestCollision();
-            cp = closest.getContactPoint();
 
             float distanceToFirstTarget = closest.getDistance();
             if (distanceToFirstTarget < distanceToFirstWall) {
+                cr = closest;
 
                 Integer hitId = Integer.valueOf(closest.getGeometry().getName());
                 Entity mobHit = cs.getMobs().get(hitId);
                 
                 if (mobHit instanceof Destructible destructible) {
+                    if(destructible instanceof  Mob){
+                        hitMob = true;
+                    }
                     p.dealDamageClient(calculateDamage(distanceToFirstTarget),destructible);
                 }
             }
         }
-        return cp;
+
+        if(!hitMob && cr != null){
+            Vfx.getEffect(VfxType.BULLET_IMPACT).playAt(cs.getDebugNode(), cr.getContactPoint().add(cr.getContactNormal().mult(0.3f)),cr.getContactNormal());
+        } else if (hitMob){
+            Vfx.getEffect(VfxType.ON_SHOT_BLOOD).playAt(cs.getDebugNode(), cr.getContactPoint().add(cr.getContactNormal().mult(0.3f)),cr.getContactNormal());
+        }
+
+        return new Triple<>(cr.getContactPoint(), cr.getContactNormal(), hitMob ? VfxType.ON_SHOT_BLOOD : VfxType.BULLET_IMPACT);
     }
 }

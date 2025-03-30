@@ -56,12 +56,20 @@ public class MobItemInteractionMessage extends TwoWayMessage {
             var newItem = getItemByIdServer(itemId);
 
             if (mob.getEquipment().addItem(newItem)) {
+                var onPickupHandler = newItem.getTemplate().getServerOnPickupHandler();
+                if(onPickupHandler != null){
+                    onPickupHandler.accept(newItem,mob);
+                }
+
                 server.getServer().broadcast(this);
             }
-
         } else if (getInteractionType() == ItemInteractionType.EQUIP) {
-            getMobByIdServer(mobId).equipServer(getItemByIdServer(itemId));
-            server.getServer().broadcast(this);
+            var mob = getMobByIdServer(mobId);
+            var item = getItemByIdServer(itemId);
+            if(mob.getEquipment().hasItem(item)){
+                mob.equipServer(getItemByIdServer(itemId));
+                server.getServer().broadcast(this);
+            }
         } else if (getInteractionType() == ItemInteractionType.UNEQUIP) {
 //            getMobById(imsg.getMobId()).unequip(getItemById(imsg.getItemId()));
             server.getServer().broadcast(this);
@@ -71,6 +79,12 @@ public class MobItemInteractionMessage extends TwoWayMessage {
 
             removeItemFromMobEquipmentServer(mobId, itemId);
             mob.unequipServer(droppedItem);
+
+            var onDropHandler = droppedItem.getTemplate().getServerOnDropHandler();
+            if(onDropHandler != null){
+                onDropHandler.accept(droppedItem,mob);
+            }
+
             server.getServer().broadcast(this);
         }
     }
@@ -101,15 +115,14 @@ public class MobItemInteractionMessage extends TwoWayMessage {
                             targetItem.getDroppedItemNode().removeFromParent();
                         });
                     }
-
                     getMobByIdClient(mobId).getEquipment().addItem(targetItem);
                     break;
                 case DROP:
-                    removeItemFromPlayerHotbar(client.getPlayer(),targetItem);
-                    removeItemFromMobEquipmentClient(mobId, itemId);
-                    Item dropped = getItemByIdClient(itemId);
                     var mobDroppingItem = getMobByIdClient(mobId);
+                    removeItemFromMobEquipmentClient(mobId, itemId);
+                    removeItemFromPlayerHotbar(client.getPlayer(),targetItem);
                     mobDroppingItem.unequip(targetItem);
+                    Item dropped = getItemByIdClient(itemId);
                     dropped.drop(mobDroppingItem.getNode().getWorldTranslation().add(0, 2, 0), mobDroppingItem.getNode().getLocalRotation().getRotationColumn(2).normalize().multLocal(8));
                     break;
                 case DESTROY:

@@ -1,15 +1,27 @@
-package game.items;
+package itemSystem;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
-import game.items.ArmorItemStatTemplate.*;
-import game.items.WeaponItemStatTemplate.MeleeWeaponStatTemplate;
-import game.items.WeaponItemStatTemplate.RangedWeaponStatTemplate;
+import events.GameEvent;
+import events.NewLevelEnteredEvent;
+import game.entities.Entity;
+import game.entities.mobs.Mob;
+import game.items.Item;
+import itemSystem.ArmorItemStatTemplate.*;
+import itemSystem.WeaponItemStatTemplate.MeleeWeaponStatTemplate;
+import itemSystem.WeaponItemStatTemplate.RangedWeaponStatTemplate;
 import game.items.weapons.MobWeaponUsageData.MobMeleeWeaponUsageData;
 import game.items.weapons.MobWeaponUsageData.MobRangedWeaponUsageData;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.function.BiConsumer;
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
+import statusEffects.EffectTemplates;
+import statusEffects.onEnterLevelEffects.CornucopiaEffect;
 
 public class ItemTemplates {
 
@@ -24,7 +36,7 @@ public class ItemTemplates {
         return templates.get(index);
     }
 
-    public static final ItemTemplate RIFLE_MANNLICHER_95 = new RangedWeaponTemplate("Mannlicher 95", WEAPONS_PATH + "Mannlicher95/mannlicher95.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "Mannlicher95/Mannlicher95Drop.j3o",
+    public static final ItemTemplate RIFLE_MANNLICHER_95 = new RangedWeaponTemplate("Mannlicher 95","UNUSED", WEAPONS_PATH + "Mannlicher95/mannlicher95.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "Mannlicher95/Mannlicher95Drop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
             new ThirdPersonOffsetData(new Vector3f(-0.37f,          0.33f,    0f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, 180 * FastMath.DEG_TO_RAD), 1),
             ItemType.RIFLE, 0,
@@ -32,28 +44,28 @@ public class ItemTemplates {
             MobRangedWeaponUsageData.RIFLE_MANNLICHER_95_MOB_USAGE_DATA
     );
 
-    public static final ItemTemplate VEST_TRENCH = new VestTemplate("Soldier Jacket", ITEMS_PATH + "TrenchSet/officersCoat.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o",
+    public static final ItemTemplate VEST_TRENCH = new VestTemplate("Soldier Jacket", "UNUSED",ITEMS_PATH + "TrenchSet/officersCoat.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.15f, 0), new Vector3f(-90 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 0.85f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.VEST, 1,
             VestStatTemplate.TRENCH_VEST_DEFAULT_STATS
     );
 
-    public static final ItemTemplate BOOTS_TRENCH = new BootsTemplate("Soldier Boots", ITEMS_PATH + "TrenchSet/officersLeg?.j3o", ICON_PATH + "equipmentTrenchShoes.png", ITEMS_PATH + "TrenchSet/officersBootsDrop.j3o",
+    public static final ItemTemplate BOOTS_TRENCH = new BootsTemplate("Soldier Boots", "UNUSED",ITEMS_PATH + "TrenchSet/officersLeg?.j3o", ICON_PATH + "equipmentTrenchShoes.png", ITEMS_PATH + "TrenchSet/officersBootsDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.75f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.BOOTS, 2,
             BootsStatTemplate.TRENCH_BOOTS_DEFAULT_STATS
     );
 
-    public static final ItemTemplate GLOVES_TRENCH = new GlovesTemplate("Soldier Gloves", ITEMS_PATH + "TrenchSet/officersHand?.j3o", null, null,
+    public static final ItemTemplate GLOVES_TRENCH = new GlovesTemplate("Soldier Gloves", "UNUSED",ITEMS_PATH + "TrenchSet/officersHand?.j3o", null, null,
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.GLOVES, 3,
             GlovesStatTemplate.TRENCH_GLOVES_DEFAULT_STATS
     );
 
-    public static final ItemTemplate KNIFE = new MeleeWeaponTemplate("Steel Knife", WEAPONS_PATH + "trenchKnife/trenchKnife.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "trenchKnife/trenchKnifeDrop.j3o",
+    public static final ItemTemplate KNIFE = new MeleeWeaponTemplate("Steel Knife", "UNUSED",WEAPONS_PATH + "trenchKnife/trenchKnife.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "trenchKnife/trenchKnifeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(90 * FastMath.DEG_TO_RAD, 0, 90 * FastMath.DEG_TO_RAD), 1),
             new ThirdPersonOffsetData(new Vector3f(-0.23f,          0.25f,    0f), new Vector3f(200 * FastMath.DEG_TO_RAD, 90 * FastMath.DEG_TO_RAD, 0), 1),
             ItemType.KNIFE, 4,
@@ -62,31 +74,31 @@ public class ItemTemplates {
     );
 
     //bare    
-    public static final ItemTemplate HEAD_1 = new HelmetTemplate("", ITEMS_PATH + "TrenchSet/head1.j3o", null, null, null,
+    public static final ItemTemplate HEAD_1 = new HelmetTemplate("", "UNUSED",ITEMS_PATH + "TrenchSet/head1.j3o", null, null, null,
             null,
             ItemType.HELMET, 5, true,
             HelmetStatTemplate.DEFAULT_HEAD_DEFAULT_STATS
     );
 
-    public static final ItemTemplate TORSO_1 = new VestTemplate("", ITEMS_PATH + "Bare/torsoBare.j3o", null, null, null,
+    public static final ItemTemplate TORSO_1 = new VestTemplate("", "UNUSED",ITEMS_PATH + "Bare/torsoBare.j3o", null, null, null,
             null,
             ItemType.VEST, 6,
             VestStatTemplate.DEFAULT_TORSO_DEFAULT_STATS
     );
 
-    public static final ItemTemplate LEG_1 = new BootsTemplate("", ITEMS_PATH + "Bare/leg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
+    public static final ItemTemplate LEG_1 = new BootsTemplate("", "UNUSED",ITEMS_PATH + "Bare/leg?.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
             null,
             ItemType.BOOTS, 7,
             BootsStatTemplate.DEFAULT_BOOTS_DEFAULT_STATS
     );
 
-    public static final ItemTemplate HAND_1 = new GlovesTemplate("", ITEMS_PATH + "Bare/hands.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
+    public static final ItemTemplate HAND_1 = new GlovesTemplate("", "UNUSED",ITEMS_PATH + "Bare/hands.j3o", null, null, new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
             null,
             ItemType.GLOVES, 8,
             GlovesStatTemplate.DEFAULT_GLOVES_DEFAULT_STATS
     );
 
-    public static final ItemTemplate PISTOL_C96 = new RangedWeaponTemplate("C96", WEAPONS_PATH + "C96/c96.j3o", ICON_PATH + "equipmentC96.png", WEAPONS_PATH + "C96/c96drop.j3o",
+    public static final ItemTemplate PISTOL_C96 = new RangedWeaponTemplate("C96", "UNUSED",WEAPONS_PATH + "C96/c96.j3o", ICON_PATH + "equipmentC96.png", WEAPONS_PATH + "C96/c96drop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
             new ThirdPersonOffsetData(new Vector3f(-0.37f,          0.33f,    0f), new Vector3f(180 * FastMath.DEG_TO_RAD, 90 * FastMath.DEG_TO_RAD, 0), 1),
             ItemType.PISTOL, 9,
@@ -94,37 +106,37 @@ public class ItemTemplates {
             MobRangedWeaponUsageData.PISTOL_C96_MOB_USAGE_DATA
     );
 
-    public static final ItemTemplate SMOKE_GRENADE = new ItemTemplate("Smoke Grenade [Throwable]", ITEMS_PATH + "Throwable/smokeGrenade.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Throwable/smokeGrenadeDrop.j3o",
+    public static final ItemTemplate SMOKE_GRENADE = new ItemTemplate("Smoke Grenade [Throwable]", "UNUSED",ITEMS_PATH + "Throwable/smokeGrenade.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Throwable/smokeGrenadeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.GRENADE, 10);
 
-    public static final ItemTemplate PISTOL_AMMO_PACK = new ItemTemplate("Pistol Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o",
+    public static final ItemTemplate PISTOL_AMMO_PACK = new ItemTemplate("Pistol Ammo Pack [Ammo]", "UNUSED",null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.PISTOL_AMMO, 11);
 
-    public static final ItemTemplate RIFLE_AMMO_PACK = new ItemTemplate("Rifle Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/rifleAmmoPack.j3o",
+    public static final ItemTemplate RIFLE_AMMO_PACK = new ItemTemplate("Rifle Ammo Pack [Ammo]","UNUSED", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/rifleAmmoPack.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.RIFLE_AMMO, 12);
 
-    public static final ItemTemplate SMG_AMMO_PACK = new ItemTemplate("SMG Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o",
+    public static final ItemTemplate SMG_AMMO_PACK = new ItemTemplate("SMG Ammo Pack [Ammo]", "UNUSED",null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.SMG_AMMO, 13);
 
-    public static final ItemTemplate LMG_AMMO_PACK = new ItemTemplate("LMG Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/lmgAmmoPack.j3o",
+    public static final ItemTemplate LMG_AMMO_PACK = new ItemTemplate("LMG Ammo Pack [Ammo]", "UNUSED",null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/lmgAmmoPack.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.LMG_AMMO, 14);
 
-    public static final ItemTemplate SHOTGUN_AMMO_PACK = new ItemTemplate("Shotgun Ammo Pack [Ammo]", null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o",
+    public static final ItemTemplate SHOTGUN_AMMO_PACK = new ItemTemplate("Shotgun Ammo Pack [Ammo]", "UNUSED",null, ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "AmmoPacks/pistolAmmoPack.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1.1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.SHOTGUN_AMMO, 15);
 
-    public static final ItemTemplate LMG_HOTCHKISS = new RangedWeaponTemplate("Hotchkiss", WEAPONS_PATH + "Hotchkiss/hotchkissFp.j3o", ICON_PATH + "equipmentHotchkiss.png", WEAPONS_PATH + "Hotchkiss/hotchkissDrop.j3o",
+    public static final ItemTemplate LMG_HOTCHKISS = new RangedWeaponTemplate("Hotchkiss", "UNUSED",WEAPONS_PATH + "Hotchkiss/hotchkissFp.j3o", ICON_PATH + "equipmentHotchkiss.png", WEAPONS_PATH + "Hotchkiss/hotchkissDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f),
             new ThirdPersonOffsetData(new Vector3f(-0.37f,          0.33f,    0f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, 180 * FastMath.DEG_TO_RAD), 1),
             ItemType.LMG, 16,
@@ -132,26 +144,26 @@ public class ItemTemplates {
             MobRangedWeaponUsageData.LMG_HOTCHKISS_MOB_USAGE_DATA
     );
 
-    public static final ItemTemplate TRENCH_HELMET = new HelmetTemplate("Trench Helmet", ITEMS_PATH + "TrenchSet/trenchHelmet.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "TrenchSet/trenchHelmet.j3o",
+    public static final ItemTemplate TRENCH_HELMET = new HelmetTemplate("Trench Helmet", "UNUSED",ITEMS_PATH + "TrenchSet/trenchHelmet.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "TrenchSet/trenchHelmet.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.HELMET, 17, false,
             HelmetStatTemplate.TRENCH_HELMET_DEFAULT_STATS
     );
 
-    public static final ItemTemplate MEDPACK = new ItemTemplate("Medpack", CONSUMABLE_PATH + "medpack.j3o", ICON_PATH + "equipmentMedpack.png", CONSUMABLE_PATH + "medpack.j3o",
+    public static final ItemTemplate MEDPACK = new ItemTemplate("Medpack", "UNUSED",CONSUMABLE_PATH + "medpack.j3o", ICON_PATH + "equipmentMedpack.png", CONSUMABLE_PATH + "medpack.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 0.8f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.MEDPACK, 18);
 
-    public static final ItemTemplate GAS_MASK = new HelmetTemplate("Gas Mask", ITEMS_PATH + "Misc/gasMask.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/gasMask.j3o",
+    public static final ItemTemplate GAS_MASK = new HelmetTemplate("Gas Mask", "UNUSED",ITEMS_PATH + "Misc/gasMask.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/gasMask.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.HELMET, 19, false,
             HelmetStatTemplate.GAS_MASK_DEFAULT_STATS
     );
 
-    public static final ItemTemplate AXE = new MeleeWeaponTemplate("Fireaxe", WEAPONS_PATH + "Fireaxe/fireaxe.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "Fireaxe/fireaxeDrop.j3o",
+    public static final ItemTemplate AXE = new MeleeWeaponTemplate("Fireaxe", "UNUSED",WEAPONS_PATH + "Fireaxe/fireaxe.j3o", ICON_PATH + "equipmentTrenchKnife.png", WEAPONS_PATH + "Fireaxe/fireaxeDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 1),
             //                                   lewo/prawo  przod/tyl   gora/dol
             new ThirdPersonOffsetData(new Vector3f(-0.22f,          0.2f,    0f), new Vector3f(-90 * FastMath.DEG_TO_RAD, 0 * FastMath.DEG_TO_RAD, -110 * FastMath.DEG_TO_RAD), 1),
@@ -160,32 +172,37 @@ public class ItemTemplates {
             MobMeleeWeaponUsageData.AXE_DEFAULT_STATS
     );
 
-    public static final ItemTemplate RIFLE_BORYSOV = new RangedWeaponTemplate("Borysov", WEAPONS_PATH + "borysov/borysovFP.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "borysov/borysovDrop.j3o",
-            new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
+    public static final ItemTemplate RIFLE_BORYSOV = new RangedWeaponTemplate("Fedorov", "UNUSED",WEAPONS_PATH + "borysov/borysovFP.j3o", ICON_PATH + "equipmentMannlicher95.png", WEAPONS_PATH + "borysov/borysovDrop.j3o",
+            new DropOffsetData(new Vector3f(0, 0.1f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 1.2f),
             new ThirdPersonOffsetData(new Vector3f(-0.37f,          0.33f,    0f), new Vector3f(0 * FastMath.DEG_TO_RAD, -90 * FastMath.DEG_TO_RAD, 180 * FastMath.DEG_TO_RAD), 1),
             ItemType.RIFLE, 21,
             RangedWeaponStatTemplate.RIFLE_BORYSOV_DEFAULT_STATS,
             MobRangedWeaponUsageData.RIFLE_BORYSOV_MOB_USAGE_DATA
     );
 
-    public static final ItemTemplate REPORT = new ItemTemplate("Report", ITEMS_PATH + "Misc/report.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/report.j3o",
+    public static final ItemTemplate REPORT = new ItemTemplate("Report", "No Item Description",ITEMS_PATH + "Misc/report.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/report.j3o",
             new DropOffsetData(new Vector3f(0, 0.0f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.REPORT, 22);
 
-    public static final ItemTemplate SECRET_SOCIETY_VEST_1 = new VestTemplate("Red Hand Cloak", ITEMS_PATH+"SecretSociety1/SecretSocietyVest1.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o",
+    public static final ItemTemplate SECRET_SOCIETY_VEST_1 = new VestTemplate("Red Hand Cloak", "UNUSED",ITEMS_PATH+"SecretSociety1/SecretSocietyVest1.j3o", ICON_PATH + "equipmentTrenchCoat.png", ITEMS_PATH + "TrenchSet/officersCoatDrop.j3o",
             new DropOffsetData(new Vector3f(0, 0.15f, 0), new Vector3f(-90 * FastMath.DEG_TO_RAD, 0, 0 * FastMath.DEG_TO_RAD), 0.85f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.VEST, 23,
             VestStatTemplate.SECRET_SOCIETY_VEST_1_DEFAULT_STATS
     );
 
-    public static final ItemTemplate SECRET_SOCIETY_HOOD_1 = new HelmetTemplate("Red hand Mask", ITEMS_PATH+ "SecretSociety1/SecretSocietyHelmetHood1.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/gasMask.j3o",
+    public static final ItemTemplate SECRET_SOCIETY_HOOD_1 = new HelmetTemplate("Red hand Mask", "UNUSED",ITEMS_PATH+ "SecretSociety1/SecretSocietyHelmetHood1.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Misc/gasMask.j3o",
             new DropOffsetData(new Vector3f(0, 0.05f, 0), new Vector3f(0, 0, 90 * FastMath.DEG_TO_RAD), 0.8f),
             new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
             ItemType.HELMET, 24, false,
             HelmetStatTemplate.SECRET_SOCIETY_HOOD_1_DEFAULT_STATS
     );
+
+    public static final ItemTemplate ARTIFACT_CORNUCOPIA = new ItemTemplate(ItemTypeDefinitions.getAsArtifact("Cornucopia"), "Provides a random item whenever you enter a new level.",ITEMS_PATH + "Artifacts/Cornucopia.j3o", ICON_PATH + "equipmentSmokeGrenade.png", ITEMS_PATH + "Artifacts/Cornucopia.j3o",
+            new DropOffsetData(new Vector3f(0, 0.0f, 0), new Vector3f(0, 0, 0 * FastMath.DEG_TO_RAD), 1f),
+            new ThirdPersonOffsetData(new Vector3f(0, 0, 0), new Vector3f(0, 0, 0), 1),
+            ItemType.CORNUCOPIA, 25, Arrays.asList(EffectTemplates.ITEM_CORNUCOPIA_ITEM_SPAWN));
 
     static {
         templates.add(RIFLE_MANNLICHER_95.getTemplateIndex(), RIFLE_MANNLICHER_95);
@@ -214,13 +231,40 @@ public class ItemTemplates {
         templates.add(REPORT.getTemplateIndex(), REPORT);
         templates.add(SECRET_SOCIETY_VEST_1.getTemplateIndex(), SECRET_SOCIETY_VEST_1);
         templates.add(SECRET_SOCIETY_HOOD_1.getTemplateIndex(), SECRET_SOCIETY_HOOD_1);
+
+        ARTIFACT_CORNUCOPIA.isServerGameEventListener = true;
+        ARTIFACT_CORNUCOPIA.setServerGameEventHandler((event,entity) -> {
+            if(event instanceof NewLevelEnteredEvent && entity instanceof Item item){
+
+                item.getOnEnterLevelEffects().forEach(effect -> effect.applyServer(null));
+            }
+        });
+        ARTIFACT_CORNUCOPIA.setServerOnPickupHandler((i,mob) -> {
+            var onLevelEnterEffects = i.getOnEnterLevelEffects();
+            for(var effect : onLevelEnterEffects){
+                if(effect instanceof CornucopiaEffect) {
+                    effect.setTarget(mob);
+                    break;
+                }
+            }
+        });
+        ARTIFACT_CORNUCOPIA.setServerOnDropHandler((i,mob) -> {
+            var onLevelEnterEffects = i.getOnEnterLevelEffects();
+            for(var effect : onLevelEnterEffects){
+                if(effect instanceof CornucopiaEffect) {
+                    effect.setTarget(null);
+                    break;
+                }
+            }
+        });
+        templates.add(ARTIFACT_CORNUCOPIA.getTemplateIndex(), ARTIFACT_CORNUCOPIA);
     }
 
     @Getter
-    @AllArgsConstructor
     public static class ItemTemplate {
 
         protected final String name;
+        protected final String description;
         protected final String fpPath; // path to the model seen in first person
         protected final String iconPath; // path to the icon seen eq
         protected final String dropPath; // path to the model seen when dropped on the ground/equipped by others
@@ -228,7 +272,47 @@ public class ItemTemplates {
         protected final ThirdPersonOffsetData thirdPersonOffsetData;
         protected final ItemType type;
         protected final int templateIndex;
+        protected final List<EffectTemplates.EffectTemplate> serverSideEffects;
 
+
+        @Setter
+        @Getter
+        protected BiConsumer<Item, Mob> serverOnPickupHandler;
+        @Setter
+        @Getter
+        protected BiConsumer<Item,Mob> serverOnDropHandler;
+        @Getter
+        protected boolean isServerGameEventListener;
+
+        @Getter
+        @Setter
+        protected BiConsumer<GameEvent, Entity> serverGameEventHandler;
+
+        public ItemTemplate(String name, String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex) {
+            this.name = name;
+            this.description = description;
+            this.fpPath = fpPath;
+            this.iconPath = iconPath;
+            this.dropPath = dropPath;
+            this.dropData = dropData;
+            this.thirdPersonOffsetData = thirdPersonOffsetData;
+            this.type = type;
+            this.templateIndex = templateIndex;
+            serverSideEffects = new ArrayList<>(0);
+        }
+
+        public ItemTemplate(String name, String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, List<EffectTemplates.EffectTemplate> serverSideEffects) {
+            this.name = name;
+            this.description = description;
+            this.fpPath = fpPath;
+            this.iconPath = iconPath;
+            this.dropPath = dropPath;
+            this.dropData = dropData;
+            this.thirdPersonOffsetData = thirdPersonOffsetData;
+            this.type = type;
+            this.templateIndex = templateIndex;
+            this.serverSideEffects = serverSideEffects;
+        }
     }
 
     @Getter
@@ -237,8 +321,8 @@ public class ItemTemplates {
         private final HelmetStatTemplate defaultStats;
         private final boolean replacesHead;
 
-        public HelmetTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, boolean replacesHead, HelmetStatTemplate defaultStats) {
-            super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
+        public HelmetTemplate(String name,String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, boolean replacesHead, HelmetStatTemplate defaultStats) {
+            super(name,description, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.replacesHead = replacesHead;
             this.defaultStats = defaultStats;
         }
@@ -249,8 +333,8 @@ public class ItemTemplates {
 
         private final VestStatTemplate defaultStats;
 
-        public VestTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, VestStatTemplate defaultStats) {
-            super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
+        public VestTemplate(String name, String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, VestStatTemplate defaultStats) {
+            super(name,description, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
 
         }
@@ -261,8 +345,8 @@ public class ItemTemplates {
 
         private final GlovesStatTemplate defaultStats;
 
-        public GlovesTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, GlovesStatTemplate defaultStats) {
-            super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
+        public GlovesTemplate(String name,String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, GlovesStatTemplate defaultStats) {
+            super(name,description, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
         }
     }
@@ -272,8 +356,8 @@ public class ItemTemplates {
 
         private final BootsStatTemplate defaultStats;
 
-        public BootsTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, BootsStatTemplate defaultStats) {
-            super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
+        public BootsTemplate(String name,String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, BootsStatTemplate defaultStats) {
+            super(name,description, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
         }
     }
@@ -284,8 +368,8 @@ public class ItemTemplates {
         private final RangedWeaponStatTemplate defaultStats;
         private final MobRangedWeaponUsageData mobUsageData;
 
-        public RangedWeaponTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, RangedWeaponStatTemplate defaultStats, MobRangedWeaponUsageData mobUsageData) {
-            super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
+        public RangedWeaponTemplate(String name,String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, RangedWeaponStatTemplate defaultStats, MobRangedWeaponUsageData mobUsageData) {
+            super(name,description, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
             this.mobUsageData = mobUsageData;
         }
@@ -297,8 +381,8 @@ public class ItemTemplates {
         private final MeleeWeaponStatTemplate defaultStats;
         private final MobMeleeWeaponUsageData mobUsageData;
 
-        public MeleeWeaponTemplate(String name, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, MeleeWeaponStatTemplate defaultStats,MobMeleeWeaponUsageData mobUsageData) {
-            super(name, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
+        public MeleeWeaponTemplate(String name, String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex, MeleeWeaponStatTemplate defaultStats,MobMeleeWeaponUsageData mobUsageData) {
+            super(name, description, fpPath, iconPath, dropPath, dropData, thirdPersonOffsetData, type, templateIndex);
             this.defaultStats = defaultStats;
             this.mobUsageData = mobUsageData;
         }
@@ -327,7 +411,8 @@ public class ItemTemplates {
         RIFLE, PISTOL, LMG, KNIFE, AXE, GRENADE,
         PISTOL_AMMO, RIFLE_AMMO, SMG_AMMO, LMG_AMMO, SHOTGUN_AMMO,
         MEDPACK,
-        REPORT
+        REPORT,
+        CORNUCOPIA
     }
 
 }

@@ -12,8 +12,9 @@ import game.entities.mobs.HumanMob;
 import game.entities.mobs.MudBeetle;
 import game.entities.mobs.TrainingDummy;
 import game.items.Item;
-import game.items.ItemTemplates;
-import game.items.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTemplates;
+import itemSystem.ItemTemplates.ItemTemplate;
+import itemSystem.ItemTypeDefinitions;
 import game.items.armor.Boots;
 import game.items.armor.Gloves;
 import game.items.armor.Helmet;
@@ -190,19 +191,19 @@ public class AllMobFactory extends MobFactory {
             var weaponTemplate = ItemTemplates.KNIFE;
 
             Item helmet = serverLevelManager.registerItemLocal(helmetTemplate, true);
-            helmet.setName("\\#1e8a00#"+helmet.getName());
+            helmet.setName(ItemTypeDefinitions.getAsArtifact(helmet.getName()));
             serverLevelManager.broadcastEntityOnNextLevel(helmet);
             p.getEquipment().addItem(helmet);
             p.equipServer(helmet);
 
             Item vest = serverLevelManager.registerItemLocal(vestTemplate, true);
-            vest.setName("\\#1e8a00#"+vest.getName());
+            vest.setName(ItemTypeDefinitions.getAsArtifact(vest.getName()));
             serverLevelManager.broadcastEntityOnNextLevel(vest);
             p.getEquipment().addItem(vest);
             p.equipServer(vest);
 
             var weapon = (Knife) serverLevelManager.registerItemLocal(weaponTemplate, true);
-            weapon.setName("\\#1e8a00#"+weapon.getName());
+            weapon.setName(ItemTypeDefinitions.getAsArtifact(weapon.getName()));
             weapon.setDamage(11f);
             serverLevelManager.broadcastEntityOnNextLevel(weapon);
             p.getEquipment().addItem(weapon);

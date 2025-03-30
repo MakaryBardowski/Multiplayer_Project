@@ -93,12 +93,7 @@ public class DestructibleDecoration extends StatusEffectContainer {
         if (getHealth() <= 0) {
             destroyServer();
             onDeathServer();
-            return;
         }
-        Main.getInstance().enqueue(() -> {
-            notifyEventSubscribers(new DamageReceivedEvent(damageData));
-        }
-        );
     }
 
     @Override

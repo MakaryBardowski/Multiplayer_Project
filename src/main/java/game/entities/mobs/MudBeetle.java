@@ -8,7 +8,7 @@ import behaviorTree.composite.ParallelNode;
 import behaviorTree.composite.SelectorNode;
 import behaviorTree.composite.SequenceNode;
 import behaviorTree.context.MudBeetleContext;
-import game.effects.EmitterPooler;
+import game.effects.Vfx;
 import game.entities.Destructible;
 import game.items.Item;
 import game.map.collision.WorldGrid;
@@ -209,12 +209,12 @@ public class MudBeetle extends Mob {
 
         setHealth(getHealth()-calculateDamage(damageData.getRawDamage()));
 
-        ParticleEmitter blood = EmitterPooler.getBlood();
-        Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 1, 0);
-        blood.setLocalTranslation(bloodPos);
+//        ParticleEmitter blood = Vfx.getBlood();
+//        Vector3f bloodPos = node.getWorldTranslation().clone().add(0, 1, 0);
+//        blood.setLocalTranslation(bloodPos);
 
         if (getHealth() <= 0) {
-            blood.emitParticles(2);
+//            blood.emitParticles(2);
             Main.getInstance().enqueue(() -> {
                 projectFromTo(ClientGameAppState.getInstance(), node.getWorldTranslation().clone().add(0, 1, 0), new Vector3f(0, -1, 0), "Textures/Gameplay/Decals/testBlood" + new Random().nextInt(2) + ".png", new Random().nextInt(2) + 2f);
 
@@ -223,7 +223,7 @@ public class MudBeetle extends Mob {
             destroyClient();
             onDeathClient();
         } else {
-            blood.emitParticles(2);
+//            blood.emitParticles(2);
         }
     }
     

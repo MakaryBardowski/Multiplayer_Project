@@ -4,6 +4,7 @@ import client.appStates.ClientGameAppState;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.IntegerAttribute;
+import itemSystem.ItemTemplates;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewAmmoPackMessage;
 
