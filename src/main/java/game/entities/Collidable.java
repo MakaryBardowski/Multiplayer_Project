@@ -18,8 +18,10 @@ import server.ServerGameAppState;
 @Getter
 @Setter
 public abstract class Collidable extends Movable {
-
     private static final Spatial.CullHint HITBOX_CULLING = Spatial.CullHint.Always;
+
+    private float[][] corners = new float[8][3];
+
     protected CollisionShape collisionShape;
     protected Node hitboxNode = new Node(); // hitbox center is at this node
     @Getter
@@ -46,7 +48,7 @@ public abstract class Collidable extends Movable {
         float width = collisionShape.getWidth();
         float height = collisionShape.getHeight(); // height == 1.25??
         float depth = collisionShape.getLength();
-        float[][] corners = new float[8][3];
+
         corners[0] = new float[]{centerX - width, centerY + height, centerZ - depth};
         corners[1] = new float[]{centerX + width, centerY + height, centerZ - depth};
         corners[2] = new float[]{centerX - width, centerY + height, centerZ + depth};

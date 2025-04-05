@@ -1,5 +1,6 @@
 package game.entities.mobs.player;
 
+import com.jme3.texture.Texture2D;
 import game.entities.factories.MobSpawnType;
 import game.entities.inventory.Hotbar;
 import game.items.Equippable;
@@ -51,6 +52,22 @@ public class Player extends HumanMob {
     @Getter
     @Setter
     private boolean forward, backward, right, left, holdsTrigger;
+
+    // equipment preview
+    @Getter
+    private Node equipmentPreviewNode;
+
+    @Getter
+    private Node equipmentPreviewCameraAnchorNode;
+
+    @Getter
+    private SkinningControl equipmentPreviewSkinningControl;
+    @Getter
+    protected Node equipmentPreviewThirdPersonHandsNode;
+    @Getter
+    @Setter
+    protected Texture2D equipmentPreviewTexture;
+
 
     // camera
     private CameraNode mainCameraNode;
@@ -147,7 +164,6 @@ public class Player extends HumanMob {
 
         cachedSpeed = 11.25f;
         attributes.put(SPEED_ATTRIBUTE_KEY, new FloatAttribute(cachedSpeed));
-
     }
 
     @Override
@@ -373,6 +389,15 @@ public class Player extends HumanMob {
 
     public static boolean isPlayerControlsEnabled(){
         return isPlayerControlsEnabled;
+    }
+
+    public void createEquipmentPreviewNodeAndSkinningControl(){
+        equipmentPreviewNode = node.clone(false);
+        equipmentPreviewSkinningControl = equipmentPreviewNode.getChild(0).getControl(SkinningControl.class);
+        equipmentPreviewThirdPersonHandsNode = new Node();
+        ((Node) equipmentPreviewNode.getChild("Armature")).attachChild(equipmentPreviewThirdPersonHandsNode);
+        equipmentPreviewCameraAnchorNode = new Node();
+        equipmentPreviewNode.attachChild(equipmentPreviewCameraAnchorNode);
     }
 
 }

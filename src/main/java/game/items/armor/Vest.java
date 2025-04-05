@@ -34,6 +34,13 @@ public class Vest extends Armor {
         setupModelLight(vest);
         n.attachChild(vest);
         setupModelShootability(vest, m.getId());
+
+        if(m instanceof Player p && p.getEquipmentPreviewNode() != null) {
+            Node vestPreviewNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("Spine");
+            vestPreviewNode.detachAllChildren();
+            var previewVestModel = vest.clone(false);
+            vestPreviewNode.attachChild(previewVestModel);
+        }
     }
 
     @Override

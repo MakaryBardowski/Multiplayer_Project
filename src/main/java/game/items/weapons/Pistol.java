@@ -35,13 +35,14 @@ import messages.items.NewRangedWeaponMessage;
 
 public class Pistol extends RangedWeapon {
 
-    private static final float BULLET_SPEED = 1200f;
+    private static final float BULLET_SPEED = 300f;
 
     private Node muzzleNode;
     private CameraRecoilControl camRecoil;
     private RecoilControl gunRecoil;
     private ParticleEmitter muzzleEmitter;
     private int thirdPersonModelParentIndex;
+    private int equipmentPreviewThirdPersonModelParentIndex;
 
     public Pistol(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
         super(id, damage, template, name, node, maxAmmo, roundsPerSecond);
@@ -70,10 +71,11 @@ public class Pistol extends RangedWeapon {
         }
 
         p.setEquippedRightHand(null);
-        if (PlayerEqualsMyPlayer(p)) {
+        if (ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().isMyPlayer(p)) {
             p.getGunNode().removeControl(gunRecoil);
             p.getMainCameraNode().removeControl(camRecoil);
             p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+            p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").detachChildAt(equipmentPreviewThirdPersonModelParentIndex);
         }
         p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
 
@@ -91,7 +93,7 @@ public class Pistol extends RangedWeapon {
 
         p.setEquippedRightHand(this);
 
-        if (PlayerEqualsMyPlayer(p)) {
+        if (ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().isMyPlayer(p)) {
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) getAmmo() + "/" + (int) getMaxAmmo());
 
             Node model = (Node) assetManager.loadModel(template.getFpPath());
@@ -232,10 +234,6 @@ public class Pistol extends RangedWeapon {
         return msg;
     }
 
-    private boolean PlayerEqualsMyPlayer(Player p) {
-        return p == ClientGameAppState.getInstance().getPlayer();
-    }
-
     @Override
     public void serverEquip(HumanMob m) {
         m.setEquippedRightHand(this);
@@ -372,5 +370,12 @@ public class Pistol extends RangedWeapon {
         humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
         setupModelShootability(model, humanMob.getId());
         thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+
+        if(humanMob instanceof Player p && p.getEquipmentPreviewNode() != null) {
+            var previewModelNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR");
+            var previewModel = model.clone(false);
+            previewModelNode.attachChild(previewModel);
+            equipmentPreviewThirdPersonModelParentIndex = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").getChildIndex(previewModel);
+        }
     }
 }

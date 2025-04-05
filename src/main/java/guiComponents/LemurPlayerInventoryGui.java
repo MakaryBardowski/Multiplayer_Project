@@ -1,9 +1,8 @@
 package guiComponents;
 
 import static guiComponents.inventoryComponents.LemurUtils.getWidthRatio;
-import guiComponents.inventoryComponents.EquipmentButton;
-import guiComponents.inventoryComponents.HotbarButton;
-import guiComponents.inventoryComponents.TooltipMouseListener;
+
+import guiComponents.inventoryComponents.*;
 import guiComponents.inventoryComponents.TooltipMouseListener.TooltipSource;
 
 import guiComponents.dragDrop.DragAndDropControl;
@@ -46,6 +45,8 @@ public class LemurPlayerInventoryGui {
     private boolean enabled;
 
     private Container hotbarContainer;
+
+    private EquipmentPreviewDragToRotateListener equipmentPreviewListener;
 
     public LemurPlayerInventoryGui(Player player) {
         this.player = player;
@@ -164,12 +165,17 @@ public class LemurPlayerInventoryGui {
     public Label createCharacterPreviewLabel(float sizePx) {
         Label clickMe = new Label("");
         clickMe.setPreferredSize(new Vector3f(sizePx * 2, sizePx * 4, 2));
-//        clickMe.setName("4");
-//        var path = Equipment.getItemByIndex(4).getIconPath();
-//        var ic = new IconComponent(path);
-//        ic.setIconSize(new Vector2f(sizePx * 2, sizePx * 4));
-//        clickMe.setIcon(ic);
-//        clickMe.addMouseListener(new TooltipMouseListener());
+        clickMe.setName("4");
+        var path = "Textures/GUI/EquipmentIcons/equippedIconHelmet.png";
+        var ic = new IconComponent(path);
+
+        ic.setImageTexture(player.getEquipmentPreviewTexture());
+        ic.setIconSize(new Vector2f(sizePx * 2, sizePx * 4));
+        clickMe.setIcon(ic);
+
+        equipmentPreviewListener = new EquipmentPreviewDragToRotateListener(this,clickMe);
+
+        clickMe.addMouseListener(equipmentPreviewListener);
         return clickMe;
     }
 
@@ -210,6 +216,7 @@ public class LemurPlayerInventoryGui {
             }
             getDragIcon().removeFromParent();
             TooltipMouseListener.getTooltipInnerContainer().removeFromParent();
+            equipmentPreviewListener.setPressed(false);
         } else {
             for (var buttonIndex : equipmentButtonsByIndex.keySet()) {
                 var button = equipmentButtonsByIndex.get(buttonIndex);

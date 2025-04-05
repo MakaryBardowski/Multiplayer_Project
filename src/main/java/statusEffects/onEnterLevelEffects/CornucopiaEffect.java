@@ -13,12 +13,13 @@ import statusEffects.EffectProcType;
 public class CornucopiaEffect extends OnEnterLevelEffect{
     private DropTable<ItemTemplates.ItemTemplate> dropTable = new DropTable<>(
             new ChanceEntry<>(30,ItemTemplates.MEDPACK),
-            new ChanceEntry<>(15,ItemTemplates.PISTOL_AMMO_PACK),
-            new ChanceEntry<>(15,ItemTemplates.RIFLE_AMMO_PACK),
+            new ChanceEntry<>(14.95f,ItemTemplates.PISTOL_AMMO_PACK),
+            new ChanceEntry<>(14.95f,ItemTemplates.RIFLE_AMMO_PACK),
             new ChanceEntry<>(10,ItemTemplates.LMG_HOTCHKISS),
             new ChanceEntry<>(10,ItemTemplates.RIFLE_BORYSOV),
             new ChanceEntry<>(10,ItemTemplates.PISTOL_C96),
-            new ChanceEntry<>(10,ItemTemplates.LMG_AMMO_PACK)
+            new ChanceEntry<>(10,ItemTemplates.LMG_AMMO_PACK),
+            new ChanceEntry<>(0.1f,ItemTemplates.ARTIFACT_CORNUCOPIA)
             );
     public CornucopiaEffect(int id, String name, StatusEffectContainer target, EffectProcType procType) {
         super(id, name, target, procType);

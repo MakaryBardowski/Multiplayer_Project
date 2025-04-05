@@ -5,6 +5,7 @@ import client.appStates.ClientGameAppState;
 import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
+import com.jme3.math.FastMath;
 import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -28,6 +29,7 @@ import game.items.Holdable;
 public class Grenade extends ThrowableWeapon {
 
     private int thirdPersonModelParentIndex;
+    private int equipmentPreviewThirdPersonModelParentIndex;
 
     @Getter
     private final float throwSpeed = 40;
@@ -155,6 +157,11 @@ public class Grenade extends ThrowableWeapon {
         }
         p.setEquippedRightHand(null);
         p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+
+        if(ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().isMyPlayer(p)){
+            p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").detachChildAt(equipmentPreviewThirdPersonModelParentIndex);
+        }
+
         p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
     }
 
@@ -201,7 +208,8 @@ public class Grenade extends ThrowableWeapon {
 
     private void humanEquipInThirdPerson(HumanMob humanMob, AssetManager assetManager) {
         Node model = (Node) assetManager.loadModel(template.getDropPath());
-        model.move(0, -0.33f, 0.2f);
+        model.move(-0.25f, 0.33f, -0.1f);
+        model.rotate(FastMath.DEG_TO_RAD*180,0,0);
 
         Geometry ge = (Geometry) (model.getChild(0));
         Material originalMaterial = ge.getMaterial();
@@ -215,5 +223,12 @@ public class Grenade extends ThrowableWeapon {
         humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
         setupModelShootability(model, humanMob.getId());
         thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+
+        if(humanMob instanceof Player p && p.getEquipmentPreviewNode() != null) {
+            var previewModelNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR");
+            var previewModel = model.clone(false);
+            previewModelNode.attachChild(previewModel);
+            equipmentPreviewThirdPersonModelParentIndex = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").getChildIndex(previewModel);
+        }
     }
 }

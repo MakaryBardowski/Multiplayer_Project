@@ -72,6 +72,11 @@ public class Gloves extends Armor {
         setupModelShootability(gloveR, m.getId());
 
         m.getThirdPersonHandsNode().attachChild(gloveR);
+
+        if(m instanceof Player p && p.getEquipmentPreviewNode() != null) {
+            var glovesPreviewModel = gloveR.clone(false);
+            p.getEquipmentPreviewThirdPersonHandsNode().attachChild(glovesPreviewModel);
+        }
     }
 
     @Override

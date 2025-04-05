@@ -33,6 +33,7 @@ import server.ServerGameAppState;
 public class Knife extends MeleeWeapon {
 
     private int thirdPersonModelParentIndex;
+    private int equipmentPreviewThirdPersonModelParentIndex;
 
     public Knife(int id, float damage, ItemTemplate template, String name, Node node, float roundsPerSecond) {
         super(id, damage, template, name, node, roundsPerSecond);
@@ -61,6 +62,11 @@ public class Knife extends MeleeWeapon {
         }
         p.setEquippedRightHand(null);
         p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+
+        if(ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().isMyPlayer(p)){
+            p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").detachChildAt(equipmentPreviewThirdPersonModelParentIndex);
+        }
+
         p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
     }
 
@@ -321,5 +327,12 @@ public class Knife extends MeleeWeapon {
         humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
         setupModelShootability(model, humanMob.getId());
         thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+
+        if(humanMob instanceof Player p && p.getEquipmentPreviewNode() != null) {
+            var previewModelNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR");
+            var previewModel = model.clone(false);
+            previewModelNode.attachChild(previewModel);
+            equipmentPreviewThirdPersonModelParentIndex = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").getChildIndex(previewModel);
+        }
     }
 }

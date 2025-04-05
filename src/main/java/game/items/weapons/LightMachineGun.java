@@ -44,6 +44,7 @@ public class LightMachineGun extends RangedWeapon {
 
     private ParticleEmitter muzzleEmitter;
     private int thirdPersonModelParentIndex;
+    private int equipmentPreviewThirdPersonModelParentIndex;
 
     public LightMachineGun(int id, float damage, ItemTemplate template, String name, Node node, int maxAmmo, float roundsPerSecond) {
         super(id, damage, template, name, node, maxAmmo, roundsPerSecond);
@@ -72,10 +73,11 @@ public class LightMachineGun extends RangedWeapon {
         }
 
         p.setEquippedRightHand(null);
-        if (PlayerEqualsMyPlayer(p)) {
+        if (ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().isMyPlayer(p)) {
             p.getGunNode().removeControl(gunRecoil);
             p.getMainCameraNode().removeControl(camRecoil);
             p.getFirstPersonHands().getRightHandEquipped().detachAllChildren();
+            p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").detachChildAt(equipmentPreviewThirdPersonModelParentIndex);
         }
         p.getSkinningControl().getAttachmentsNode("HandR").detachChildAt(thirdPersonModelParentIndex);
 
@@ -92,7 +94,7 @@ public class LightMachineGun extends RangedWeapon {
 
         p.setEquippedRightHand(this);
 
-        if (PlayerEqualsMyPlayer(p)) {
+        if (ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().isMyPlayer(p)) {
             ClientGameAppState.getInstance().getNifty().getCurrentScreen().findControl("ammo", LabelControl.class).setText((int) getAmmo() + "/" + (int) getMaxAmmo());
 
             Node model = (Node) assetManager.loadModel(template.getFpPath());
@@ -227,10 +229,6 @@ public class LightMachineGun extends RangedWeapon {
         NewRangedWeaponMessage msg = new NewRangedWeaponMessage(this);
         msg.setReliable(true);
         return msg;
-    }
-
-    private boolean PlayerEqualsMyPlayer(Player p) {
-        return p == ClientGameAppState.getInstance().getPlayer();
     }
 
     @Override
@@ -369,6 +367,13 @@ public class LightMachineGun extends RangedWeapon {
         humanMob.getSkinningControl().getAttachmentsNode("HandR").attachChild(model);
         setupModelShootability(model, humanMob.getId());
         thirdPersonModelParentIndex = humanMob.getSkinningControl().getAttachmentsNode("HandR").getChildIndex(model);
+
+        if(humanMob instanceof Player p && p.getEquipmentPreviewNode() != null) {
+            var previewModelNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR");
+            var previewModel = model.clone(false);
+            previewModelNode.attachChild(previewModel);
+            equipmentPreviewThirdPersonModelParentIndex = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("HandR").getChildIndex(previewModel);
+        }
     }
 
 }

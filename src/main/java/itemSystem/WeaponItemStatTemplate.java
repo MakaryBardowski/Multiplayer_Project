@@ -44,7 +44,7 @@ public class WeaponItemStatTemplate {
                 new Vector3f(0,0,0),
                 0
         );
-        public static RangedWeaponStatTemplate RIFLE_BORYSOV_DEFAULT_STATS = new RangedWeaponStatTemplate(3.9f,6f,3024,
+        public static RangedWeaponStatTemplate RIFLE_BORYSOV_DEFAULT_STATS = new RangedWeaponStatTemplate(3.9f,6f,24,
                 40,
                 1.4f, 0.85f, .35f,
                 new Vector3f(0,0.7f,3),

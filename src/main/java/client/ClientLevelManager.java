@@ -101,6 +101,9 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
     private final Node pickableNode = new Node("PICKABLE NODE");
 
     @Getter
+    private final Node equipmentPreviewNode = new Node("EQUIPMENT PREVIEW NODE");
+
+    @Getter
     @Setter
     private volatile Map nextStaticMap; // cached from server
 
@@ -122,6 +125,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
         entityNode.attachChild(pickableNode);
         worldNode.attachChild(mapNode);
         rootNode.attachChild(worldNode);
+        rootNode.attachChild(equipmentPreviewNode);
 
         float renderDistance = 700f;
         MAIN_INSTANCE.getCamera().setFrustumPerspective(70, (float) GAME_APP_STATE.getSettings().getWidth() / GAME_APP_STATE.getSettings().getHeight(), 0.01f, renderDistance);
@@ -133,6 +137,9 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
         al.setColor(ColorRGBA.White.mult(0.5f));
         worldNode.addLight(al);
 
+        AmbientLight equipmentPreviewModelLight = new AmbientLight();
+        equipmentPreviewModelLight.setColor(ColorRGBA.White.mult(0.5f));
+        equipmentPreviewNode.addLight(equipmentPreviewModelLight);
         grid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
 //        DebugUtils.drawGrid();
 
@@ -272,6 +279,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
 
     private void destroyCurrentLevel(){
         if(level != null){
+            getDebugNode().detachAllChildren();
             level.getBlockWorld().getWorldNode().removeFromParent();
             level = null;
         }
@@ -288,5 +296,9 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
         rootNode.removeFromParent();
         Main.getInstance().getCamera().setLocation(new Vector3f(0,6,0.1f));
         Main.getInstance().getCamera().setRotation(new Quaternion(0,1,0,0));
+    }
+
+    public boolean isMyPlayer(Mob m){
+        return m.getId() == player.getId();
     }
 }

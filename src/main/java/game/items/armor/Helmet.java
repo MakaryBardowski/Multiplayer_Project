@@ -3,6 +3,9 @@ package game.items.armor;
 import client.appStates.ClientGameAppState;
 
 import static game.map.blocks.VoxelLighting.setupModelLight;
+
+import com.jme3.scene.Spatial;
+import debugging.DebugUtils;
 import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.network.AbstractMessage;
@@ -42,19 +45,30 @@ public class Helmet extends Armor {
         Node n = m.getSkinningControl().getAttachmentsNode("Head");
         n.detachAllChildren();
 
-//        m.getSkinningControl().getArmature().getJoint("Head").setLocalRotation(new Quaternion(1,0.6f,new Random().nextFloat(),1f));
         Node helmet = (Node) Main.getInstance().getAssetManager().loadModel(helmetTemplate.getFpPath());
+        Node head = null;
         setupModelLight(helmet);
         n.attachChild(helmet);
         setupModelShootability(helmet, m.getId());
 
         if (!helmetTemplate.isReplacesHead()) {
             helmet.setLocalScale(HELMET_SCALE_ZBUFFER_FIGHTING);
-            Node head = (Node) Main.getInstance().getAssetManager().loadModel(m.getDefaultHelmet().getTemplate().getFpPath());
+            head = (Node) Main.getInstance().getAssetManager().loadModel(m.getDefaultHelmet().getTemplate().getFpPath());
             setupModelLight(head);
             n.attachChild(head);
             setupModelShootability(head, m.getId());
             ((Geometry) head.getChild(0)).getMaterial().getAdditionalRenderState().setPolyOffset(5, 5);
+        }
+
+        if(m instanceof Player p && p.getEquipmentPreviewNode() != null){
+            var previewModelHeadNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("Head");
+            previewModelHeadNode.detachAllChildren();
+            var previewHelmetModel = helmet.clone(false);
+            previewModelHeadNode.attachChild(previewHelmetModel);
+            if (head != null) {
+                var previewHead = head.clone(false);
+                previewModelHeadNode.attachChild(previewHead);
+            }
         }
     }
 

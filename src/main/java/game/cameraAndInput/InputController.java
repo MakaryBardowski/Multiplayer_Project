@@ -187,7 +187,7 @@ public class InputController {
                     player.getMainCameraNode().removeFromParent();
                     player.setPickupRange(10000f);
 
-                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Never);
+                    player.getFirstPersonHands().getHandsNode().setCullHint(Spatial.CullHint.Always);
                     player.getNode().setCullHint(Spatial.CullHint.Inherit);
 
                     player.setMovementControlLocked(true);

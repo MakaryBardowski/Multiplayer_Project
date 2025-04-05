@@ -15,16 +15,13 @@ import game.items.Item;
 import java.util.Random;
 
 public class ParticleUtils {
-
-    private static float finalY = 3;
-
     private static final Random RANDOM = new Random();
 
     public static void spawnGorePhysicalParticleShaded(Node particleNode, Vector3f initialPos) {
         setMaterialForShadedParticles(particleNode);
         attachParticleNode(particleNode, ClientGameAppState.getInstance().getDebugNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
-        GoreParticle strategy = createGoreParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY);
+        GoreParticle strategy = createGoreParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity());
         createParticle(particleNode, strategy);
     }
 
@@ -38,7 +35,7 @@ public class ParticleUtils {
         setMaterialForShadedParticles(particleNode);
         attachParticleNode(particleNode, ClientGameAppState.getInstance().getPickableNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
-        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), finalY, i);
+        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, generateRandomVelocity(), generateRandomRotationalVelocity(), i);
         createParticle(particleNode, strategy);
     }
 
@@ -46,7 +43,7 @@ public class ParticleUtils {
         setMaterialForShadedParticles(particleNode);
         attachParticleNode(particleNode, ClientGameAppState.getInstance().getPickableNode());
         moveParticleToSpawnpoint(particleNode, initialPos);
-        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, velocity, generateRandomRotationalVelocity(), finalY, i);
+        DroppedItem strategy = createDroppedItemParticleStrategy(particleNode, velocity, generateRandomRotationalVelocity(), i);
         createParticle(particleNode, strategy);
     }
 
@@ -98,12 +95,12 @@ public class ParticleUtils {
         return rotVelocity;
     }
 
-    private static GoreParticle createGoreParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY) {
-        return new GoreParticle(particleNode, velocity, rotVelocity, finalY);
+    private static GoreParticle createGoreParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity) {
+        return new GoreParticle(particleNode, velocity, rotVelocity);
     }
 
-    private static DroppedItem createDroppedItemParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, float finalY, Item i) {
-        return new DroppedItem(particleNode, velocity, rotVelocity, finalY, i);
+    private static DroppedItem createDroppedItemParticleStrategy(Node particleNode, Vector3f velocity, Vector3f rotVelocity, Item i) {
+        return new DroppedItem(particleNode, velocity, rotVelocity, i);
     }
 
     private static void attachParticleNode(Node particleNode, Node parentNode) {

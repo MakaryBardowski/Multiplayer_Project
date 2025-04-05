@@ -1,10 +1,8 @@
 package game.effects.particleStrategies;
 
-import client.appStates.ClientGameAppState;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import game.entities.mobs.Mob;
 import game.items.Item;
 import game.map.collision.RectangleAABB;
 
@@ -12,29 +10,53 @@ public class DroppedItem extends ParticleMovementStrategy {
 
     private final Vector3f velocity;
     private final Vector3f rotationVelocity;
-    private final float finalY;
     private final Item item;
     private static final float GRAVITY = 13.81f;//9.81f;
+    private static final float BOUNCE_VELOCITY_MULTIPLIER = -0.7f;
 
-    public DroppedItem(Node node, Vector3f velocity, Vector3f rotationVelocity, float finalY, Item item) {
+    private final Vector3f tempVelocity = new Vector3f();
+    public DroppedItem(Node node, Vector3f velocity, Vector3f rotationVelocity, Item item) {
         super(node,new RectangleAABB(node.getWorldTranslation(),item.getTemplate().getDropData().getOffset().x,item.getTemplate().getDropData().getOffset().y,item.getTemplate().getDropData().getOffset().z));
         this.velocity = velocity;
         this.rotationVelocity = rotationVelocity;
-        this.finalY = finalY;
         this.item = item;
     }
 
     @Override
     public void updateParticle(float tpf) {
-        if (hasNotHitGround()) {
-            move(tpf);
-        } else {
-            onHitGround();
+            tempVelocity.set(velocity.mult(tpf));
+            node.getChild(1).rotate(rotationVelocity.x * tpf, rotationVelocity.y * tpf, rotationVelocity.z * tpf);
+            velocity.subtractLocal(0, GRAVITY * tpf, 0);
+
+            if(hasNotCollidedVertically()) {
+                moveY(tpf);
+                moveXZ(tpf);
+            }else{
+                if(tempVelocity.y > 0){
+                    tempVelocity.setY(tempVelocity.y* BOUNCE_VELOCITY_MULTIPLIER);
+                    moveY(tpf);
+                    moveXZ(tpf);
+                } else {
+                    onStop();
+                }
+            }
+    }
+
+    private void moveXZ(float tpf){
+        if(doesNotCollideAfterMove(tempVelocity.x,0,0)) {
+            moveX(tpf);
+        }else{
+            tempVelocity.setX(tempVelocity.x* BOUNCE_VELOCITY_MULTIPLIER);
+        }
+        if(doesNotCollideAfterMove(0,0,tempVelocity.z)) {
+            moveZ(tpf);
+        }else {
+            tempVelocity.setZ(tempVelocity.z* BOUNCE_VELOCITY_MULTIPLIER);
         }
     }
 
     @Override
-    public void onHitGround() {
+    public void onStop() {
         float[] startQ = new float[3];
         node.getChild(1).getWorldRotation().toAngles(startQ);
         startQ[0] = item.getTemplate().getDropData().getRotation().getX();
@@ -45,25 +67,23 @@ public class DroppedItem extends ParticleMovementStrategy {
     }
 
     @Override
-    protected boolean hasNotHitGround() {
-//        var nearby = ClientGameAppState.getInstance().getGrid().getNearbyCollisionShapeAtPos(node.getWorldTranslation(), collisionShape);
-//        if(nearby == null){
-//            return false;
-//        }
-//        for(var cs : nearby){
-//            if(cs.getCollisionShape() instanceof RectangleAABB otherAABB && !(cs instanceof Mob) && collisionShape.wouldCollideAtPosition(cs.getCollisionShape(), node.getWorldTranslation())){
-//                return false;
-//            }
-//        }
-//        return true;
-        return node.getLocalTranslation().getY() > finalY;
+    protected boolean hasNotCollidedVertically() {
+        return doesNotCollideAfterMove(0, tempVelocity.y, 0);
     }
 
     @Override
-    public void move(float tpf) {
-        node.getChild(1).rotate(rotationVelocity.x * tpf, rotationVelocity.y * tpf, rotationVelocity.z * tpf);
-        node.move(velocity.mult(tpf));
-        velocity.subtractLocal(0, GRAVITY * tpf, 0);
+    public void moveX(float tpf) {
+        node.move(tempVelocity.x,0,0);
     }
-    
+
+    @Override
+    public void moveY(float tpf) {
+        node.move(0,tempVelocity.y,0);
+    }
+
+    @Override
+    public void moveZ(float tpf) {
+        node.move(0,0,tempVelocity.z);
+    }
+
 }

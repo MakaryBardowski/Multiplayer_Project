@@ -50,6 +50,21 @@ public class Boots extends Armor {
         l.attachChild(bootL);
         bootR.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
         bootL.rotate(0, -FastMath.DEG_TO_RAD * 90, 0);
+
+        if(m instanceof Player p && p.getEquipmentPreviewNode() != null){
+            Node previewRightLegNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("LegR");
+            Node previewLeftLegNode = p.getEquipmentPreviewSkinningControl().getAttachmentsNode("LegL");
+
+            previewRightLegNode.detachAllChildren();
+            previewLeftLegNode.detachAllChildren();
+
+            var previewBootR = bootR.clone(false);
+            var previewBootL = bootL.clone(false);
+
+            previewLeftLegNode.attachChild(previewBootL);
+            previewRightLegNode.attachChild(previewBootR);
+
+        }
     }
 
     @Override
