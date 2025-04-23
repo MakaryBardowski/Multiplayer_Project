@@ -8,6 +8,8 @@ public class LevelLoadKeys {
     public static final String MAP_BLOCK_POSITION_Y_KEY = "height";
     public static final String MAP_BLOCK_DATA_KEY = "blockData";
 
+    public static final String ROOM_PREFAB_JOIN_POINTS_DATA_KEY = "joinPoints";
+
     public static final String PLAYER_SPAWNPOINTS_KEY = "playerSpawnpoints";
 
     public static final String ENTITIES_KEY = "entities";

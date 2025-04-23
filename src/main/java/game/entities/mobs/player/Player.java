@@ -62,11 +62,17 @@ public class Player extends HumanMob {
 
     @Getter
     private SkinningControl equipmentPreviewSkinningControl;
+
     @Getter
     protected Node equipmentPreviewThirdPersonHandsNode;
+
     @Getter
     @Setter
     protected Texture2D equipmentPreviewTexture;
+
+    @Getter
+    @Setter
+    private ViewPort equipmentPreviewViewport;
 
 
     // camera

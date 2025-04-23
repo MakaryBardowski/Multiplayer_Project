@@ -17,7 +17,7 @@ public class DebugUtils {
 
     public static Geometry DEBUG_GEO = null;
 
-    public static void drawGrid() {
+    public static void drawGrid(Node parent) {
         var cs = ClientGameAppState.getInstance();
         Material mat = new Material(cs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
         mat.getAdditionalRenderState().setWireframe(true);
@@ -33,9 +33,25 @@ public class DebugUtils {
                 g.setMaterial(mat);
                 g.center().move(cs.getGrid().getCellSize() * i + 0.5f, cs.getBLOCK_SIZE() + .01f, cs.getGrid().getCellSize() * j + 0.5f);
                 g.scale(cs.getGrid().getCellSize());
-                cs.getDebugNode().attachChild(g);
+                parent.attachChild(g);
             }
         }
+    }
+
+    public static void drawMapBounds(Node parent){
+        var cs = ClientGameAppState.getInstance();
+        Material mat = new Material(cs.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.getAdditionalRenderState().setWireframe(true);
+        mat.getAdditionalRenderState().setLineWidth(2f);
+
+        mat.setColor("Color", ColorRGBA.Yellow);
+
+        Geometry g = new Geometry("wireframe grid", new Grid(2, 2, 2f));
+
+        g.setMaterial(mat);
+        g.scale(cs.getGrid().getCellSize());
+        g.setLocalScale(cs.getMap().getBlockWorld().getMapSizeX()*cs.getBLOCK_SIZE()*0.5f  ,1,cs.getMap().getBlockWorld().getMapSizeZ()*cs.getBLOCK_SIZE()*0.5f);
+        parent.attachChild(g);
     }
 
     public static void addArrow(Node node, AssetManager a) {
@@ -72,5 +88,18 @@ public class DebugUtils {
         n.attachChild(red);
         return n;
     }
+
+    public static void attachCoordinateAxes(Node parentNode,AssetManager assetManager) {
+        var length = 20;
+        Arrow arrow = new Arrow(Vector3f.UNIT_X.mult(length));
+        putShape(parentNode, arrow, ColorRGBA.Red, assetManager);
+
+        arrow = new Arrow(Vector3f.UNIT_Y.mult(length));
+        putShape(parentNode, arrow, ColorRGBA.Green, assetManager);
+
+        arrow = new Arrow(Vector3f.UNIT_Z.mult(length));
+        putShape(parentNode, arrow, ColorRGBA.Blue, assetManager);
+    }
+
 
 }

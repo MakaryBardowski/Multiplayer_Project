@@ -39,7 +39,7 @@ import game.items.weapons.Rifle;
 import game.map.ServerLevelGenerator;
 import game.map.MapType;
 import game.map.EntitySpawner;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import lombok.Getter;
 import game.map.collision.WorldGrid;
 
@@ -106,7 +106,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     private final int COLLISION_GRID_CELL_SIZE = 18;
 
     @Getter
-    private final int MAP_SIZE_XZ = 20;
+    private final int MAP_SIZE_XZ = 40;
 
     @Getter
     private final int MAP_SIZE_Y = 20;
@@ -144,9 +144,12 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
 
             var type = MapType.values()[RANDOM.nextInt(MapType.values().length)];
 
-            while(type.equals(MapType.FILE)) {
+            while(type.equals(MapType.FILE) || type.equals(MapType.CELLULAR_AUTOMATA)) {
                 type = MapType.values()[RANDOM.nextInt(MapType.values().length)];
             }
+
+            type = MapType.FILE;
+
             levelTypes[i] = type;
 //            levelTypes[i] = MapType.BSP;
         }
@@ -191,7 +194,8 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         clearEntities();
         currentLevelIndex = newLevelIndex;
 
-        if(newLevelIndex == 3 || newLevelIndex == 5){
+        if(false){
+//        if(newLevelIndex == 3 || newLevelIndex == 5){
             var hostsByPlayerId = ServerGameAppState.getInstance().getHostsByPlayerId();
 
             var cardSession = new CardChoiceSession(cardChoiceSessions.size());

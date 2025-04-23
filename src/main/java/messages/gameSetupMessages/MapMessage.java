@@ -3,7 +3,7 @@ package messages.gameSetupMessages;
 import client.appStates.ClientGameAppState;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import messages.TwoWayMessage;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;

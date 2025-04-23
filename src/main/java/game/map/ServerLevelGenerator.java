@@ -2,20 +2,23 @@ package game.map;
 
 import LevelLoadSystem.LevelLoader;
 import client.Main;
+import com.jme3.math.Vector3f;
 import game.map.proceduralGeneration.BspMapGenerator;
 import game.map.proceduralGeneration.CellularAutomataMapGenerator;
 import game.map.proceduralGeneration.RandomMapGenerator;
+import game.map.proceduralGeneration.stages.Stage1MapGenerator;
 
 import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerLevelGenerator {
-    private static final String MAPS_PWD = Main.isIDEMode() ? "assets" :  Paths.get("").toAbsolutePath().toString();
+    private static final String MAPS_PWD = Main.isIDEMode() ? "assets/Maps/" :  Paths.get("").toAbsolutePath().toString()+"/Maps/";
     private static final String LEVEL_FILE_EXTENSION = ".json";
-    private static final String BOSS_LEVEL_FILEPATH_PREFIX = "assets/Maps/bossRoom";
     private static final String INVALID_MAP_TYPE_FOR_FILE_LOADING_PROVIDED_MESSAGE = "cannot load map of given type '%s'. Maps can be loaded with types ARMORY,BOSS";
 
-    public static final String SAVED_MAP_FILEPATH_TEMPLATE = MAPS_PWD + "/Maps/Map";
+    public static final String SAVED_MAP_FILEPATH_TEMPLATE = MAPS_PWD + "Map";
 
 
     private final long levelSeed;
@@ -31,11 +34,16 @@ public class ServerLevelGenerator {
     public LevelGenerationResult generateLevel(int generatedMapSizeX, int generatedMapSizeY, int generatedMapSizeZ) throws IOException {
         switch (mapType) {
             case FILE: {
-                var levelFilePath = getSavedLevelFilepath(mapType, levelIndex);
-                var levelLoadResult = new LevelLoader().readLevelFile(levelFilePath);
-                var map = levelLoadResult.getMap();
-                var entitySpawnData  = levelLoadResult.getSavedEntityData();
-                return new LevelGenerationResult(map,entitySpawnData,levelLoadResult.getPlayerSpawnpoints());
+//                var levelFilePath = getSavedLevelFilepath(mapType, levelIndex);
+//                var levelLoadResult = new LevelLoader().readLevelFile(levelFilePath);
+//                var map = levelLoadResult.getMap();
+//                var entitySpawnData  = levelLoadResult.getSavedEntityData();
+//                return new LevelGenerationResult(map,entitySpawnData,levelLoadResult.getPlayerSpawnpoints());
+                var mapGenResult = new Stage1MapGenerator(levelSeed, generatedMapSizeX,generatedMapSizeY,generatedMapSizeZ).createRandomMap();
+                var room = mapGenResult.getRooms().get(0);
+                return new LevelGenerationResult(mapGenResult.getMap(), mapGenResult.getEntitySpawnData(),
+                        List.of(new Vector3f(room.getStartX()+5,room.getStartY()+1,room.getStartZ()+5))
+                        );
             }
             case NAIVE: {
                 var mapGenResult = new RandomMapGenerator(levelSeed, generatedMapSizeX,generatedMapSizeY,generatedMapSizeZ).createRandomMap();

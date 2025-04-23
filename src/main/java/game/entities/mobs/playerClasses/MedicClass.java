@@ -20,6 +20,7 @@ public class MedicClass extends PlayerClass {
         return List.of(
                 KNIFE,
                 PISTOL_C96,
+                PISTOL_AMMO_PACK,
                 GAS_MASK,
                 VEST_TRENCH,
                 BOOTS_TRENCH,

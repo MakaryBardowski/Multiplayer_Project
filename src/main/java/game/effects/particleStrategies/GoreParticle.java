@@ -35,12 +35,12 @@ public class GoreParticle extends ParticleMovementStrategy {
             if(doesNotCollideAfterMove(tempVelocity.x,0,0)) {
                 moveX(tpf);
             }else{
-                tempVelocity.setX(tempVelocity.x*HORIZONTAL_BOUNCE_VELOCITY_MULTIPLIER);
+                velocity.setX(velocity.x*HORIZONTAL_BOUNCE_VELOCITY_MULTIPLIER);
             }
             if(doesNotCollideAfterMove(0,0,tempVelocity.z)) {
                 moveZ(tpf);
             }else {
-                tempVelocity.setZ(tempVelocity.z*HORIZONTAL_BOUNCE_VELOCITY_MULTIPLIER);
+                velocity.setZ(velocity.z*HORIZONTAL_BOUNCE_VELOCITY_MULTIPLIER);
             }
             velocity.subtractLocal(0, GRAVITY * tpf, 0);
         }else{

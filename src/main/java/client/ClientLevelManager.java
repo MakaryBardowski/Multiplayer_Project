@@ -25,7 +25,7 @@ import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import game.map.ClientLevelGenerator;
 import game.map.MapType;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import game.map.collision.WorldGrid;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
     private final int CHUNK_SIZE = 16;
 
     @Getter
-    private final int MAP_SIZE_XZ = 20;
+    private final int MAP_SIZE_XZ = 40;
 
     @Getter
     private final int MAP_SIZE_Y = 20;
@@ -290,6 +290,10 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
         if(player != null && player.getGunViewPort() != null){
             player.getGunViewPort().detachScene(player.getGunNode());
             renderManager.removeMainView(player.getGunViewPort());
+
+            player.getEquipmentPreviewViewport().detachScene(player.getEquipmentPreviewNode());
+            renderManager.removeMainView(player.getEquipmentPreviewViewport());
+
             player.getPlayerHealthbar().cleanup();
             player.getPlayerinventoryGui().cleanup();
         }

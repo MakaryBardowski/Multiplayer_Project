@@ -2,6 +2,7 @@ package pathfinding;
 
 import Utils.GridUtils;
 import com.jme3.math.Vector3f;
+import game.map.MapDataModel.Map;
 
 import java.util.*;
 
@@ -9,7 +10,7 @@ public class AStar {
 
     private static Node currentNode;
     private static Node neighbor;
-    private static game.map.blocks.Map grid;
+    private static Map grid;
     private static boolean[][][] visited;  // 3D visited array
     private static final PriorityQueue<Node> openSet = new PriorityQueue<>(new NodeComparator());
     private static final Queue<Node> nodePool = new LinkedList<>();  // Node pool to reuse nodes
@@ -28,7 +29,7 @@ public class AStar {
         {{-1, 0, 0}, {1, 0, 0}},
         {{0, 0, -1}, {0, 0, 1}},};
 
-    public static void setPathfindingMap(game.map.blocks.Map map,int mapSizeX, int mapSizeY, int mapSizeZ) {
+    public static void setPathfindingMap(Map map, int mapSizeX, int mapSizeY, int mapSizeZ) {
         grid = map;
         visited = new boolean[mapSizeX][mapSizeY][mapSizeZ];  // 3D visited array
 

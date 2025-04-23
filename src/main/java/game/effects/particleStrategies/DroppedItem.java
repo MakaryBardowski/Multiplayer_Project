@@ -27,13 +27,15 @@ public class DroppedItem extends ParticleMovementStrategy {
             tempVelocity.set(velocity.mult(tpf));
             node.getChild(1).rotate(rotationVelocity.x * tpf, rotationVelocity.y * tpf, rotationVelocity.z * tpf);
             velocity.subtractLocal(0, GRAVITY * tpf, 0);
+            velocity.setX(velocity.x * 0.98f);
+            velocity.setZ(velocity.z * 0.98f);
 
             if(hasNotCollidedVertically()) {
                 moveY(tpf);
                 moveXZ(tpf);
             }else{
                 if(tempVelocity.y > 0){
-                    tempVelocity.setY(tempVelocity.y* BOUNCE_VELOCITY_MULTIPLIER);
+                    velocity.setY(velocity.y* BOUNCE_VELOCITY_MULTIPLIER);
                     moveY(tpf);
                     moveXZ(tpf);
                 } else {
@@ -46,12 +48,12 @@ public class DroppedItem extends ParticleMovementStrategy {
         if(doesNotCollideAfterMove(tempVelocity.x,0,0)) {
             moveX(tpf);
         }else{
-            tempVelocity.setX(tempVelocity.x* BOUNCE_VELOCITY_MULTIPLIER);
+            velocity.setX(velocity.x* BOUNCE_VELOCITY_MULTIPLIER);
         }
         if(doesNotCollideAfterMove(0,0,tempVelocity.z)) {
             moveZ(tpf);
         }else {
-            tempVelocity.setZ(tempVelocity.z* BOUNCE_VELOCITY_MULTIPLIER);
+            velocity.setZ(velocity.z* BOUNCE_VELOCITY_MULTIPLIER);
         }
     }
 

@@ -210,6 +210,43 @@
 			"y": 1,
 			"z": 8.5
 		}
+	},
+
+	{
+		"entityType": 3,
+		"templateIndex": 0,
+		"position": {
+			"x": 9.5,
+			"y": 1,
+			"z": 9.5
+		}
+	},
+	{
+		"entityType": 3,
+		"templateIndex": 0,
+		"position": {
+			"x": 9.5,
+			"y": 1,
+			"z": 7.5
+		}
+	},
+	{
+		"entityType": 3,
+		"templateIndex": 0,
+		"position": {
+			"x": 7.5,
+			"y": 1,
+			"z": 9.5
+		}
+	},
+	{
+		"entityType": 3,
+		"templateIndex": 0,
+		"position": {
+			"x": 7.5,
+			"y": 1,
+			"z": 7.5
+		}
 	}
 ]
 }

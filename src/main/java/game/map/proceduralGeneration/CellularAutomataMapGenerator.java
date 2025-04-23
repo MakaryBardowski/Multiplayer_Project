@@ -3,7 +3,7 @@ package game.map.proceduralGeneration;
 import client.appStates.ClientGameAppState;
 import game.map.MapGenerationResult;
 import game.map.blocks.BlockType;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 
 
 public class CellularAutomataMapGenerator extends MapGenerator{

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.jme3.math.Vector3f;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +30,6 @@ public class LevelLoadResultDeserializer extends StdDeserializer<LevelLoadResult
         int mapSizeZ = dimensionNode.get(2).asInt();
 
         byte[] logicMap = new byte[mapSizeX   *   mapSizeY   *   mapSizeZ];
-        var savedEntitiesData = new ArrayList<EntitySpawnData>();
         var blocksNode = node.get(LevelLoadKeys.MAP_BLOCK_LAYER_KEY);
         for(var layerData : blocksNode){
             var height = layerData.get(LevelLoadKeys.MAP_BLOCK_POSITION_Y_KEY).asInt();
@@ -48,63 +47,10 @@ public class LevelLoadResultDeserializer extends StdDeserializer<LevelLoadResult
 
         var entitesNode = node.get(LevelLoadKeys.ENTITIES_KEY);
 
-
-        for(var entityNode : entitesNode){
-            var entityTypeIndex = entityNode.get(LevelLoadKeys.ENTITY_TYPE_INDEX_KEY).asInt();
-            if(entityTypeIndex == 1){
-                savedEntitiesData.add(getItemSpawnData(entityNode));
-            }
-        }
-
-        for(var entityNode : entitesNode){
-            var entityTypeIndex = entityNode.get(LevelLoadKeys.ENTITY_TYPE_INDEX_KEY).asInt();
-            if(entityTypeIndex == 0){
-                savedEntitiesData.add(getDestructibleDecorationSpawnData(entityNode));
-            } else if(entityTypeIndex == 2) {
-                savedEntitiesData.add(getIndestructibleDecorationSpawnData(entityNode));
-            } else if(entityTypeIndex == 3){
-                savedEntitiesData.add(getMobSpawnData(entityNode));
-            }
-        }
-
-        return new LevelLoadResult(logicMap,mapSizeX,mapSizeY,mapSizeZ,blockSizeNode.asInt(), savedEntitiesData,playerSpawnpoints);
+        return new LevelLoadResult(logicMap,mapSizeX,mapSizeY,mapSizeZ,blockSizeNode.asInt(), EntitySpawnDataDeserializationUtils.getEntitySpawnDataFromNode(entitesNode),playerSpawnpoints);
     }
 
-    private EntitySpawnData getDestructibleDecorationSpawnData(JsonNode entityNode){
-        var entityTemplateIndex = entityNode.get(LevelLoadKeys.ENTITY_TEMPLATE_INDEX_KEY).asInt();
-        var positionX = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_X_KEY).asDouble();
-        var positionY = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Y_KEY).asDouble();
-        var positionZ = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Z_KEY).asDouble();
-        return new DestructibleDecorationSpawnData(entityTemplateIndex,new Vector3f(positionX,positionY,positionZ));
-    }
 
-    private EntitySpawnData getIndestructibleDecorationSpawnData(JsonNode entityNode){
-        var entityTemplateIndex = entityNode.get(LevelLoadKeys.ENTITY_TEMPLATE_INDEX_KEY).asInt();
-        var positionX = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_X_KEY).asDouble();
-        var positionY = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Y_KEY).asDouble();
-        var positionZ = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Z_KEY).asDouble();
-        return new IndestructibleDecorationSpawnData(entityTemplateIndex,new Vector3f(positionX,positionY,positionZ));
-    }
-
-    private EntitySpawnData getItemSpawnData(JsonNode entityNode){
-        var entityTemplateIndex = entityNode.get(LevelLoadKeys.ENTITY_TEMPLATE_INDEX_KEY).asInt();
-        var positionX = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_X_KEY).asDouble();
-        var positionY = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Y_KEY).asDouble();
-        var positionZ = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Z_KEY).asDouble();
-        var isDropped = entityNode.get(LevelLoadKeys.ENTITY_ITEM_IS_DROPPED).asBoolean();
-        var droppable = entityNode.get(LevelLoadKeys.ENTITY_ITEM_IS_DROPPABLE).asBoolean();
-
-        return new ItemSpawnData(entityTemplateIndex,new Vector3f(positionX,positionY,positionZ),isDropped,droppable);
-    }
-
-    private EntitySpawnData getMobSpawnData(JsonNode entityNode){
-        var entityTemplateIndex = entityNode.get(LevelLoadKeys.ENTITY_TEMPLATE_INDEX_KEY).asInt();
-        var positionX = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_X_KEY).asDouble();
-        var positionY = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Y_KEY).asDouble();
-        var positionZ = (float) entityNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Z_KEY).asDouble();
-
-        return new MobSpawnData(entityTemplateIndex,new Vector3f(positionX,positionY,positionZ));
-    }
 
     private List<Vector3f> getPlayerSpawnpoints(JsonNode playerSpawnpointsNode){
         var playerSpawnpoints = new ArrayList<Vector3f>();

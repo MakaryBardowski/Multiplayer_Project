@@ -3,7 +3,7 @@ package server;
 import com.jme3.app.Application;
 import com.jme3.network.serializing.Serializer;
 import game.entities.mobs.Mob;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import lombok.Setter;
 import messages.messageListeners.ServerMessageListener;
 import messages.MobPosRotUpdateMessage;

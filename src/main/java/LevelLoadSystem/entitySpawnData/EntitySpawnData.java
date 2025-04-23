@@ -10,10 +10,20 @@ import server.ServerLevelManager;
 @Getter
 @ToString
 @AllArgsConstructor
-public abstract class EntitySpawnData {
+public abstract class EntitySpawnData implements Cloneable {
     protected int templateIndex;
     protected Vector3f position;
 
     public abstract Entity serverSpawn(ServerLevelManager serverLevelManager);
 
+    @Override
+    public EntitySpawnData clone() {
+        try {
+            EntitySpawnData clone = (EntitySpawnData) super.clone();
+            clone.position = new Vector3f(position.x,position.y,position.z);
+            return clone;
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError();
+        }
+    }
 }

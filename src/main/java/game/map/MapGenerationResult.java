@@ -1,16 +1,28 @@
 package game.map;
 
-import game.map.blocks.Map;
+import LevelLoadSystem.entitySpawnData.EntitySpawnData;
+import game.map.MapDataModel.Map;
 import game.map.proceduralGeneration.Room;
-import java.util.ArrayList;
+
 import java.util.List;
-import jme3utilities.math.Vector3i;
+
 import lombok.Getter;
 import lombok.AllArgsConstructor;
 
 @Getter
-@AllArgsConstructor
 public class MapGenerationResult {
     private Map map;
-    private List<Room> rooms;
+    private List<Room> rooms; //todo:  remove
+
+    private List<EntitySpawnData> entitySpawnData;
+
+    public MapGenerationResult(Map map, List<Room> rooms){
+       this(map,rooms,null);
+    }
+
+    public MapGenerationResult(Map map, List<Room> rooms, List<EntitySpawnData> entitySpawnData){
+        this.map = map;
+        this.rooms = rooms;
+        this.entitySpawnData = entitySpawnData;
+    }
 }

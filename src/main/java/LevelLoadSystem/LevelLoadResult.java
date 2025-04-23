@@ -3,7 +3,7 @@ package LevelLoadSystem;
 import LevelLoadSystem.entitySpawnData.EntitySpawnData;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.jme3.math.Vector3f;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 
 import java.util.List;
 

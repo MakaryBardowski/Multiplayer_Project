@@ -5,6 +5,8 @@ import com.jme3.scene.Node;
 
 import java.util.HashMap;
 import java.util.Random;
+
+import game.map.MapDataModel.Map;
 import jme3tools.optimize.TextureAtlas;
 import lombok.Getter;
 
@@ -171,7 +173,7 @@ public class BlockWorld {
         // because it writes to chunk and batches it only once
         Random r = new Random();
 
-        for (int index = 0; index < logicMap.getLength(); index++) {
+        for (int index = 0; index < logicMap.getMaxBlockCount(); index++) {
                     int x = logicMap.getXFromIndex(index);
                     int y = logicMap.getYFromIndex(index);
                     int z = logicMap.getZFromIndex(index);
@@ -192,6 +194,8 @@ public class BlockWorld {
                         addBlockDataToChunk(x, y, z, BlockType.OFFICE_TOP);
                     }else if (logicMap.getBlockIdAtIndex(index) == BlockType.OFFICE_FLOOR.blockId){
                         addBlockDataToChunk(x, y, z, BlockType.OFFICE_FLOOR);
+                    }else if(logicMap.getBlockIdAtIndex(index) ==  BlockType.WATER.blockId){
+                        addBlockDataToChunk(x, y, z, BlockType.WATER);
                     }
 
         }

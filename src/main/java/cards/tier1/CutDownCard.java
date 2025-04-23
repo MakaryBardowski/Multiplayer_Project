@@ -8,7 +8,7 @@ import statusEffects.EffectTemplates;
 public class CutDownCard extends AugmentCardTemplate {
 
     public CutDownCard() {
-        super(0,"Cut Down", "Dealing damage to targets with \nless than \\#FF0000#7.5\\#FFFFFF#% of your max \nhealth instantly kills them.","Textures/GUI/Cards/cutdown.png");
+        super(0,"Cut Down", "Dealing damage to targets with \nless than \\#FF0000#7.5\\#FFFFFF#% of their max \nhealth instantly kills them.","Textures/GUI/Cards/cutdown.png");
     }
 
     @Override

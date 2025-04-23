@@ -149,7 +149,7 @@ public class PlayerFactory extends MobFactory {
     }
 
 
-    private void createEquipmentViewViewport(Player p) {
+    private void createEquipmentViewViewport(Player p) { // does it spawn infinite non-garbage collected viewports when Main menu -> new Game -> Main menu -> new Game -> ...?
         CameraNode equipmentViewCameraNode = new CameraNode("Player"+p.getId() +" (name: "+p.getName()+")  equipment showcase Camera Node", equipmentShowcaseViewCamera);
 //        equipmentShowcaseViewCamera.setViewPort( 0.5f , 1.0f  ,  0.0f , 0.5f);
 
@@ -163,42 +163,6 @@ public class PlayerFactory extends MobFactory {
                 p.getEquipmentPreviewNode()
         );
         view2.attachScene(p.getEquipmentPreviewNode());
-
-
-//p.getEquipmentPreviewNode().addControl(new Control() {
-//    Spatial spatial;
-//    @Override
-//    public Control cloneForSpatial(Spatial spatial) {
-//        return null;
-//    }
-//
-//    @Override
-//    public void setSpatial(Spatial spatial) {
-//        this.spatial = spatial;
-//    }
-//
-//    @Override
-//    public void update(float v) {
-//        System.out.println("spatial : "+spatial);
-//        spatial.rotate(0,3*v,0);
-//        equipmentViewCameraNodeAnchor.rotate(0,-3*v,0);
-//    }
-//
-//    @Override
-//    public void render(RenderManager renderManager, ViewPort viewPort) {
-//
-//    }
-//
-//    @Override
-//    public void write(JmeExporter jmeExporter) throws IOException {
-//
-//    }
-//
-//    @Override
-//    public void read(JmeImporter jmeImporter) throws IOException {
-//
-//    }
-//});
 
         equipmentShowcaseViewCamera.setFrustumPerspective(45f, (float) equipmentShowcaseViewCamera.getWidth() / equipmentShowcaseViewCamera.getHeight(), 0.1f, 30f);
         equipmentViewCameraNode.move(0,2f,4);
@@ -215,6 +179,6 @@ public class PlayerFactory extends MobFactory {
         view2.setOutputFrameBuffer(out);
         out.setColorTexture(texture);
         p.setEquipmentPreviewTexture(texture);
-
+        p.setEquipmentPreviewViewport(view2);
     }
 }

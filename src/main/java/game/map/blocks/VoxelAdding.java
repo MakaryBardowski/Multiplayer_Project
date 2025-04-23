@@ -4,6 +4,8 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.math.Vector4f;
+import game.map.MapDataModel.Map;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

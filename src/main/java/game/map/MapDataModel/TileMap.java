@@ -1,30 +1,28 @@
-package game.map.blocks;
+package game.map.MapDataModel;
 
 import com.jme3.math.Vector3f;
+import game.map.blocks.BlockType;
+import game.map.collision.RectangleAABB;
 import lombok.Getter;
 
-public class Map {
-    @Getter
-    private final int blockSize;
+import java.util.List;
 
-    @Getter
-    private int mapSizeX;
+@Getter
+public abstract class TileMap {
 
-    @Getter
-    private int mapSizeY;
+    protected final int mapSizeX;
 
-    @Getter
-    private int mapSizeZ;
+    protected final int mapSizeY;
 
-    @Getter
-    private byte[] logicMap;
+    protected final int mapSizeZ;
 
-    public Map(byte[] logicMap,int mapSizeX, int mapSizeY, int mapSizeZ, int blockSize){
+    protected final byte[] logicMap;
+
+    public TileMap(byte[] logicMap,int mapSizeX, int mapSizeY, int mapSizeZ){
         this.logicMap = logicMap;
         this.mapSizeX = mapSizeX;
         this.mapSizeY = mapSizeY;
         this.mapSizeZ = mapSizeZ;
-        this.blockSize = blockSize;
     }
 
     public byte getBlockIdAtIndex(int index){
@@ -38,58 +36,35 @@ public class Map {
         return logicMap[positionToIndex(x,y,z)];
     }
 
-    public byte getBlockIdAtPosition(Vector3f position) {
-        return logicMap[positionToIndex(position)];
-    }
 
     public void setBlockIdAtPosition(int x, int y,int z, byte blockId){
         logicMap[positionToIndex(x,y,z)] = blockId;
     }
 
-    public void setBlockIdAtPosition(Vector3f position, byte blockId) {
-        logicMap[positionToIndex(position)] = blockId;
-    }
 
     public boolean isPositionEmpty(int x, int y, int z){
         return getBlockIdAtPosition(x,y,z) == 0;
     }
 
-    public boolean isPositionEmpty(Vector3f position){
-        return getBlockIdAtPosition(position) == 0;
-    }
+
 
     public boolean isPositionNotEmpty(int x, int y, int z){
         return !isPositionEmpty(x,y,z);
     }
 
-    public boolean isPositionNotEmpty(Vector3f position){
-        return !isPositionEmpty(position);
-    }
+
 
     public boolean isWithinMapBounds(int x,int y, int z){
         int index = positionToIndex(x,y,z);
         return index < logicMap.length && index >= 0;
     }
 
-    public boolean isWithinMapBounds(Vector3f position){
-        return positionToIndex(position) < logicMap.length;
-    }
-
-    private int positionToIndex(int x, int y, int z){
+    protected int positionToIndex(int x, int y, int z){
         return x * (mapSizeY * mapSizeZ) + y * mapSizeZ + z;
     }
 
-    private int positionToIndex(Vector3f position){
-        return positionToIndex(
-                (int) (Math.floor(position.x / blockSize)),
-                (int) (Math.floor(position.y / blockSize)),
-                (int) (Math.floor(position.z / blockSize))
-        );
-    }
-
     public int getXFromIndex(int index) {
-        int x = index / (mapSizeY * mapSizeZ);
-        return x;
+        return  index / (mapSizeY * mapSizeZ);
     }
 
     public int getYFromIndex(int index) {
@@ -102,7 +77,7 @@ public class Map {
         return z;
     }
 
-    public int getLength(){
+    public int getMaxBlockCount(){
         return logicMap.length;
     }
 
@@ -120,4 +95,32 @@ public class Map {
         );
     }
 
+
+    public boolean placePrefab(int prefabPosX, int prefabPosY, int prefabPosZ, TileMap prefab, List<PlacedRoomPrefab> alreadyPlacedPrefabs){
+        boolean success = true;
+        var prefabMap = prefab.getLogicMap();
+
+        if(
+                prefabPosX < 0 ||  prefabPosY < 0 || prefabPosZ < 0
+                ||
+                prefabPosX+prefab.mapSizeX >= this.mapSizeX || prefabPosY+prefab.mapSizeY >= this.mapSizeY || prefabPosZ+prefab.mapSizeZ >= this.mapSizeZ ){
+            return false;
+        }
+
+        for(var alreadyPlacedPrefab : alreadyPlacedPrefabs){
+            if(alreadyPlacedPrefab.overlapsPrefab(prefab,prefabPosX,prefabPosY,prefabPosZ,1)){
+               return false;
+            }
+        }
+
+        // place prefab
+        for(int i = 0; i < prefabMap.length;i++) {
+            var prefabBlock = prefab.getBlockIdAtIndex(i);
+            var prefabBlockX = prefab.getXFromIndex(i);
+            var prefabBlockY = prefab.getYFromIndex(i);
+            var prefabBlockZ = prefab.getZFromIndex(i);
+            setBlockIdAtPosition(prefabPosX + prefabBlockX, prefabPosY + prefabBlockY, prefabPosZ + prefabBlockZ, prefabBlock);
+        }
+        return success;
+    }
 }

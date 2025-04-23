@@ -1,6 +1,7 @@
 package game.cameraAndInput;
 
 import com.jme3.math.*;
+import debugging.DebugUtils;
 import game.entities.AttachedEntity;
 import game.entities.mobs.player.Player;
 import client.appStates.ClientGameAppState;
@@ -26,6 +27,7 @@ import game.items.weapons.RangedWeapon;
 import menu.states.InventoryMenuState;
 import menu.states.PauseMenuState;
 import messages.MobRotUpdateMessage;
+import messages.gameSetupMessages.NextLevelMessage;
 import server.ServerGameAppState;
 
 public class InputController {
@@ -49,6 +51,8 @@ public class InputController {
     private float currentMaxDeviationX = 0;
     private float currentMaxDeviationY = 0;
     private float proposedRotationY = 0;
+
+    private boolean debugOn = false;
 
     private boolean updatePlayersThirdPersonHandsRot = false;
 
@@ -174,6 +178,9 @@ public class InputController {
                         ServerGameAppState.getInstance().getLevelManagerMobs().forEach((key, value) -> System.err.println(value));
                     }
 
+                    var msg = new NextLevelMessage(ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().getCurrentLevelIndex());
+                    ClientGameAppState.getInstance().getClient().send(msg);
+
                     System.gc();
                     player.setRight(false);
                     player.setLeft(false);
@@ -193,12 +200,15 @@ public class InputController {
                     player.setMovementControlLocked(true);
                     player.setCameraMovementLocked(true);
                     updatePlayersThirdPersonHandsRot = true;
-//                    ServerMain.getInstance().getGrid().getContents().forEach((i,set)->{
-//                    if(!set.isEmpty()){
-//                        System.err.println("------------set "+i);
-//                    System.err.println(set);
-//                    }
-//                    });
+
+                    if(!debugOn) {
+                        debugOn = true;
+                        Main.getInstance().enqueue(() -> {
+                            DebugUtils.attachCoordinateAxes(gs.getDebugNode().getParent(), gs.getAssetManager());
+                            DebugUtils.drawMapBounds(gs.getDebugNode().getParent());
+//                            DebugUtils.drawGrid(gs.getDebugNode().getParent());
+                        });
+                    }
                 }
             }
         };

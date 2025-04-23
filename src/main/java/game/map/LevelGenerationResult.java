@@ -2,11 +2,10 @@ package game.map;
 
 import LevelLoadSystem.entitySpawnData.EntitySpawnData;
 import com.jme3.math.Vector3f;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor

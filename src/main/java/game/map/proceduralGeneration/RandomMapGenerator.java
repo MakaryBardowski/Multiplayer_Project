@@ -5,10 +5,9 @@ import game.map.MapGenerationResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 import game.map.blocks.BlockType;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import jme3utilities.math.Vector3i;
 
 public class RandomMapGenerator extends MapGenerator{

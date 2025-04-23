@@ -37,7 +37,7 @@ public class ChunkLayer {
     private int vertexCount = 0;
 
     private ArrayList<Block> blocks = new ArrayList<>();
-    private boolean isAnimated;
+    private final boolean isAnimated;
 
     public ChunkLayer(BlockWorld bw, int x, int z, boolean animated) {
         this.bw = bw;
@@ -57,20 +57,21 @@ public class ChunkLayer {
 
         Material mat = new Material(bw.getAsm(), "Common/MatDefs/Light/Lighting.j3md");
 
-//        if (isAnimated) {
-//            mat = new Material(bw.getAsm(), "Shaders/AnimatedUnshaded/AnimatedUnshaded.j3md");
-//            mat.setVector4("imageNumsAndCurrent",     new Vector4f(4, BlockType.WATER.minTexCoord.x, 4, 16));
-////mat = new Material(bw.getAsm(), "Common/MatDefs/Misc/Unshaded.j3md");
-//        }
+        if (isAnimated) {
+            mat = new Material(bw.getAsm(), "Shaders/AnimatedUnshaded/AnimatedUnshaded.j3md");
+            var imageNumInSequence = 4;
+            var firstImageOffset = BlockType.WATER.minTexCoord.x;
+            var speed = 4;
+            var atlasWidth = 16;
+            mat.setVector4("imageNumsAndCurrent",     new Vector4f(imageNumInSequence, firstImageOffset, speed, atlasWidth));
+        }
 
+        var textureToSet = isAnimated ? "ColorMap" : "DiffuseMap";
+        mat.setTexture(textureToSet, bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
+        mat.getTextureParam(textureToSet).getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
+        mat.getTextureParam(textureToSet).getTextureValue().setMinFilter(Texture.MinFilter.NearestNearestMipMap);
 
-//        mat.setTexture("DiffuseMap", Main.getInstance().getAssetManager().loadTexture("Textures/Blocks/debugColor.png"));
-
-        mat.setTexture("DiffuseMap", bw.getTextureAtlas().getAtlasTexture("DiffuseMap"));
-        mat.getTextureParam("DiffuseMap").getTextureValue().setMagFilter(Texture.MagFilter.Nearest);
-        mat.getTextureParam("DiffuseMap").getTextureValue().setMinFilter(Texture.MinFilter.NearestNearestMipMap);
-
-        Texture texture = mat.getTextureParam("DiffuseMap").getTextureValue();
+        Texture texture = mat.getTextureParam(textureToSet).getTextureValue();
         texture.getImage().setColorSpace(ColorSpace.sRGB);
 
 

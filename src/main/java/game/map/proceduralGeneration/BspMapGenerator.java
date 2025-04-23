@@ -4,13 +4,12 @@ import Utils.Pair;
 import client.appStates.ClientGameAppState;
 import game.map.MapGenerationResult;
 import game.map.blocks.BlockType;
-import game.map.blocks.Map;
+import game.map.MapDataModel.Map;
 import jme3utilities.math.Vector3i;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
 
 public class BspMapGenerator extends MapGenerator{
 
