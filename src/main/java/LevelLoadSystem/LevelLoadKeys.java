@@ -12,6 +12,8 @@ public class LevelLoadKeys {
 
     public static final String PLAYER_SPAWNPOINTS_KEY = "playerSpawnpoints";
 
+    public static final String METADATA_KEY = "metadata";
+
     public static final String ENTITIES_KEY = "entities";
     public static final String ENTITY_TYPE_INDEX_KEY = "entityType";
     public static final String ENTITY_TEMPLATE_INDEX_KEY = "templateIndex";

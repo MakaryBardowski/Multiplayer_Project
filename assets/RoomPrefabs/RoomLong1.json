@@ -68,5 +68,26 @@
 			}
 		}
 	],
-	"entities": []
+	"entities": [
+		{
+			"entityType": 0,
+			"templateIndex": 0,
+			"position": {
+				"x": 4,
+				"y": 1,
+				"z": 3
+			}
+		},
+		{
+			"entityType": 1,
+			"templateIndex": 25,
+			"position": {
+				"x": 4,
+				"y": 1.42,
+				"z": 3
+			},
+			"droppable": true,
+			"dropped": true
+		}
+	]
 }
