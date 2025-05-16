@@ -26,6 +26,7 @@
 		]
 	}
 ],
+	"exitSpawnpoints": [],
 	"joinPoints": [
 		{
 			"position": {
@@ -56,5 +57,6 @@
 			}
 		}
 	],
+	"entityPrototypes": [],
 	"entities": []
 }

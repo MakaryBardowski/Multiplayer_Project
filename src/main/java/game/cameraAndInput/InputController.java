@@ -140,7 +140,7 @@ public class InputController {
                     }
                 }
 
-                if (name.equals("I") && !gs.getPlayer().isDead() && !keyPressed) {
+                if (name.equals("TAB") && !gs.getPlayer().isDead() && !keyPressed) {
                     var menuStateMachine = gs.getMenuStateMachine();
                     if(menuStateMachine.isStateNull()) {
                         menuStateMachine.requestState(new InventoryMenuState(gs.getPlayer()));
@@ -323,7 +323,7 @@ public class InputController {
         inputManager.addMapping("Grenade", new KeyTrigger(KeyInput.KEY_G));
         inputManager.addMapping("B", new KeyTrigger(KeyInput.KEY_B));
         inputManager.addMapping("E", new KeyTrigger(KeyInput.KEY_E)); // activate item
-        inputManager.addMapping("I", new KeyTrigger(KeyInput.KEY_I)); // open EQ
+        inputManager.addMapping("TAB", new KeyTrigger(KeyInput.KEY_TAB)); // open EQ
         inputManager.addMapping("R", new KeyTrigger(KeyInput.KEY_R)); // strafe right
 
         inputManager.addMapping("K", new KeyTrigger(KeyInput.KEY_K));
@@ -363,7 +363,7 @@ public class InputController {
         inputManager.addListener(actionListener, "K");
         inputManager.addListener(actionListener, "B");
         inputManager.addListener(actionListener, "E");
-        inputManager.addListener(actionListener, "I");
+        inputManager.addListener(actionListener, "TAB");
 
         inputManager.addListener(actionListener, "1");
         inputManager.addListener(actionListener, "2");

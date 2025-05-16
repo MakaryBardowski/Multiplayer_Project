@@ -1,9 +1,9 @@
 package statusEffects.onHitEffects;
 
-import com.jme3.network.AbstractMessage;
 import data.DamageReceiveData;
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -50,7 +50,7 @@ public class DeadeyeCardEffect extends OnHitEffect{
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         return null;
     }
 }

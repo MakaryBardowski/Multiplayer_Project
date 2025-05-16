@@ -1,5 +1,6 @@
 package server;
 
+import Utils.Ansi;
 import cards.AugmentCardsTemplateRegistry;
 import cards.CardChoiceSession;
 import client.Main;
@@ -14,7 +15,6 @@ import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import data.jumpToLevelData.BaseJumpToLevelData;
-import events.EventSubscriber;
 import events.GameEvent;
 import events.NewLevelEnteredEvent;
 import game.entities.*;
@@ -51,6 +51,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import lombok.Setter;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
+import messages.TwoWayMessage;
 import messages.cardChoice.CardSelectionMessage;
 import messages.gameSetupMessages.MapMessage;
 import messages.gameSetupMessages.NextLevelMessage;
@@ -63,16 +64,16 @@ import pathfinding.AStar;
 import statusEffects.EffectFactory;
 import statusEffects.EffectTemplates;
 import statusEffects.StatusEffect;
+import subscriber.EventSubscriber;
 
 import static server.ServerGameAppState.MAX_PLAYERS;
 
 public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     private final ArrayList<EventSubscriber> subscribers = new ArrayList<>();
 
-    private final Server server;
+    private final ServerContext serverContext;
 
-    @Getter
-    private final ConcurrentHashMap<Integer, Entity> entitiesById = new ConcurrentHashMap<>();
+
     private final List<Player> players = new ArrayList<>(MAX_PLAYERS);
 
     @Getter
@@ -91,8 +92,6 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     private final Random RANDOM = new Random();
     private final AssetManager assetManager;
     private final RenderManager renderManager;
-
-
 
     @Getter
     private final Node rootNode;
@@ -119,13 +118,14 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     @Getter
     private final List<CardChoiceSession> cardChoiceSessions = new ArrayList<>(10);
 
-    public ServerLevelManager(int levelCount, Server server) {
+    public ServerLevelManager(int levelCount, ServerContext serverContext) {
+        this.serverContext = serverContext;
+        serverContext.setLevelManager(this);
         this.assetManager = Main.getInstance().getAssetManager();
         this.renderManager = Main.getInstance().getRenderManager();
         this.rootNode = new Node("server rootNode");
         this.rootNode.setCullHint(Spatial.CullHint.Always);
         Main.getInstance().getRootNode().attachChild(this.rootNode);
-        this.server = server;
         levelSeeds = new long[levelCount];
         levelTypes = new MapType[levelCount];
     }
@@ -170,7 +170,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 Thread.ofVirtual().start(() -> {
                     try {
                         var mmsg = new MapMessage(map);
-                        server.broadcast(mmsg);
+                        serverContext.notifyAllClients(mmsg);
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
@@ -191,11 +191,10 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         var newLevelSeed = jumpToLevelData.getLevelSeed();
         var newLevelType = jumpToLevelData.getLevelType();
 
-        clearEntities();
+        clearEntities(serverContext);
         currentLevelIndex = newLevelIndex;
 
-        if(false){
-//        if(newLevelIndex == 3 || newLevelIndex == 5){
+        if(newLevelIndex == 3 || newLevelIndex == 5){
             var hostsByPlayerId = ServerGameAppState.getInstance().getHostsByPlayerId();
 
             var cardSession = new CardChoiceSession(cardChoiceSessions.size());
@@ -226,7 +225,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 var thisConnectionFilter =  Filters.in(hostsByPlayerId.get(player.getId()));
 
                 var cardChoiceMessage = new CardSelectionMessage(cardSession.getCardChoiceSessionId(),cardId1,cardId2,cardId3);
-                server.broadcast(thisConnectionFilter,cardChoiceMessage);
+                serverContext.notifySelectClients(cardChoiceMessage, thisConnectionFilter);
             }
         }
 
@@ -257,11 +256,10 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 EntitySpawner mg = new EntitySpawner(newLevelSeed, BLOCK_SIZE);
                 mg.spawnNewLevelEntities(levelGenerationResult.getEntitySpawnData());
                 notifyPlayersAboutNewLevelEntities();
-                server.broadcast(new NextLevelMessage(currentLevelIndex,newLevelSeed,newLevelType,spawnpointsByPlayerId));
+                serverContext.notifyAllClients(new NextLevelMessage(currentLevelIndex,newLevelSeed,newLevelType,spawnpointsByPlayerId));
                 notifyEventSubscribers(new NewLevelEnteredEvent(currentLevelIndex));
             }catch (IOException exception){
-                System.err.println("Server could not load level of type "+newLevelType +" with seed "+newLevelSeed+". Reason: "+exception.getMessage());
-                server.getConnections().forEach(hostedConnection -> hostedConnection.close("Server failed to load next level no. "+currentLevelIndex+" seed "+newLevelSeed));
+                System.err.println(Ansi.withAnsiColor("Server could not load level of type "+newLevelType +" with seed "+newLevelSeed+". Reason: "+exception.getMessage(),Ansi.BRIGHT_YELLOW));
             }
 
         });
@@ -513,20 +511,20 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 .toList();
 
         indestructibleDecorationsInGame.forEach(id -> {
-            AbstractMessage msg = id.createNewEntityMessage();
-            server.broadcast(msg);
+            var msg = id.createNewEntityMessage();
+            serverContext.notifyAllClients(msg);
         });
 
 
         itemsInGame.forEach(item -> {
-            AbstractMessage msg = item.createNewEntityMessage();
+            var msg = item.createNewEntityMessage();
             msg.setReliable(true);
-            server.broadcast(msg);
+            serverContext.notifyAllClients(msg);
         });
 
         mobsInGame.forEach(mob -> {
-            AbstractMessage msg = mob.createNewEntityMessage();
-            server.broadcast(msg);
+            var msg = mob.createNewEntityMessage();
+            serverContext.notifyAllClients(msg);
         });
 
         mobsInGame.forEach(mob -> {
@@ -534,18 +532,18 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         });
 
         destructibleDecorationsInGame.forEach(dd -> {
-            AbstractMessage msg = dd.createNewEntityMessage();
-            server.broadcast(msg);
+            var msg = dd.createNewEntityMessage();
+            serverContext.notifyAllClients(msg);
         });
 
         chestsInGame.forEach(chest -> {
-            AbstractMessage chestMsg = chest.createNewEntityMessage();
-            server.broadcast(null, chestMsg);
+            var chestMsg = chest.createNewEntityMessage();
+            serverContext.notifySelectClients(chestMsg,null);
             for (Item item : chest.getEquipment()) {
                 if (item != null) {
                     ChestItemInteractionMessage msg = new ChestItemInteractionMessage(item, chest, INSERT);
                     msg.setReliable(true);
-                    server.broadcast(msg);
+                    serverContext.notifyAllClients(msg);
                 }
             }
         });
@@ -560,9 +558,9 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 .toList();
 
         itemsInGame.forEach(item -> {
-            AbstractMessage msg = item.createNewEntityMessage();
+            var msg = item.createNewEntityMessage();
             msg.setReliable(true);
-            server.broadcast(msg);
+            serverContext.notifyAllClients(msg);
         });
 
 
@@ -582,23 +580,23 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 .toList();
 
         destructibleDecorationsInGame.forEach(dd -> {
-            AbstractMessage msg = dd.createNewEntityMessage();
-            server.broadcast(msg);
+            var msg = dd.createNewEntityMessage();
+            serverContext.notifyAllClients(msg);
         });
 
         indestructibleDecorationsInGame.forEach(id -> {
-            AbstractMessage msg = id.createNewEntityMessage();
-            server.broadcast(msg);
+            var msg = id.createNewEntityMessage();
+            serverContext.notifyAllClients(msg);
         });
 
         chestsInGame.forEach(chest -> {
-            AbstractMessage chestMsg = chest.createNewEntityMessage();
-            server.broadcast(chestMsg);
+            var chestMsg = chest.createNewEntityMessage();
+            serverContext.notifyAllClients(chestMsg);
             for (Item item : chest.getEquipment()) {
                 if (item != null) {
                     ChestItemInteractionMessage msg = new ChestItemInteractionMessage(item, chest, INSERT);
                     msg.setReliable(true);
-                    server.broadcast(msg);
+                    serverContext.notifyAllClients(msg);
                 }
             }
         });
@@ -614,8 +612,8 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
                 .toList();
 
         notThisPlayerMobs.forEach(mob -> {
-            AbstractMessage msg = mob.createNewEntityMessage();
-            server.broadcast(Filters.in(hc), msg);
+            var msg = mob.createNewEntityMessage();
+            serverContext.notifySelectClients(msg,Filters.in(hc));
         });
 
         notThisPlayerMobs.forEach(mob -> {
@@ -628,12 +626,12 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
 
         SetPlayerMessage messageToNewPlayer = new SetPlayerMessage(notifiedPlayer.getId(), notifiedPlayer.getNode().getWorldTranslation(), notifiedPlayer.getName(), playerClassIndex);
         messageToNewPlayer.setReliable(true);
-        server.broadcast(Filters.in(hc), messageToNewPlayer);
+        serverContext.notifySelectClients(messageToNewPlayer,Filters.in(hc));
 
         // send info about new player eq
         PlayerJoinedMessage msg = new PlayerJoinedMessage(notifiedPlayer.getId(), notifiedPlayer.getNode().getWorldTranslation(), notifiedPlayer.getName(), playerClassIndex);
         msg.setReliable(true);
-        server.broadcast(Filters.notEqualTo(hc), msg);
+        serverContext.notifySelectClients(msg,Filters.notEqualTo(hc));
 
         sendNewEntityEquipmentInfo(notifiedPlayer, null);
     }
@@ -657,7 +655,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         insertIntoCollisionGrid(id);
         registerEntityLocal(id);
         var idm = new NewIndestructibleDecorationMessage(id);
-        server.broadcast(idm);
+        serverContext.notifyAllClients(idm);
     }
 
     private boolean canNotPlaceCar(int[] exitPositionOnMapIntArray) {
@@ -672,12 +670,12 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         return currentMaxId;
     }
 
-    private void clearEntities() {
+    private void clearEntities(ServerContext context) {
         var itemsToKeep = getItemsTokeep();
         entitiesById.forEach((id, entity) -> {
             if (isNotItemToKeep(entity, itemsToKeep) && isNotPlayer(entity)) { // if not an item to keep
-                System.out.println("destroying " + entity);
-                entity.destroyOnServerAndNotify();
+                System.out.println(Ansi.withAnsiColor("destroying " + entity,Ansi.BRIGHT_RED));
+                entity.destroyOnServerAndNotify(context);
             }
         });
 
@@ -740,12 +738,12 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         return entity;
     }
 
-    private void sendMessageTCP(AbstractMessage imsg, Filter<HostedConnection> filter) {
+    private void sendMessageTCP(TwoWayMessage imsg, Filter<HostedConnection> filter) {
         imsg.setReliable(true);
         if (filter == null) {
-            server.broadcast(imsg);
+            serverContext.notifyAllClients(imsg);
         } else {
-            server.broadcast(filter, imsg);
+            serverContext.notifySelectClients(imsg,filter);
         }
     }
 

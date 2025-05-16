@@ -4,16 +4,14 @@ import client.appStates.ClientGameAppState;
 
 import static game.map.blocks.VoxelLighting.setupModelLight;
 
-import com.jme3.scene.Spatial;
-import debugging.DebugUtils;
 import game.entities.mobs.player.Player;
 import client.Main;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import itemSystem.ItemTemplates.HelmetTemplate;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewHelmetMessage;
 
@@ -108,7 +106,7 @@ public class Helmet extends Armor {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewHelmetMessage msg = new NewHelmetMessage(this);
         msg.setReliable(true);
         return msg;

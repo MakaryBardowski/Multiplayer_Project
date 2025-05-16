@@ -50,6 +50,13 @@ dependencies {
             branch = "master"
         }
     }
+    implementation  ('org.mccurry:game-lib-events') {
+        version {
+            branch = "master"
+        }
+    }
+
+
     implementation 'org.lz4:lz4-java:1.8.0'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.18.2'
     implementation "org.jmonkeyengine:jme3-core:$jmeVer"

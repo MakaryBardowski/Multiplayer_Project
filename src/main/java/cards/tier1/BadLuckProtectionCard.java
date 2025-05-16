@@ -1,5 +1,6 @@
 package cards.tier1;
 
+import Utils.Ansi;
 import cards.AugmentCardTemplate;
 import game.entities.StatusEffectContainer;
 import server.ServerGameAppState;
@@ -13,7 +14,7 @@ public class BadLuckProtectionCard extends AugmentCardTemplate {
 
     @Override
     public void chooseCardClient(StatusEffectContainer statusEffectContainer) {
-        System.out.println(statusEffectContainer + " chose "+this.getName());
+        System.out.println(Ansi.withAnsiColor(statusEffectContainer + " chose "+this.getName(),Ansi.BRIGHT_YELLOW));
     }
 
     @Override

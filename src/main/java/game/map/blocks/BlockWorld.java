@@ -8,27 +8,35 @@ import java.util.Random;
 
 import game.map.MapDataModel.Map;
 import jme3tools.optimize.TextureAtlas;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
+@Getter
 public class BlockWorld {
 
-    @Getter
     private final int mapSizeX;
-    @Getter
     private final int mapSizeY;
-    @Getter
     private final int mapSizeZ;
 
     private final int BLOCK_SIZE;
+
+    @Getter(AccessLevel.NONE)
     private final int CHUNK_SIZE;
 
+    @Setter
     private Block[][][] map;  // contains block data - generated based on logic map
+
     private final Map logicMap; // contains info if a block is present (!=0) needed for culling
 
+    @Setter
     private TextureAtlas textureAtlas;
+
     private final AssetManager asm;
 
     private HashMap<String, Chunk> chunks;
+
+    @Setter
     private Node worldNode;
 
 
@@ -127,46 +135,6 @@ public class BlockWorld {
         return b;
     }
 
-///-----------------------------------------GETTERS, SETTERS AND INITS-----------------------------------------------------------
-    public TextureAtlas getTextureAtlas() {
-        return textureAtlas;
-    }
-
-    public void setTextureAtlas(TextureAtlas textureAtlas) {
-        this.textureAtlas = textureAtlas;
-    }
-
-    public AssetManager getAsm() {
-        return asm;
-    }
-
-    public Node getWorldNode() {
-        return worldNode;
-    }
-
-    public void setWorldNode(Node worldNode) {
-        this.worldNode = worldNode;
-    }
-
-    public int getBLOCK_SIZE() {
-        return BLOCK_SIZE;
-    }
-
-    public Block[][][] getMap() {
-        return map;
-    }
-
-    public void setMap(Block[][][] map) {
-        this.map = map;
-    }
-
-    public HashMap<String, Chunk> getChunks() {
-        return chunks;
-    }
-
-    public Map getLogicMap() {
-        return logicMap;
-    }
 
     private void initializeBlocks() {
         // do not change below code - it performantly creates blockData in places where logicMap != 0

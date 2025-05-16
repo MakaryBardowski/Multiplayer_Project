@@ -203,7 +203,7 @@
 ],
 "entities": [
 	{
-		"entityType": 0,
+		"entityType": "DESTRUCTIBLE_DECORATION",
 		"templateIndex": 6,
 		"position": {
 			"x": 2.5,
@@ -212,7 +212,7 @@
 		}
 	},
 	{
-		"entityType": 1,
+		"entityType": "ITEM",
 		"templateIndex": 22,
 		"position": {
 			"x": 2.5,
@@ -223,7 +223,7 @@
 		"dropped": true
 	},
 	{
-		"entityType": 1,
+		"entityType": "ITEM",
 		"templateIndex": 9,
 		"position": {
 			"x": 2.33333333,
@@ -234,7 +234,7 @@
 		"dropped": true
 	},
 	{
-		"entityType": 0,
+		"entityType": "DESTRUCTIBLE_DECORATION",
 		"templateIndex": 5,
 		"position": {
 			"x": 14.5,
@@ -243,7 +243,7 @@
 		}
 	},
 	{
-		"entityType": 0,
+		"entityType": "DESTRUCTIBLE_DECORATION",
 		"templateIndex": 5,
 		"position": {
 			"x": 12.5,
@@ -252,7 +252,7 @@
 		}
 	},
 	{
-		"entityType": 2,
+		"entityType": "INDESTRUCTIBLE_DECORATION",
 		"templateIndex": 3,
 		"position": {
 			"x": 13.5,

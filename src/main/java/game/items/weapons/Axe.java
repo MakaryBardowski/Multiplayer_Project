@@ -13,7 +13,6 @@ import com.jme3.anim.tween.action.ClipAction;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.FastMath;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import de.lessvoid.nifty.controls.label.LabelControl;
@@ -27,6 +26,7 @@ import itemSystem.ItemTemplates;
 import game.map.collision.RectangleOBB;
 import java.util.ArrayList;
 import messages.AnimationPlayedMessage;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewMeleeWeaponMessage;
 import server.ServerGameAppState;
@@ -202,7 +202,7 @@ public class Axe extends MeleeWeapon {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewMeleeWeaponMessage msg = new NewMeleeWeaponMessage(this);
         msg.setReliable(true);
         return msg;

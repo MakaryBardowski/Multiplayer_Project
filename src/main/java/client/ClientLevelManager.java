@@ -56,9 +56,6 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
     private Player player;
 
     @Getter
-    private final ConcurrentHashMap<Integer, Entity> mobs = new ConcurrentHashMap<>();
-
-    @Getter
     private WorldGrid grid;
 
     @Getter
@@ -168,7 +165,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
                         nextStaticMap = null;
 
                         for(var playerSpawnpointById : playerSpawnpointsByPlayerId.entrySet()){
-                            var entity =  getMobs().get(playerSpawnpointById.getKey());
+                            var entity =  entitiesById.get(playerSpawnpointById.getKey());
                             if(entity instanceof Player player){
                                 player.setPositionClient(playerSpawnpointById.getValue());
                             }
@@ -190,7 +187,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
                                 nextStaticMap = null;
 
                                 for(var playerSpawnpointById : playerSpawnpointsByPlayerId.entrySet()){
-                                    var entity =  getMobs().get(playerSpawnpointById.getKey());
+                                    var entity =  entitiesById.get(playerSpawnpointById.getKey());
                                     if(entity instanceof Player player){
                                         player.setPositionClient(playerSpawnpointById.getValue());
                                     }
@@ -207,7 +204,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
                 level = clientLevelGenerator.generateLevel(MAP_SIZE_XZ, MAP_SIZE_Y, MAP_SIZE_XZ);
 
                 for(var playerSpawnpointById : playerSpawnpointsByPlayerId.entrySet()){
-                    var entity =  getMobs().get(playerSpawnpointById.getKey());
+                    var entity =  entitiesById.get(playerSpawnpointById.getKey());
                     if(entity instanceof Player player){
                         player.setPositionClient(playerSpawnpointById.getValue());
                     }
@@ -224,7 +221,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
                 destructibleNode);
 
         var p = mobFactory.createClientSide(spawnType);
-        this.mobs.put(id, p);
+        entitiesById.put(id, p);
         return p;
     }
 
@@ -241,7 +238,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
 
         }
 
-        mobs.values().forEach(x -> {
+        entitiesById.values().forEach(x -> {
             if (x instanceof Mob m && x != player) {
                 if (!m.getNode().getWorldTranslation().equals(m.getServerLocation())) {
                     grid.remove(m);
@@ -260,12 +257,12 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
 
     public Player registerPlayer(Integer id, boolean setAsPlayer, int playerClassIndex) {
         Player p = new PlayerFactory(id, destructibleNode, MAIN_INSTANCE.getCamera(), setAsPlayer).createClientSide(null, playerClassIndex);
-        this.mobs.put(id, p);
+        entitiesById.put(id, p);
         return p;
     }
 
     public <T extends Entity> T registerEntity(T entity) {
-        this.mobs.put(entity.getId(), entity);
+        entitiesById.put(entity.getId(), entity);
         return entity;
     }
 

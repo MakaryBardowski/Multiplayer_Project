@@ -18,13 +18,13 @@ import com.jme3.material.RenderState;
 import com.jme3.material.RenderState.BlendMode;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import game.effects.TimedSpatialRemoveControl;
 import game.entities.Collidable;
 import messages.ThrownGrenadeExplodedMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -90,7 +90,7 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

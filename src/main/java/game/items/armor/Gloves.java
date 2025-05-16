@@ -6,7 +6,6 @@ import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
 import com.jme3.scene.Node;
@@ -17,6 +16,8 @@ import game.entities.mobs.HumanMob;
 import itemSystem.ItemTemplates.GlovesTemplate;
 import java.nio.ByteBuffer;
 import java.nio.FloatBuffer;
+
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGlovesMessage;
 
@@ -93,7 +94,7 @@ public class Gloves extends Armor {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewGlovesMessage msg = new NewGlovesMessage(this);
         msg.setReliable(true);
         return msg;

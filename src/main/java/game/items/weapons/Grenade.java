@@ -6,7 +6,6 @@ import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.material.Material;
 import com.jme3.math.FastMath;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import game.entities.mobs.HumanMob;
@@ -15,6 +14,7 @@ import game.entities.mobs.player.Player;
 import itemSystem.ItemTemplates;
 import lombok.Getter;
 import messages.GrenadeThrownMessage;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
 import static client.appStates.ClientGameAppState.removeEntityByIdClient;
@@ -51,7 +51,7 @@ public class Grenade extends ThrowableWeapon {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewGrenadeMessage msg = new NewGrenadeMessage(this);
         msg.setReliable(true);
         return msg;

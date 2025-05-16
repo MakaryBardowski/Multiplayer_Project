@@ -1,5 +1,6 @@
 package client;
 
+import Utils.Ansi;
 import client.appStates.ClientGameAppState;
 import client.appStates.LobbyTeamViewAppState;
 import client.appStates.MainMenuAppState;
@@ -41,7 +42,9 @@ public class MainMenuController implements ScreenController {
         var teamViewer = new LobbyTeamViewAppState();
         instance.getStateManager().attach(teamViewer);
 
-        System.out.println("server started");
+
+
+        System.out.println(Ansi.withAnsiColor("server started.", Ansi.BRIGHT_YELLOW));
     }
 
     public static void joinLobby() {
@@ -62,8 +65,6 @@ public class MainMenuController implements ScreenController {
 
         var teamViewer = new LobbyTeamViewAppState();
         instance.getStateManager().attach(teamViewer);
-        System.out.println("attaching team viewer");
-
     }
 
     public static void createLobby() {
@@ -110,17 +111,17 @@ public class MainMenuController implements ScreenController {
 
     public static void chooseAssault() {
         LobbyTeamViewAppState.changeClass(0);
-        System.out.println("chosen assault.");
+        System.out.println(Ansi.withAnsiColor("chosen assault.",Ansi.BRIGHT_BLUE));
     }
 
     public static void chooseMedic() {
         LobbyTeamViewAppState.changeClass(1);
 
-        System.out.println("chosen medic.");
+        System.out.println(Ansi.withAnsiColor("chosen medic.",Ansi.BRIGHT_BLUE));
     }
 
     public static void chooseCombatEngineer() {
         LobbyTeamViewAppState.changeClass(2);
-        System.out.println("chosen combat engineer.");
+        System.out.println(Ansi.withAnsiColor("chosen combat engineer.",Ansi.BRIGHT_BLUE));
     }
 }

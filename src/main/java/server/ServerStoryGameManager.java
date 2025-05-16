@@ -6,7 +6,8 @@ public class ServerStoryGameManager extends ServerGameManager {
 
     private static final int LEVEL_COUNT = 130;//13;
 
-    public ServerStoryGameManager() {
+    public ServerStoryGameManager(ServerContext serverContext) {
+        super(serverContext);
         gamemodeId = 1;
     }
 
@@ -20,7 +21,7 @@ public class ServerStoryGameManager extends ServerGameManager {
     public void updateMainLoop(float tpf) {}
 
     private void setupLevelManager() {
-        levelManager = new ServerLevelManager(LEVEL_COUNT, ServerGameAppState.getInstance().getServer());
+        levelManager = new ServerLevelManager(LEVEL_COUNT, serverContext);
         levelManager.setupLevelSeeds();
     }
 

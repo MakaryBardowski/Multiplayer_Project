@@ -43,6 +43,29 @@
 		]
 	}
 ],
+	"exitSpawnpoints": [
+		{
+			"position": {
+				"x": 3,
+				"y": 1,
+				"z": 10
+			}
+		},
+		{
+			"position": {
+				"x": 3,
+				"y": 1,
+				"z": 3
+			}
+		},
+		{
+			"position": {
+				"x": 5,
+				"y": 1,
+				"z": 10
+			}
+		}
+	],
 	"joinPoints": [
 		{
 			"position": {
@@ -68,10 +91,41 @@
 			}
 		}
 	],
+	"entityPrototypes": [
+		{
+			"type": "SELECTOR",
+			"selectorType": "RANDOM_BY_PERCENT",
+			"producedObjectReferenceId": 0,
+			"producesType": "MOB",
+			"chanceEntries": [
+				{
+					"resolvedObject": {
+						"entityType": "MOB",
+						"templateIndex": 0
+					},
+					"weight": 15
+				},
+				{
+					"resolvedObject": {
+						"entityType": "MOB",
+						"templateIndex": 1
+					},
+					"weight": 40
+				},
+				{
+					"resolvedObject": {
+						"entityType": "MOB",
+						"templateIndex": 1
+					},
+					"weight": 0.5
+				}
+			]
+		}
+	],
 	"entities": [
 		{
-			"entityType": 0,
-			"templateIndex": 0,
+			"entityType": "MOB",
+			"fromPrototypeWithId": 0,
 			"position": {
 				"x": 4,
 				"y": 1,
@@ -79,15 +133,13 @@
 			}
 		},
 		{
-			"entityType": 1,
-			"templateIndex": 25,
+			"entityType": "MOB",
+			"fromPrototypeWithId": 0,
 			"position": {
-				"x": 4,
-				"y": 1.42,
-				"z": 3
-			},
-			"droppable": true,
-			"dropped": true
+				"x": 5.5,
+				"y": 1,
+				"z": 11.5
+			}
 		}
 	]
 }

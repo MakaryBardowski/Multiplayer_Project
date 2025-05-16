@@ -8,4 +8,9 @@ sourceControl {
     gitRepository(new URI("https://github.com/MakaryBardowski/particlemonkey")) {
         producesModule("com.epagagames:particlemonkey")
     }
+
+    gitRepository(new URI("ssh://git@github.com/MakaryBardowski/game-libs.git")) {
+        producesModule("org.mccurry:game-lib-events")
+        rootDir = "game-lib-events"
+    }
 }

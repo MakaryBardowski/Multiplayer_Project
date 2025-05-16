@@ -1,12 +1,12 @@
 package statusEffects.temporaryEffects;
 
-import com.jme3.network.AbstractMessage;
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -60,7 +60,7 @@ public class DamageOverTimeEffect extends RepeatedTemporaryEffect {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         return null;
     }
 }

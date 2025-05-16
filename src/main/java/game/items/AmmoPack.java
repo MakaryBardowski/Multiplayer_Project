@@ -1,10 +1,10 @@
 package game.items;
 
 import client.appStates.ClientGameAppState;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.IntegerAttribute;
 import itemSystem.ItemTemplates;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewAmmoPackMessage;
 
@@ -34,7 +34,7 @@ public class AmmoPack extends Item {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewAmmoPackMessage msg = new NewAmmoPackMessage(this);
         msg.setReliable(true);
         return msg;

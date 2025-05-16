@@ -1,6 +1,5 @@
 package game.map.MapDataModel;
 
-import com.jme3.math.Vector3f;
 import lombok.Getter;
 
 @Getter
@@ -12,6 +11,8 @@ public class PlacedRoomPrefab extends RoomPrefab{
         super(prefab.logicMap,prefab.mapSizeX,prefab.mapSizeY,prefab.mapSizeZ);
         this.joinPoints.addAll(prefab.getJoinPoints());
         this.entitySpawnData.addAll(prefab.getEntitySpawnData());
+        this.entitySpawnDataPrototypesByResultId.putAll(prefab.getEntitySpawnDataPrototypesByResultId()); // MUTABLE!!
+        this.potentialExitSpawnpoints.addAll(prefab.getPotentialExitSpawnpoints());
         this.posX = (byte) x;
         this.posY = (byte) y;
         this.posZ = (byte) z;

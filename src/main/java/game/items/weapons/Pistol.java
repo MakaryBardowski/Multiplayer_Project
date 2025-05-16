@@ -6,6 +6,7 @@ import game.effects.GradientParticleMesh;
 import itemSystem.ItemTemplates.ItemTemplate;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
+import messages.TwoWayMessage;
 import projectiles.controls.BulletTracerControl;
 import client.appStates.ClientGameAppState;
 import client.Main;
@@ -17,7 +18,6 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
@@ -138,8 +138,6 @@ public class Pistol extends RangedWeapon {
 
     @Override
     public void playerUseInRightHand(Player p) {
-        System.out.println("use");
-        System.out.println("currentattac " + currentAttackCooldown);
         if (getAmmo() > 0 && currentAttackCooldown >= attackCooldown) {
             playerAttack(p);
         }
@@ -159,7 +157,6 @@ public class Pistol extends RangedWeapon {
     }
 
     private void shoot(Player p) {
-        System.out.println("shoot!");
         var cd = hitscan(p);
         var cs = ClientGameAppState.getInstance();
         createBullet(muzzleNode.getWorldTranslation(), cd.getFirst());
@@ -228,7 +225,7 @@ public class Pistol extends RangedWeapon {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewRangedWeaponMessage msg = new NewRangedWeaponMessage(this);
         msg.setReliable(true);
         return msg;

@@ -23,7 +23,11 @@ public class EntitySpawner {
             var server = ServerGameAppState.getInstance();
             var serverLevelManager = server.getCurrentGamemode().getLevelManager();
             entitySpawnInfo.getPosition().multLocal(blockSize);
-            serverLevelManager.broadcastEntityOnNextLevel(entitySpawnInfo.serverSpawn(serverLevelManager));
+
+            var spawnedEntity =entitySpawnInfo.serverSpawn(serverLevelManager);
+            if(spawnedEntity != null){
+                serverLevelManager.broadcastEntityOnNextLevel(spawnedEntity);
+            }
         }
     }
 

@@ -2,12 +2,12 @@ package game.items.consumable;
 
 import game.items.weapons.*;
 import client.appStates.ClientGameAppState;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import itemSystem.ItemTemplates;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
 import com.jme3.network.Filters;
@@ -36,7 +36,7 @@ public class Medpack extends ThrowableWeapon {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewGrenadeMessage msg = new NewGrenadeMessage(this);
         msg.setReliable(true);
         return msg;

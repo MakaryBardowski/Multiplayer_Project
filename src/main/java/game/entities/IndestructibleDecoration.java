@@ -4,13 +4,13 @@ import client.appStates.ClientGameAppState;
 import static client.appStates.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.DecorationTemplates.DecorationTemplate;
 import game.map.collision.RectangleAABB;
 import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.NewIndestructibleDecorationMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -56,7 +56,7 @@ public class IndestructibleDecoration extends Collidable {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         var msg = new NewIndestructibleDecorationMessage(this);
         msg.setReliable(true);
         return msg;

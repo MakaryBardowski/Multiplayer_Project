@@ -1,5 +1,6 @@
 package game.entities.mobs;
 
+import Utils.Ansi;
 import behaviorTree.BehaviorNode;
 import behaviorTree.BehaviorTree;
 import behaviorTree.LeafNode;
@@ -10,7 +11,6 @@ import behaviorTree.composite.SequenceNode;
 import behaviorTree.context.SimpleHumanMobContext;
 import debugging.CollisionShapeDebugControl;
 import events.*;
-import game.effects.Vfx;
 import game.entities.*;
 import game.entities.factories.MobSpawnType;
 import game.items.Equippable;
@@ -25,9 +25,7 @@ import com.jme3.anim.AnimComposer;
 import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
 import com.jme3.anim.tween.Tweens;
-import com.jme3.effect.ParticleEmitter;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import data.DamageReceiveData;
@@ -46,6 +44,7 @@ import lombok.Getter;
 import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -138,7 +137,7 @@ public class HumanMob extends Mob {
         if (node.getControl(CollisionShapeDebugControl.class) == null) {
             node.addControl(new CollisionShapeDebugControl(this));
         }
-        System.out.println(name + " says hi! Im being debugged!");
+        System.out.println(Ansi.withAnsiColor(name + " says hi! Im being debugged!",Ansi.BRIGHT_GREEN));
     }
 
     @Override
@@ -293,7 +292,7 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), mobSpawnType);
         msg.setReliable(true);
         return msg;

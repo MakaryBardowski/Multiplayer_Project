@@ -5,11 +5,11 @@ import client.appStates.ClientGameAppState;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.player.Player;
 import client.Main;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import itemSystem.ItemTemplates.VestTemplate;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewVestMessage;
 
@@ -79,7 +79,7 @@ public class Vest extends Armor {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewVestMessage msg = new NewVestMessage(this);
         msg.setReliable(true);
         return msg;

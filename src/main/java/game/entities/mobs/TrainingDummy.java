@@ -10,7 +10,6 @@ import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import data.DamageReceiveData;
 import game.entities.Collidable;
@@ -20,6 +19,7 @@ import game.map.collision.RectangleAABB;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -118,7 +118,7 @@ public class TrainingDummy extends Mob {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), mobSpawnType);
         msg.setReliable(true);
         return msg;

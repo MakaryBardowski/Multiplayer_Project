@@ -3,6 +3,8 @@ package LevelLoadSystem.roomPrefabs;
 import LevelLoadSystem.LevelLoadKeys;
 import LevelLoadSystem.LevelLoadResult;
 import LevelLoadSystem.entitySpawnData.*;
+import LevelLoadSystem.entitySpawnData.entityPrototypeData.EntityPrototypeDataDeserializationUtils;
+import Utils.Ansi;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -58,10 +60,25 @@ public class RoomPrefabDeserializer extends StdDeserializer<RoomPrefab> {
             prefab.addJoinPoint(x,y,z);
         }
 
+        var entityPrototypesNode = node.get(LevelLoadKeys.ENTITY_PROTOTYPES_KEY);
+
+        for(var entityPrototypeNode : entityPrototypesNode){
+            var selector = EntityPrototypeDataDeserializationUtils.getEntitySpawnDataSelector(entityPrototypeNode);
+            prefab.addEntitySpawnDataPrototype(selector);
+        }
+
         var entitesNode = node.get(LevelLoadKeys.ENTITIES_KEY);
-        var entitySpawnData = EntitySpawnDataDeserializationUtils.getEntitySpawnDataFromNode(entitesNode);
+        var entitySpawnData = EntitySpawnDataDeserializationUtils.getEntitySpawnDataFromNode(entitesNode,prefab.getEntitySpawnDataPrototypesByResultId());
         for(var esd : entitySpawnData) {
             prefab.addEntitySpawnData(esd);
+        }
+
+        var exitSpawnpointsNode = node.get(LevelLoadKeys.LEVEL_EXIT_SPAWNPOINTS_KEY);
+        for (var spawnpointNode : exitSpawnpointsNode){
+            var positionX = (float) spawnpointNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_X_KEY).asDouble();
+            var positionY = (float) spawnpointNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Y_KEY).asDouble();
+            var positionZ = (float) spawnpointNode.get(LevelLoadKeys.ENTITY_POSITION_KEY).get(LevelLoadKeys.ENTITY_POSITION_Z_KEY).asDouble();
+            prefab.addPotentialExitSpawnpoint(positionX,positionY,positionZ);
         }
 
         return prefab;

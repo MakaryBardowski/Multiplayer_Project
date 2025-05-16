@@ -1,5 +1,6 @@
 package game.map.MapDataModel;
 
+import Utils.Ansi;
 import game.map.AxisAlignedRotation;
 import jme3utilities.math.Vector3i;
 
@@ -45,10 +46,16 @@ public class RotatedRoomPrefabs {
             rotatedPrefab.addJoinPoint(joinPoint.z(),joinPoint.y(),M-1-joinPoint.x());
         }
 
+        rotatedPrefab.setEntitySpawnDataPrototypesByResultId(room.getEntitySpawnDataPrototypesByResultId());
+
         for(var entitySpawnData : room.getEntitySpawnData()){
             var esdPosition = entitySpawnData.getPosition();
-            esdPosition.set(esdPosition.z,esdPosition.y,M-1-esdPosition.x);
+            esdPosition.set(esdPosition.z,esdPosition.y,M-esdPosition.x);
             rotatedPrefab.addEntitySpawnData(entitySpawnData);
+        }
+
+        for(var exitSpawnpoint : room.getPotentialExitSpawnpoints()){
+            rotatedPrefab.addPotentialExitSpawnpoint(exitSpawnpoint.z,exitSpawnpoint.y,M-exitSpawnpoint.x);
         }
 
 

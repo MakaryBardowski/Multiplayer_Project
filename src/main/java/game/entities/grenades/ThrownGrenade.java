@@ -5,11 +5,11 @@ import static client.appStates.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.entities.Collidable;
 import lombok.Getter;
 import lombok.Setter;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -68,7 +68,7 @@ public abstract class ThrownGrenade extends Collidable {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

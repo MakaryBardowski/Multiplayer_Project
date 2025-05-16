@@ -82,9 +82,6 @@ public class RecoilControl extends AbstractControl {
                                 getRandomNumber(-rotationRecoilZ, rotationRecoilZ))
                 )
         );
-        System.out.println(" UP RECOIL "+ upRecoil);
-        System.out.println(" SIDE RECOIL "+ sideRecoil);
-        System.out.println(" SIDE RECOIL "+ backRecoil);
         targetPositionRecoil = targetPositionRecoil.subtract(targetRotationRecoil.getRotationColumn(2).add(sideRecoil, upRecoil, backRecoil));
     }
 

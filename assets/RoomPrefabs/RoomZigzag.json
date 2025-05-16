@@ -9,7 +9,6 @@
 			2, 2, 2, 2, 2,
 			2, 2, 2, 2, 2,
 			2, 2, 2, 2, 2,
-
 			2, 2, 2, 2, 2
 		]
 	},
@@ -21,11 +20,11 @@
 			1, 0, 1, 0, 1,
 			1, 0, 1, 0, 1,
 			1, 0, 0, 0, 1,
-
 			1, 1, 0, 1, 1
 		]
 	}
 ],
+	"exitSpawnpoints": [],
 	"joinPoints": [
 		{
 			"position": {
@@ -49,5 +48,142 @@
 			}
 		}
 	],
-	"entities": []
+	"entityPrototypes": [
+		{
+			"type": "SELECTOR",
+			"selectorType": "RANDOM_BY_PERCENT",
+			"producedObjectReferenceId": 0,
+			"producesType": "ITEM",
+			"chanceEntries": [
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 21,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 3
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 20,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 4
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 18,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 6
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 16,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 2.5
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 4,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 5
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 1,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 2.5
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 17,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 1
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 19,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 1.5
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 11,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 3.5
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 12,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 3
+				},
+				{
+					"resolvedObject": {
+						"entityType": "ITEM",
+						"templateIndex": 14,
+						"droppable": true,
+						"dropped": true
+					},
+					"weight": 2
+				}
+			]
+		}
+	],
+	"entities": [
+		{
+			"entityType": "ITEM",
+			"fromPrototypeWithId": 0,
+			"position": {
+				"x": 2.5,
+				"y": 1,
+				"z": 4.5
+			}
+		},
+		{
+			"entityType": "ITEM",
+			"fromPrototypeWithId": 0,
+			"position": {
+				"x": 1.5,
+				"y": 1,
+				"z": 2.5
+			}
+		},
+		{
+			"entityType": "ITEM",
+			"fromPrototypeWithId": 0,
+			"position": {
+				"x": 3.5,
+				"y": 1,
+				"z": 1.5
+			}
+		}
+	]
 }

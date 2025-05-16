@@ -4,10 +4,8 @@ import client.appStates.ClientGameAppState;
 import static client.appStates.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import data.DamageReceiveData;
-import events.DamageReceivedEvent;
 import game.entities.DecorationTemplates.DecorationTemplate;
 import game.entities.mobs.Mob;
 import game.map.collision.RectangleAABB;
@@ -15,6 +13,7 @@ import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewDestructibleDecorationMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -62,7 +61,7 @@ public class DestructibleDecoration extends StatusEffectContainer {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewDestructibleDecorationMessage msg = new NewDestructibleDecorationMessage(this);
         msg.setReliable(true);
         return msg;

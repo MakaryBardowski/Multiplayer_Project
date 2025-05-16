@@ -165,7 +165,7 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         short ammo = 24;
         short maxAmmo = 24;
-        AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
+        AmmoPack ammoPack = new AmmoPack(id, template, template.getName(), dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
 
@@ -173,7 +173,7 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         short ammo = 23;
         short maxAmmo = 23;
-        AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
+        AmmoPack ammoPack = new AmmoPack(id, template, template.getName(), dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
 
@@ -181,7 +181,7 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         short ammo = 24;
         short maxAmmo = 24;
-        AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
+        AmmoPack ammoPack = new AmmoPack(id, template, template.getName(), dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
 
@@ -189,7 +189,7 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         short ammo = 45;
         short maxAmmo = 45;
-        AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
+        AmmoPack ammoPack = new AmmoPack(id, template, template.getName(), dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
 
@@ -197,7 +197,7 @@ public class ItemFactory {
         Node dropNode = createItemDropNode(template);
         short ammo = 9;
         short maxAmmo = 9;
-        AmmoPack ammoPack = new AmmoPack(id, template, "Ammo Pack", dropNode, droppable, ammo, maxAmmo);
+        AmmoPack ammoPack = new AmmoPack(id, template, template.getName(), dropNode, droppable, ammo, maxAmmo);
         return ammoPack;
     }
 

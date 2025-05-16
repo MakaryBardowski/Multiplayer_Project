@@ -160,15 +160,16 @@ public class Player extends HumanMob {
         if (playerClass instanceof AssaultClass) {
             setHealth(25);
             setMaxHealth(25);
+            cachedSpeed = 10f;
         } else if (playerClass instanceof MedicClass) {
             setHealth(20);
             setMaxHealth(20);
+            cachedSpeed = 10f;
         } else {
             setHealth(35);
             setMaxHealth(35);
+            cachedSpeed = 9.5f;
         }
-
-        cachedSpeed = 11.25f;
         attributes.put(SPEED_ATTRIBUTE_KEY, new FloatAttribute(cachedSpeed));
     }
 

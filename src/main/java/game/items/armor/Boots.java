@@ -5,11 +5,11 @@ import static game.map.blocks.VoxelLighting.setupModelLight;
 import game.entities.mobs.player.Player;
 import client.Main;
 import com.jme3.math.FastMath;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.entities.mobs.HumanMob;
 import itemSystem.ItemTemplates.BootsTemplate;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
 
@@ -103,7 +103,7 @@ public class Boots extends Armor {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewBootsMessage msg = new NewBootsMessage(this);
         msg.setReliable(true);
         return msg;

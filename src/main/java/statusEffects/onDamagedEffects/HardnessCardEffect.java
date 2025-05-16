@@ -1,8 +1,8 @@
 package statusEffects.onDamagedEffects;
 
-import com.jme3.network.AbstractMessage;
 import data.DamageReceiveData;
 import game.entities.StatusEffectContainer;
+import messages.TwoWayMessage;
 import statusEffects.EffectProcType;
 
 public class HardnessCardEffect extends OnDamagedEffect {
@@ -29,7 +29,7 @@ public class HardnessCardEffect extends OnDamagedEffect {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         return null;
     }
 }

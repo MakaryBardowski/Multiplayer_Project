@@ -203,7 +203,7 @@
 ],
 "entities": [
 	{
-		"entityType": 3,
+		"entityType": "MOB",
 		"templateIndex": 3,
 		"position": {
 			"x": 8.5,
@@ -212,7 +212,7 @@
 		}
 	},
 	{
-		"entityType": 2,
+		"entityType": "INDESTRUCTIBLE_DECORATION",
 		"templateIndex": 3,
 		"position": {
 			"x": 13.5,

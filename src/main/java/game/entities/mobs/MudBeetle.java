@@ -8,7 +8,6 @@ import behaviorTree.composite.ParallelNode;
 import behaviorTree.composite.SelectorNode;
 import behaviorTree.composite.SequenceNode;
 import behaviorTree.context.MudBeetleContext;
-import game.effects.Vfx;
 import game.entities.Destructible;
 import game.items.Item;
 import game.map.collision.WorldGrid;
@@ -19,9 +18,7 @@ import client.Main;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
-import com.jme3.effect.ParticleEmitter;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import data.DamageReceiveData;
 import static game.effects.DecalProjector.projectFromTo;
@@ -36,6 +33,7 @@ import java.util.Random;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -195,7 +193,7 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewMobMessage msg = new NewMobMessage(this, node.getWorldTranslation(), mobSpawnType);
         msg.setReliable(true);
         return msg;

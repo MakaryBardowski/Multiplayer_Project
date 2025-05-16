@@ -47,7 +47,7 @@ public class LevelLoadResultDeserializer extends StdDeserializer<LevelLoadResult
 
         var entitesNode = node.get(LevelLoadKeys.ENTITIES_KEY);
 
-        return new LevelLoadResult(logicMap,mapSizeX,mapSizeY,mapSizeZ,blockSizeNode.asInt(), EntitySpawnDataDeserializationUtils.getEntitySpawnDataFromNode(entitesNode),playerSpawnpoints);
+        return new LevelLoadResult(logicMap,mapSizeX,mapSizeY,mapSizeZ,blockSizeNode.asInt(), EntitySpawnDataDeserializationUtils.getEntitySpawnDataFromNode(entitesNode,null),playerSpawnpoints);
     }
 
 

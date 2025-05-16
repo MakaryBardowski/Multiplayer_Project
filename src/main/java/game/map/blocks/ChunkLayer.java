@@ -1,6 +1,6 @@
 package game.map.blocks;
 
-import client.Main;
+
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
@@ -77,7 +77,7 @@ public class ChunkLayer {
 
 
 //        mat.setBoolean("UseVertexColor", true);
-        mat.getAdditionalRenderState().setWireframe(Main.WIREFRAME);
+
 //        mat.getAdditionalRenderState().setLineWidth(7);
 
         geometry.setMaterial(mat);

@@ -1,5 +1,6 @@
 package server;
 
+import Utils.Ansi;
 import com.jme3.app.Application;
 import com.jme3.network.serializing.Serializer;
 import game.entities.mobs.Mob;
@@ -78,14 +79,13 @@ public class ServerGameAppState extends AbstractAppState {
     public ServerGameAppState(AssetManager assetManager, RenderManager renderManager) {
 
         instance = this;
-        currentGamemode = new ServerStoryGameManager();
     }
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
         super.initialize(stateManager,app);
         startServer();
-
+        currentGamemode = new ServerStoryGameManager(new ServerContext(server,null));
     }
 
     @Override // the whole update method should be on another thread
@@ -125,8 +125,6 @@ public class ServerGameAppState extends AbstractAppState {
                 tickTimer = 0;
             }
 
-        } else {
-            System.out.println("server is PAUSED");
         }
     }
 
@@ -137,7 +135,7 @@ public class ServerGameAppState extends AbstractAppState {
         server.getConnections().forEach(hc -> {
             var newPlayer = currentGamemode.levelManager.createAndRegisterPlayer(hc);
             hostsByPlayerId.put(newPlayer.getId(), hc);
-            System.out.println("[SERVER] added player " + newPlayer.getId());
+            System.out.println(Ansi.withAnsiColor("[SERVER] added player " + newPlayer.getId(),Ansi.BRIGHT_BLUE));
         });
 
         currentGamemode.levelManager.notifyPlayersAboutNonMobEntities();

@@ -1,11 +1,11 @@
 package statusEffects.onEnterLevelEffects;
 
-import com.jme3.network.AbstractMessage;
 import data.ChanceEntry;
 import game.entities.StatusEffectContainer;
 import game.entities.mobs.Mob;
 import itemSystem.DropTable;
 import itemSystem.ItemTemplates;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
@@ -54,7 +54,7 @@ public class CornucopiaEffect extends OnEnterLevelEffect{
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         return null;
     }
 }

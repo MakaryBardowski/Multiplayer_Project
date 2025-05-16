@@ -5,7 +5,6 @@ import static client.appStates.ClientGameAppState.removeEntityByIdClient;
 import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import data.DamageReceiveData;
 import game.entities.DecorationTemplates.DecorationTemplate;
@@ -19,6 +18,7 @@ import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewChestMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -128,7 +128,7 @@ public class Chest extends StatusEffectContainer {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         NewChestMessage msg = new NewChestMessage(this, node.getWorldTranslation());
         msg.setReliable(true);
         return msg;

@@ -139,7 +139,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public ConcurrentHashMap<Integer, Entity> getMobs() {
-        return currentGamemode.getLevelManager().getMobs();
+        return currentGamemode.getLevelManager().getEntitiesById();
     }
 
     public Level getMap() {
@@ -199,7 +199,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public static void removeEntityByIdClient(int id) {
-        instance.currentGamemode.getLevelManager().getMobs().remove(id);
+        instance.currentGamemode.getLevelManager().getEntitiesById().remove(id);
     }
 
     public void connectToServer() {

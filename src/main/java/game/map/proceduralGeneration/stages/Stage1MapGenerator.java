@@ -1,6 +1,8 @@
 package game.map.proceduralGeneration.stages;
 
 import LevelLoadSystem.entitySpawnData.EntitySpawnData;
+import LevelLoadSystem.entitySpawnData.IndestructibleDecorationSpawnData;
+import Utils.Ansi;
 import client.appStates.ClientGameAppState;
 import data.ChanceEntry;
 import game.map.AxisAlignedRotation;
@@ -12,9 +14,12 @@ import game.map.blocks.BlockType;
 import game.map.proceduralGeneration.MapGenerator;
 import game.map.proceduralGeneration.Room;
 import generators.PercentageRandomGenerator;
+
 import jme3utilities.math.Vector3i;
 
 import java.util.*;
+
+import static game.entities.DecorationTemplates.EXIT_CAR;
 
 public class Stage1MapGenerator extends MapGenerator {
     private final LinkedHashSet<Vector3i> openJoinPoints = new LinkedHashSet<>();
@@ -39,7 +44,9 @@ public class Stage1MapGenerator extends MapGenerator {
         Map logicMap = new Map(flatMap, mapSizeX, mapSizeY, mapSizeZ, ClientGameAppState.getInstance().getBLOCK_SIZE());
 
 
-        var playerRoom = RoomPrefabs.getPrefabAtIndex(0, AxisAlignedRotation.FACE_SOUTH_MINUS_Z_AXIS);
+
+
+        var playerRoom = RoomPrefabs.getPrefabAtIndex(0, AxisAlignedRotation.FACE_EAST_MINUS_X_AXIS);
         var playerRoomPosX = mapSizeX / 2;
         var playerRoomPosY = 0;
         var playerRoomPosZ = mapSizeZ / 2;
@@ -84,14 +91,33 @@ public class Stage1MapGenerator extends MapGenerator {
             }
         }
 
-        // get entitySpawnData
         var entitySpawnData = new ArrayList<EntitySpawnData>();
-        for(var placedRoom : alreadyPlacedPrefabs){
+
+        var roomIndexesWithExitSpawnpoints = new ArrayList<Integer>();
+        for(int i =0; i < alreadyPlacedPrefabs.size(); i++){
+            var placedRoom = alreadyPlacedPrefabs.get(i);
+            if(!placedRoom.getPotentialExitSpawnpoints().isEmpty()){
+                roomIndexesWithExitSpawnpoints.add(i);
+            }
+
             var esd = placedRoom.getEntitySpawnData();
             for(var clonedEsd : esd){
                 clonedEsd.getPosition().addLocal(placedRoom.getPosX(),placedRoom.getPosY(),placedRoom.getPosZ());
             }
             entitySpawnData.addAll(esd);
+        }
+
+
+        if(!roomIndexesWithExitSpawnpoints.isEmpty()) {
+            var roomWithExitIndex = roomIndexesWithExitSpawnpoints.get(random.nextInt(roomIndexesWithExitSpawnpoints.size()));
+            var room = alreadyPlacedPrefabs.get(roomWithExitIndex);
+            var exitSpawnpointIndex = random.nextInt(room.getPotentialExitSpawnpoints().size());
+            var exitSpawnpoint = room.getPotentialExitSpawnpoints().get(exitSpawnpointIndex).clone();
+            entitySpawnData.add(
+                    new IndestructibleDecorationSpawnData(EXIT_CAR.getTemplateIndex(),exitSpawnpoint.addLocal(room.getPosX(),room.getPosY(),room.getPosZ()))
+            );
+        }else{
+            System.out.println(Ansi.withAnsiColor("No exit spawned - no rooms with exit spawnpoints.",Ansi.BRIGHT_YELLOW));
         }
 
         return new MapGenerationResult(
@@ -153,6 +179,7 @@ public class Stage1MapGenerator extends MapGenerator {
                     openJoinPoints.add(new Vector3i(testedPrefabPosX + joinPoint.x(), testedPrefabPosY + joinPoint.y(), testedPrefabPosZ + joinPoint.z()));
 
                 }
+
                 alreadyPlacedPrefabs.add(new PlacedRoomPrefab(testedPrefab,testedPrefabPosX,testedPrefabPosY,testedPrefabPosZ));
                 return true;
             }

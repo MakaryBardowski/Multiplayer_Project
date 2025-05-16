@@ -1,10 +1,10 @@
 package game.items.misc;
 
 import client.appStates.ClientGameAppState;
-import com.jme3.network.AbstractMessage;
 import com.jme3.scene.Node;
 import game.items.Item;
 import itemSystem.ItemTemplates;
+import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewMiscItemMessage;
 
@@ -26,7 +26,7 @@ public class MiscellaneousItem extends Item {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         var msg = new NewMiscItemMessage(this);
         msg.setReliable(true);
         return msg;

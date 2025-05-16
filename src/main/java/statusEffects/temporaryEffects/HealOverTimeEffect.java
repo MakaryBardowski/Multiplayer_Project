@@ -1,9 +1,9 @@
 package statusEffects.temporaryEffects;
 
-import com.jme3.network.AbstractMessage;
 import game.entities.StatusEffectContainer;
 import lombok.Getter;
 import messages.DestructibleHealReceiveMessage;
+import messages.TwoWayMessage;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -48,7 +48,7 @@ public class HealOverTimeEffect extends RepeatedTemporaryEffect {
     }
 
     @Override
-    public AbstractMessage createNewEntityMessage() {
+    public TwoWayMessage createNewEntityMessage() {
         return null;
     }
 }

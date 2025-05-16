@@ -1,23 +1,21 @@
 package game.entities;
 
-import com.jme3.network.AbstractMessage;
-import events.EventPublisher;
-
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
-import events.EventSubscriber;
 import events.GameEvent;
 import lombok.Getter;
 import lombok.Setter;
 import messages.*;
+import publisher.EventPublisher;
+import server.ServerContext;
 import server.ServerGameAppState;
+import subscriber.EventSubscriber;
 
 @Getter
-public abstract class Entity implements EventPublisher, EventSubscriber{
+public abstract class Entity implements EventPublisher, EventSubscriber {
     private final ArrayList<EventSubscriber> subscribers = new ArrayList<>(1);
 
     private static final DeleteEntityMessage dem = new DeleteEntityMessage();
@@ -38,10 +36,10 @@ public abstract class Entity implements EventPublisher, EventSubscriber{
         this.name = name;
     }
 
-    public final void destroyOnServerAndNotify() {
+    public final void destroyOnServerAndNotify(ServerContext context) {
         destroyServer();
         dem.setId(id);
-        ServerGameAppState.getInstance().getServer().broadcast(dem);
+        context.notifyAllClients(dem);
     }
     // this should be abstract!
     public void destroyClient(){};
@@ -49,7 +47,7 @@ public abstract class Entity implements EventPublisher, EventSubscriber{
 
     public void destroyServer(){};
 
-    public abstract AbstractMessage createNewEntityMessage();
+    public abstract TwoWayMessage createNewEntityMessage();
 
     public void attributeChangedNotification(int attributeId, Attribute oldAttributeCopy, Attribute copyOfNewAttribute) {}
 
