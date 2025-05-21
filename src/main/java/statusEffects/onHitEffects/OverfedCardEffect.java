@@ -4,6 +4,7 @@ import data.DamageReceiveData;
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -18,13 +19,12 @@ public class OverfedCardEffect extends OnHitEffect{
     }
 
     @Override
-    public DamageReceiveData applyServer(DamageReceiveData input) {
-        var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
-        var attacker = (Destructible) serverLevelManager.getEntitiesById().get(input.getAttackerId());
-        var victim = (Destructible) serverLevelManager.getEntitiesById().get(input.getVictimId());
+    public DamageReceiveData applyServer(ServerContext ctx, DamageReceiveData input) {
+        var attacker = (Destructible) ctx.getEntity(input.getAttackerId());
+        var victim = (Destructible) ctx.getEntity(input.getVictimId());
 
         if( ( victim.getHealth() - victim.calculateDamage(input.getRawDamage()) ) <= 0){
-            attacker.setFloatAttributesAndNotifyClients(getHealthAndMaxHealthUpdate(
+            attacker.setFloatAttributesAndNotifyClients(ctx,getHealthAndMaxHealthUpdate(
                     attacker.getFloatAttribute(Destructible.MAX_HEALTH_ATTRIBUTE_KEY).getValue()+HEALTH_INCREASE,
                     attacker.getFloatAttribute(Destructible.HEALTH_ATTRIBUTE_KEY).getValue()+HEALTH_INCREASE
             ));

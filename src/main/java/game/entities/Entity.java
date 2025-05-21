@@ -3,26 +3,28 @@ package game.entities;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.BiConsumer;
 
+import Utils.TriConsumer;
+
+import events.ServerEventSubscriber;
 import events.GameEvent;
+import events.ServerEventPublisher;
 import lombok.Getter;
 import lombok.Setter;
 import messages.*;
-import publisher.EventPublisher;
 import server.ServerContext;
-import server.ServerGameAppState;
-import subscriber.EventSubscriber;
+
 
 @Getter
-public abstract class Entity implements EventPublisher, EventSubscriber {
-    private final ArrayList<EventSubscriber> subscribers = new ArrayList<>(1);
+public abstract class Entity implements ServerEventPublisher, ServerEventSubscriber {
+    public static final int NOT_DETERMINED_ID = -1;
+    private final ArrayList<ServerEventSubscriber> subscribers = new ArrayList<>(1);
 
     private static final DeleteEntityMessage dem = new DeleteEntityMessage();
 
     @Getter
     @Setter
-    private BiConsumer<GameEvent,Entity> gameEventHandler;
+    private TriConsumer<ServerContext,GameEvent,Entity> serverGameEventHandler;
 
     @Getter
     protected ConcurrentHashMap<Integer, Attribute> attributes = new ConcurrentHashMap<>(0);
@@ -37,7 +39,7 @@ public abstract class Entity implements EventPublisher, EventSubscriber {
     }
 
     public final void destroyOnServerAndNotify(ServerContext context) {
-        destroyServer();
+        destroyServer(context);
         dem.setId(id);
         context.notifyAllClients(dem);
     }
@@ -45,34 +47,34 @@ public abstract class Entity implements EventPublisher, EventSubscriber {
     public void destroyClient(){};
     // this should be abstract!
 
-    public void destroyServer(){};
+    public void destroyServer(ServerContext ctx){};
 
     public abstract TwoWayMessage createNewEntityMessage();
 
     public void attributeChangedNotification(int attributeId, Attribute oldAttributeCopy, Attribute copyOfNewAttribute) {}
 
-    public void setFloatAttributeAndNotifyClients(int attributeId, float val) {
+    public void setFloatAttributeAndNotifyClients(ServerContext ctx, int attributeId, float val) {
         setFloatAttribute(attributeId, val);
         var msg = new EntitySetFloatAttributeMessage(this, attributeId, val);
-        ServerGameAppState.getInstance().getServer().broadcast(msg);
+        ctx.notifyAllClients(msg);
     }
 
-    public void setIntegerAttributeAndNotifyClients(int attributeId, int val) {
+    public void setIntegerAttributeAndNotifyClients(ServerContext ctx,int attributeId, int val) {
         setIntegerAttribute(attributeId, val);
         var msg = new EntitySetIntegerAttributeMessage(this, attributeId, val);
-        ServerGameAppState.getInstance().getServer().broadcast(msg);
+        ctx.notifyAllClients(msg);
     }
 
-    public void setFloatAttributesAndNotifyClients(Map<Integer,Float> floatAttributesById) {
+    public void setFloatAttributesAndNotifyClients(ServerContext ctx,Map<Integer,Float> floatAttributesById) {
         setFloatAttributes(floatAttributesById);
         var msg = new BatchSetFloatAttributeMessage(this, floatAttributesById);
-        ServerGameAppState.getInstance().getServer().broadcast(msg);
+        ctx.notifyAllClients(msg);
     }
 
-    public void setIntegerAttributesAndNotifyClients(Map<Integer,Integer> integerAttributesById) {
+    public void setIntegerAttributesAndNotifyClients(ServerContext ctx,Map<Integer,Integer> integerAttributesById) {
         setIntegerAttributes(integerAttributesById);
         var msg = new BatchSetIntegerAttributeMessage(this, integerAttributesById);
-        ServerGameAppState.getInstance().getServer().broadcast(msg);
+        ctx.notifyAllClients(msg);
     }
 
     public void setFloatAttribute(int attributeId, float val) {
@@ -112,24 +114,27 @@ public abstract class Entity implements EventPublisher, EventSubscriber {
         return id;
     }
 
-    public final void addEventSubscriber(EventSubscriber eventSubscriber){
+    @Override
+    public final void addEventSubscriber(ServerEventSubscriber eventSubscriber){
         subscribers.add(eventSubscriber);
     }
 
-    public void removeEventSubscriber(EventSubscriber eventSubscriber){
+    @Override
+    public void removeEventSubscriber(ServerEventSubscriber eventSubscriber){
         subscribers.remove(eventSubscriber);
     }
 
-    public void notifyEventSubscribers(GameEvent gameEvent){
+    @Override
+    public void notifyEventSubscribersServer(ServerContext ctx, GameEvent gameEvent){
         for(var subscriber : subscribers){
-            subscriber.receiveEventNotification(gameEvent);
+            subscriber.receiveEventNotificationServer(ctx,gameEvent);
         }
     }
 
     @Override
-    public void receiveEventNotification(GameEvent gameEvent) {
-        if(gameEventHandler != null){
-            gameEventHandler.accept(gameEvent,this);
+    public void receiveEventNotificationServer(ServerContext ctx,GameEvent gameEvent) {
+        if(serverGameEventHandler != null){
+            serverGameEventHandler.accept(ctx,gameEvent,this);
         }
     }
 }

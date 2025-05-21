@@ -10,6 +10,7 @@ import game.entities.mobs.player.Player;
 import game.items.Item;
 import lombok.Getter;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeItemFromMobEquipmentServer;
 
@@ -41,19 +42,19 @@ public class MobItemInteractionMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        if(getMobByIdServer(mobId) == null){
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        if(getMobByIdServer(ctx,mobId) == null){
             System.err.println("Provided mob with id "+mobId + " doesnt exist on server. It requested item interaction "+getInteractionType());
             return;
         }
-        if(getItemByIdServer(itemId) == null){
+        if(getItemByIdServer(ctx,itemId) == null){
             System.err.println("Provided item with id "+itemId + " doesnt exist on server. It was a target of item interaction "+getInteractionType());
             return;
         }
 
         if (getInteractionType() == ItemInteractionType.PICK_UP) {
-            var mob = getMobByIdServer(mobId);
-            var newItem = getItemByIdServer(itemId);
+            var mob = getMobByIdServer(ctx,mobId);
+            var newItem = getItemByIdServer(ctx,itemId);
 
             if (mob.getEquipment().addItem(newItem)) {
                 var onPickupHandler = newItem.getTemplate().getServerOnPickupHandler();
@@ -61,31 +62,31 @@ public class MobItemInteractionMessage extends TwoWayMessage {
                     onPickupHandler.accept(newItem,mob);
                 }
 
-                server.getServer().broadcast(this);
+                ctx.notifyAllClients(this);
             }
         } else if (getInteractionType() == ItemInteractionType.EQUIP) {
-            var mob = getMobByIdServer(mobId);
-            var item = getItemByIdServer(itemId);
+            var mob = getMobByIdServer(ctx,mobId);
+            var item = getItemByIdServer(ctx,itemId);
             if(mob.getEquipment().hasItem(item)){
-                mob.equipServer(getItemByIdServer(itemId));
-                server.getServer().broadcast(this);
+                mob.equipServer(ctx,getItemByIdServer(ctx,itemId));
+                ctx.notifyAllClients(this);
             }
         } else if (getInteractionType() == ItemInteractionType.UNEQUIP) {
 //            getMobById(imsg.getMobId()).unequip(getItemById(imsg.getItemId()));
-            server.getServer().broadcast(this);
+            ctx.notifyAllClients(this);
         } else if (getInteractionType() == ItemInteractionType.DROP) {
-            var mob = getMobByIdServer(mobId);
-            var droppedItem = getItemByIdServer(itemId);
+            var mob = getMobByIdServer(ctx,mobId);
+            var droppedItem = getItemByIdServer(ctx,itemId);
 
-            removeItemFromMobEquipmentServer(mobId, itemId);
-            mob.unequipServer(droppedItem);
+            removeItemFromMobEquipmentServer(ctx,mobId, itemId);
+            mob.unequipServer(ctx,droppedItem);
 
             var onDropHandler = droppedItem.getTemplate().getServerOnDropHandler();
             if(onDropHandler != null){
                 onDropHandler.accept(droppedItem,mob);
             }
 
-            server.getServer().broadcast(this);
+            ctx.notifyAllClients(this);
         }
     }
 

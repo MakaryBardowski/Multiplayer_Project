@@ -7,6 +7,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.AttachedEntity;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -63,11 +64,11 @@ public class MobPosRotUpdateMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        if (entityExistsLocallyServer(id)) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        if (entityExistsLocallyServer(ctx,id)) {
             Main.getInstance().enqueue(() -> {
-                if (ServerGameAppState.getInstance().getLevelManagerMobs().get(id) != null) {
-                    ((AttachedEntity)  ServerGameAppState.getInstance().getLevelManagerMobs().get(id)) .getNode().setLocalRotation(getRot());
+                if (ctx.hasEntity(id)) {
+                    ((AttachedEntity)  ctx.getEntity(id)) .getNode().setLocalRotation(getRot());
                 }
             });
         }

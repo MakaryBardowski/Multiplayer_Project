@@ -12,7 +12,7 @@ import de.lessvoid.nifty.screen.ScreenController;
 import server.ServerGameAppState;
 
 public class MainMenuController implements ScreenController {
-
+    private static ServerGameAppState serverGameAppState;
     @Override
     public void bind(Nifty nifty, Screen screen) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -32,8 +32,8 @@ public class MainMenuController implements ScreenController {
         goToLobbyScreenHost();
 
         Main instance = Main.getInstance();
-        ServerGameAppState sm = new ServerGameAppState(instance.getAssetManager(), instance.getRenderManager());
-        instance.getStateManager().attach(sm);
+        serverGameAppState = new ServerGameAppState(instance.getAssetManager(), instance.getRenderManager());
+        instance.getStateManager().attach(serverGameAppState);
 
         var clientGameState = new ClientGameAppState(Main.getInstance(), "localhost");
         instance.getStateManager().attach(clientGameState);
@@ -99,7 +99,7 @@ public class MainMenuController implements ScreenController {
     }
 
     public static void startGame() {
-        ServerGameAppState.getInstance().startGame();
+        serverGameAppState.startGame();
     }
 
     public static void leaveLobby() {

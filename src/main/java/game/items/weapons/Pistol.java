@@ -32,6 +32,7 @@ import messages.EntitySetIntegerAttributeMessage;
 import messages.HitscanTrailMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewRangedWeaponMessage;
+import server.ServerContext;
 
 public class Pistol extends RangedWeapon {
 
@@ -82,7 +83,7 @@ public class Pistol extends RangedWeapon {
     }
 
     @Override
-    public void attack(Mob m) {
+    public void attackServer(ServerContext ctx, Mob m) {
 
     }
 
@@ -139,12 +140,12 @@ public class Pistol extends RangedWeapon {
     @Override
     public void playerUseInRightHand(Player p) {
         if (getAmmo() > 0 && currentAttackCooldown >= attackCooldown) {
-            playerAttack(p);
+            playerAttackServer(p);
         }
     }
 
     @Override
-    public void playerAttack(Player p) {
+    public void playerAttackServer(Player p) {
         muzzleEmitter.emitParticles(1);
         currentAttackCooldown = 0;
         int newAmmo = getAmmo() - 1;
@@ -232,12 +233,12 @@ public class Pistol extends RangedWeapon {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setEquippedRightHand(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getEquippedRightHand() == this) {
             m.setEquippedRightHand(null);
         }

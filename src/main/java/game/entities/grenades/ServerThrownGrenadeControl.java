@@ -11,7 +11,9 @@ import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.control.Control;
 import static game.map.collision.MovementCollisionUtils.calculateNewPosInLogicMap;
 import java.io.IOException;
-import server.ServerGameAppState;
+
+import game.constants.SharedConstants;
+import server.ServerContext;
 
 public class ServerThrownGrenadeControl extends AbstractControl implements Savable, Cloneable {
 
@@ -25,10 +27,13 @@ public class ServerThrownGrenadeControl extends AbstractControl implements Savab
     private byte bounces = 0;
     private final byte maxBounces = 5;
 
-    public ServerThrownGrenadeControl(ThrownGrenade grenade, Vector3f direction, float speed) {
+    private ServerContext serverContext;
+
+    public ServerThrownGrenadeControl(ServerContext serverContext, ThrownGrenade grenade, Vector3f direction, float speed) {
         this.grenade = grenade;
         this.direction = direction;
         this.speed = speed;
+        this.serverContext = serverContext;
     } // empty serialization constructor
 
     /**
@@ -65,17 +70,17 @@ public class ServerThrownGrenadeControl extends AbstractControl implements Savab
         moveVec.addLocal(dragForce);
         moveVec.subtractLocal(0, gravity * tpf, 0);
 
-        var posInMapNow = calculateNewPosInLogicMap(spatial, new Vector3f(), ServerGameAppState.getInstance().getBLOCK_SIZE());
-        var posInMapAfterMove = calculateNewPosInLogicMap(spatial, moveVec, ServerGameAppState.getInstance().getBLOCK_SIZE());
+        var posInMapNow = calculateNewPosInLogicMap(spatial, new Vector3f(), SharedConstants.BLOCK_SIZE);
+        var posInMapAfterMove = calculateNewPosInLogicMap(spatial, moveVec, SharedConstants.BLOCK_SIZE);
 
 
-        if (ServerGameAppState.getInstance().getMap().isPositionNotEmpty((int) posInMapNow.getX(),(int) posInMapAfterMove.getY(),(int) posInMapNow.getZ()) && bounces <= maxBounces) {
+        if (serverContext.getCurrentMap().isPositionNotEmpty((int) posInMapNow.getX(),(int) posInMapAfterMove.getY(),(int) posInMapNow.getZ()) && bounces <= maxBounces) {
             moveVec.setY(-moveVec.getY() * BOUNCE_ELASTICITY);
             bounces++;
         }
 
         if (bounces > maxBounces) {
-            grenade.explodeServer();
+            grenade.explodeServer(serverContext);
             spatial.removeFromParent();
             spatial.removeControl(this);
         } else {
@@ -85,7 +90,7 @@ public class ServerThrownGrenadeControl extends AbstractControl implements Savab
 
     @Override
     public Control cloneForSpatial(Spatial spatial) {
-        final ServerThrownGrenadeControl control = new ServerThrownGrenadeControl(grenade, direction, speed);
+        final ServerThrownGrenadeControl control = new ServerThrownGrenadeControl(serverContext,grenade, direction, speed);
         /* Optional: use setters to copy userdata into the cloned control */
         // control.setIndex(i); // example
         control.setSpatial(spatial);

@@ -5,6 +5,7 @@ import client.Main;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -18,7 +19,7 @@ public class NewMiscItemMessage extends NewItemMessage{
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection sender) {
+    public void handleServer(ServerContext ctx, HostedConnection sender) {
     }
 
     @Override

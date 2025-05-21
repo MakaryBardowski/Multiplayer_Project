@@ -4,6 +4,7 @@ import client.appStates.ClientGameAppState;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -24,9 +25,8 @@ public class HostChangedPlayerClassMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState serverGameAppState, HostedConnection hc) {
-        var server = ServerGameAppState.getInstance().getServer();
-        var newHc = server.getConnection(connectionId);
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        var newHc = ctx.getConnectedClient(connectionId);
         
         newHc.setAttribute("class", classId);
     }

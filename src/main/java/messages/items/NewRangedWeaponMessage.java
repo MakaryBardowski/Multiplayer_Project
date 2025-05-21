@@ -7,6 +7,7 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.IntegerAttribute;
 import game.items.weapons.RangedWeapon;
 import lombok.Getter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -23,7 +24,7 @@ public class NewRangedWeaponMessage extends NewItemMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

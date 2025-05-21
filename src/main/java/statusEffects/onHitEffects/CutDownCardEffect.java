@@ -4,6 +4,7 @@ import data.DamageReceiveData;
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -15,11 +16,10 @@ public class CutDownCardEffect extends OnHitEffect{
     }
 
     @Override
-    public DamageReceiveData applyServer(DamageReceiveData input) {
-        var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
-        var attacker = (Destructible) serverLevelManager.getEntitiesById().get(input.getAttackerId());
+    public DamageReceiveData applyServer(ServerContext ctx, DamageReceiveData input) {
+        var attacker = (Destructible) ctx.getEntity(input.getAttackerId());
 
-        var victim = (Destructible) serverLevelManager.getEntitiesById().get(input.getVictimId());
+        var victim = (Destructible) ctx.getEntity(input.getVictimId());
 
         if( ( victim.getHealth() - victim.calculateDamage(input.getRawDamage()) ) <= victim.getMaxHealth()*EXECUTE_THRESHOLD){
             input.setRawDamage(victim.getMaxHealth()*99);

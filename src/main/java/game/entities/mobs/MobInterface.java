@@ -1,6 +1,7 @@
 package game.entities.mobs;
 
 import game.items.Item;
+import server.ServerContext;
 
 public interface MobInterface extends AiSteerable{
 
@@ -11,9 +12,9 @@ public interface MobInterface extends AiSteerable{
 
     void unequip(Item e);
 
-    void equipServer(Item e);
+    void equipServer(ServerContext ctx, Item e);
     
-    void unequipServer(Item e);
+    void unequipServer(ServerContext ctx, Item e);
     
     
 }

@@ -45,7 +45,8 @@ import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 import messages.TwoWayMessage;
-import server.ServerGameAppState;
+import server.ServerContext;
+
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public class HumanMob extends Mob {
@@ -218,20 +219,20 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void receiveDamageServer(DamageReceiveData damageData) {
+    public void receiveDamageServer(ServerContext ctx, DamageReceiveData damageData) {
         for(var onDamageReceivedEffect : onDamageReceivedEffects){
-            onDamageReceivedEffect.applyServer(damageData);
+            onDamageReceivedEffect.applyServer(ctx,damageData);
         }
 
         setHealth(getHealth()-calculateDamage(damageData.getRawDamage()));
 
         if (getHealth() <= 0) {
-            destroyServer();
+            destroyServer(ctx);
             onDeathServer();
             return;
         }
         Main.getInstance().enqueue(() -> {
-            notifyEventSubscribers(new DamageReceivedEvent(damageData));
+            notifyEventSubscribersServer(ctx,new DamageReceivedEvent(damageData));
         }
         );
     }
@@ -278,16 +279,16 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void equipServer(Item e) {
+    public void equipServer(ServerContext ctx, Item e) {
         if (e instanceof Equippable equippableItem) {
-            equippableItem.serverEquip(this);
+            equippableItem.serverEquip(ctx,this);
         }
     }
 
     @Override
-    public void unequipServer(Item e) {
+    public void unequipServer(ServerContext ctx, Item e) {
         if (e instanceof Equippable equippableItem) {
-            equippableItem.serverUnequip(this);
+            equippableItem.serverUnequip(ctx,this);
         }
     }
 
@@ -334,16 +335,16 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
-        WorldGrid grid = ServerGameAppState.getInstance().getGrid();
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
+        WorldGrid grid = ctx.getCollisionGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
     }
 
     @Override
-    public void moveServer(Vector3f moveVec) {
-        super.moveServer(moveVec);
+    public void moveServer(ServerContext ctx, Vector3f moveVec) {
+        super.moveServer(ctx, moveVec);
         positionChangedOnServer.set(true);
     }
 
@@ -352,7 +353,7 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
     }
 
     @Override
@@ -383,7 +384,7 @@ public class HumanMob extends Mob {
 
     }
 
-    public void addAi() {
+    public void addAi(ServerContext ctx) {
 
         var attack = new LeafNode(new Attack());
 
@@ -420,18 +421,17 @@ public class HumanMob extends Mob {
         );
 
         var rootNode = new ParallelNode(children);
-        var context = new SimpleHumanMobContext(this);
+        var context = new SimpleHumanMobContext(ctx,this);
         addEventSubscriber(context);
         behaviorTree = new BehaviorTree(rootNode, context);
 
     }
 
     @Override
-    public void destroyServer() {
+    public void destroyServer(ServerContext ctx) {
         Main.getInstance().enqueue(() -> {
-            removeEntityByIdServer(id);
-            var server = ServerGameAppState.getInstance();
-            server.getGrid().remove(this);
+            removeEntityByIdServer(ctx,id);
+            ctx.getCollisionGrid().remove(this);
             if (node.getParent() != null) {
                 node.removeFromParent();
             }
@@ -485,12 +485,12 @@ public class HumanMob extends Mob {
     }
 
     @Override
-    public void dealDamageServer(DamageReceiveData damageReceiveData, Destructible target) {
+    public void dealDamageServer(ServerContext ctx, DamageReceiveData damageReceiveData, Destructible target) {
         for(var onHitEffect : onDealDamageEffects){
-            onHitEffect.applyServer(damageReceiveData);
+            onHitEffect.applyServer(ctx, damageReceiveData);
         }
 
-        target.receiveDamageServer(damageReceiveData);
+        target.receiveDamageServer(ctx, damageReceiveData);
     }
 
     @Override

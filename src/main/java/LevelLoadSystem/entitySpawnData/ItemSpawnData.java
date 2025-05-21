@@ -3,6 +3,7 @@ package LevelLoadSystem.entitySpawnData;
 import com.jme3.math.Vector3f;
 import game.entities.Entity;
 import itemSystem.ItemTemplates;
+import server.ServerContext;
 import server.ServerLevelManager;
 
 public class ItemSpawnData extends EntitySpawnData{
@@ -16,7 +17,7 @@ public class ItemSpawnData extends EntitySpawnData{
     }
 
     @Override
-    public Entity serverSpawn(ServerLevelManager serverLevelManager) {
+    public Entity serverSpawn(ServerContext ctx, ServerLevelManager serverLevelManager) {
         var item = serverLevelManager.registerItemLocal(ItemTemplates.getTemplateByIndex(templateIndex),droppable);
 
         if (isDropped) {

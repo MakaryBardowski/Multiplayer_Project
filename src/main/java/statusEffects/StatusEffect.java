@@ -5,6 +5,7 @@ import game.entities.Entity;
 import game.entities.StatusEffectContainer;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 
 public abstract class StatusEffect<InputType,OutputType> extends Entity {
     @Getter
@@ -26,7 +27,7 @@ public abstract class StatusEffect<InputType,OutputType> extends Entity {
         this.procType = procType;
     }
 
-    public abstract OutputType applyServer(InputType input);
+    public abstract OutputType applyServer(ServerContext ctx, InputType input);
 
     public abstract OutputType applyClient(InputType input);
 

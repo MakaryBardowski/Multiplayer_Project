@@ -7,12 +7,12 @@ import behaviorTree.context.Context;
 import behaviorTree.context.SimpleHumanMobContext;
 import client.Main;
 import com.jme3.math.Vector3f;
+import game.constants.SharedConstants;
 import game.entities.mobs.HumanMob;
 import server.ServerGameAppState;
 
 public class WalkAction extends NodeAction {
 
-    private static final int BLOCK_SIZE = ServerGameAppState.getInstance().getBLOCK_SIZE();
     private Vector3f currentNode;
 
     @Override
@@ -47,7 +47,7 @@ public class WalkAction extends NodeAction {
         }
         boolean achievedDestination = false;
         var currentNodeIndex = hc.getCurrentNodeIndex();
-        currentNode = hc.getCurrentPath().get(currentNodeIndex).mult(BLOCK_SIZE);
+        currentNode = hc.getCurrentPath().get(currentNodeIndex).mult(SharedConstants.BLOCK_SIZE);
         var distance = human.getNode().getWorldTranslation().distance(currentNode);
 
         hc.setDesiredLookDirection(currentNode.subtract(human.getNode().getWorldTranslation()));
@@ -83,7 +83,7 @@ public class WalkAction extends NodeAction {
 //                    }
 //                }
 
-                human.moveServer(moveVec);
+                human.moveServer(hc.getServerContext(),moveVec);
             });
         }
         return false;
@@ -92,12 +92,12 @@ public class WalkAction extends NodeAction {
 
     private boolean canMarkCurrentNodeAsVisited(SimpleHumanMobContext hc, int currentNodeIndex, Vector3f currentNode, Vector3f mobPos) {
 
-        int mobPosX = (int) (Math.floor(mobPos.x / BLOCK_SIZE));
-        int mobPosY = (int) (Math.floor(mobPos.y / BLOCK_SIZE));
-        int mobPosZ = (int) (Math.floor(mobPos.z / BLOCK_SIZE));
-        int currentNodeX = (int) (Math.floor(currentNode.x / BLOCK_SIZE / 2));
-        int currentNodeY = (int) (Math.floor(currentNode.y / BLOCK_SIZE / 2));
-        int currentNodeZ = (int) (Math.floor(currentNode.z / BLOCK_SIZE / 2));
+        int mobPosX = (int) (Math.floor(mobPos.x / SharedConstants.BLOCK_SIZE));
+        int mobPosY = (int) (Math.floor(mobPos.y / SharedConstants.BLOCK_SIZE));
+        int mobPosZ = (int) (Math.floor(mobPos.z / SharedConstants.BLOCK_SIZE));
+        int currentNodeX = (int) (Math.floor(currentNode.x / SharedConstants.BLOCK_SIZE / 2));
+        int currentNodeY = (int) (Math.floor(currentNode.y / SharedConstants.BLOCK_SIZE / 2));
+        int currentNodeZ = (int) (Math.floor(currentNode.z / SharedConstants.BLOCK_SIZE / 2));
 
         return mobPosX == currentNodeX && mobPosY == currentNodeY && mobPosZ == currentNodeZ && currentNodeIndex < hc.getCurrentPath().size(); //-1;
         /* all nodes but the last can be flagged as achieved when entering the tile. only the last

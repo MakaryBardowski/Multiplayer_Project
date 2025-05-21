@@ -25,6 +25,7 @@ import generators.PercentageRandomGenerator;
 import java.util.ArrayList;
 import java.util.List;
 
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectTemplates;
 
@@ -92,17 +93,17 @@ public class AllMobFactory extends MobFactory {
     }
 
     @Override
-    public Mob createServerSide(MobSpawnType spawnType, Object... creationData) {
+    public Mob createServerSide(ServerContext ctx, MobSpawnType spawnType, Object... creationData) {
         if (spawnType == MUD_BEETLE) {
             MudBeetle p = createMudBeetle();
             DestructibleUtils.attachDestructibleToNode(p, mobsNode, new Vector3f(10, 4, 10));
-            p.addAi();
+            p.addAi(ctx);
             return p;
         } else if (spawnType == SOLDIER) {
             HumanMob p = createHumanMob(spawnType,"Soldier "+id);
             DestructibleUtils.attachDestructibleToNode(p, mobsNode, new Vector3f(10, 4, 10));
 
-            var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
+            var serverLevelManager = ctx.getLevelManager();
             Helmet defaultHead = (Helmet) serverLevelManager.registerItemLocal(ItemTemplates.HEAD_1, false);
             Vest defaultVest = (Vest) serverLevelManager.registerItemLocal(ItemTemplates.TORSO_1, false);
             Gloves defaultGloves = (Gloves) serverLevelManager.registerItemLocal(ItemTemplates.HAND_1, false);
@@ -118,10 +119,10 @@ public class AllMobFactory extends MobFactory {
             p.setDefaultBoots(defaultBoots);
 
             // player starts naked (equips bare body parts. overriden by starting eq later)
-            p.equipServer(defaultHead);
-            p.equipServer(defaultVest);
-            p.equipServer(defaultGloves);
-            p.equipServer(defaultBoots);
+            p.equipServer(ctx,defaultHead);
+            p.equipServer(ctx,defaultVest);
+            p.equipServer(ctx,defaultGloves);
+            p.equipServer(ctx,defaultBoots);
 
             var helmet = helmetGenerator.getRandom();
             var vest = vestGenerator.getRandom();
@@ -132,31 +133,31 @@ public class AllMobFactory extends MobFactory {
                 Item item = serverLevelManager.registerItemLocal(helmet, true);
                 serverLevelManager.broadcastEntityOnNextLevel(item);
                 p.getEquipment().addItem(item);
-                p.equipServer(item);
+                p.equipServer(ctx,item);
             }
             if (vest != null) {
                 Item item = serverLevelManager.registerItemLocal(vest, true);
                 serverLevelManager.broadcastEntityOnNextLevel(item);
                 p.getEquipment().addItem(item);
-                p.equipServer(item);
+                p.equipServer(ctx,item);
             }
             if (boots != null) {
                 Item item = serverLevelManager.registerItemLocal(boots, true);
                 serverLevelManager.broadcastEntityOnNextLevel(item);
                 p.getEquipment().addItem(item);
-                p.equipServer(item);
+                p.equipServer(ctx,item);
             }
             if (weapon != null) {
                 Item item = serverLevelManager.registerItemLocal(weapon, true);
                 serverLevelManager.broadcastEntityOnNextLevel(item);
                 p.getEquipment().addItem(item);
-                p.equipServer(item);
+                p.equipServer(ctx,item);
             }
 
             var regenEffect = serverLevelManager.createAndRegisterStatusEffect(EffectTemplates.DEFAULT_REGENERATION,p);
             p.addEffect(regenEffect);
 
-            p.addAi();
+            p.addAi(ctx);
             return p;
         } else if (spawnType == RED_HAND_1){
             HumanMob p = createHumanMob(spawnType,"Emissary "+id);
@@ -165,7 +166,7 @@ public class AllMobFactory extends MobFactory {
             p.setCachedSpeed(8.75f);
             DestructibleUtils.attachDestructibleToNode(p, mobsNode, new Vector3f(10, 4, 10));
 
-            var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
+            var serverLevelManager = ctx.getLevelManager();
             Helmet defaultHead = (Helmet) serverLevelManager.registerItemLocal(ItemTemplates.HEAD_1, false);
             Vest defaultVest = (Vest) serverLevelManager.registerItemLocal(ItemTemplates.TORSO_1, false);
             Gloves defaultGloves = (Gloves) serverLevelManager.registerItemLocal(ItemTemplates.HAND_1, false);
@@ -181,10 +182,10 @@ public class AllMobFactory extends MobFactory {
             p.setDefaultBoots(defaultBoots);
 
             // player starts naked (equips bare body parts. overriden by starting eq later)
-            p.equipServer(defaultHead);
-            p.equipServer(defaultVest);
-            p.equipServer(defaultGloves);
-            p.equipServer(defaultBoots);
+            p.equipServer(ctx,defaultHead);
+            p.equipServer(ctx,defaultVest);
+            p.equipServer(ctx,defaultGloves);
+            p.equipServer(ctx,defaultBoots);
 
             var helmetTemplate = ItemTemplates.SECRET_SOCIETY_HOOD_1;
             var vestTemplate = ItemTemplates.SECRET_SOCIETY_VEST_1;
@@ -194,26 +195,26 @@ public class AllMobFactory extends MobFactory {
             helmet.setName(ItemTypeDefinitions.getAsArtifact(helmet.getName()));
             serverLevelManager.broadcastEntityOnNextLevel(helmet);
             p.getEquipment().addItem(helmet);
-            p.equipServer(helmet);
+            p.equipServer(ctx,helmet);
 
             Item vest = serverLevelManager.registerItemLocal(vestTemplate, true);
             vest.setName(ItemTypeDefinitions.getAsArtifact(vest.getName()));
             serverLevelManager.broadcastEntityOnNextLevel(vest);
             p.getEquipment().addItem(vest);
-            p.equipServer(vest);
+            p.equipServer(ctx,vest);
 
             var weapon = (Knife) serverLevelManager.registerItemLocal(weaponTemplate, true);
             weapon.setName(ItemTypeDefinitions.getAsArtifact(weapon.getName()));
             weapon.setDamage(11f);
             serverLevelManager.broadcastEntityOnNextLevel(weapon);
             p.getEquipment().addItem(weapon);
-            p.equipServer(weapon);
+            p.equipServer(ctx,weapon);
 
 
             var regenEffect = serverLevelManager.createAndRegisterStatusEffect(EffectTemplates.DEFAULT_REGENERATION,p);
             p.addEffect(regenEffect);
 
-            p.addAi();
+            p.addAi(ctx);
             return p;
         } else if (spawnType == TRAINING_DUMMY) {
             var p = createTrainingDummy();

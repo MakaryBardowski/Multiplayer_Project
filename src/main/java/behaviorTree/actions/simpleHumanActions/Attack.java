@@ -44,7 +44,7 @@ public class Attack extends NodeAction {
             }
 
             Main.getInstance().enqueue(() -> {
-                mw.attack(human);
+                mw.attackServer(hc.getServerContext(),human);
             });
             lastAttackedTimestamp = hc.getCurrentUpdateTimestamp();
         }

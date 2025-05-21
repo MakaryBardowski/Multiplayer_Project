@@ -5,6 +5,8 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import messages.TwoWayMessage;
 import static messages.lobby.HostJoinedLobbyMessage.updateLobby;
+
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -25,13 +27,12 @@ public class HostChangedNicknameMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState serverGameAppState, HostedConnection hc) {
-        var server = ServerGameAppState.getInstance().getServer();
-        var newHc = server.getConnection(connectionId);
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        var newHc = ctx.getConnectedClient(connectionId);
         
         newHc.setAttribute("nick", nick);
 //        System.out.println("connection"+connectionId+" new name "+newHc.getAttribute("nick"));
-        server.broadcast(this);
+        ctx.notifyAllClients(this);
     }
 
     @Override

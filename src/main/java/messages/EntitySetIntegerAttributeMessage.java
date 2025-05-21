@@ -5,6 +5,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Entity;
 import lombok.Getter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -29,9 +30,9 @@ public class EntitySetIntegerAttributeMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        var entity = server.getLevelManagerMobs().get(entityId);
-        entity.setIntegerAttributeAndNotifyClients(attributeId, attributeValue);
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        var entity = ctx.getEntity(entityId);
+        entity.setIntegerAttributeAndNotifyClients(ctx,attributeId, attributeValue);
     }
 
     @Override

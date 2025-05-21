@@ -25,6 +25,7 @@ import game.entities.DestructibleUtils;
 import game.entities.mobs.HumanMob;
 import game.entities.mobs.playerClasses.PlayerClass;
 import game.map.blocks.VoxelLighting;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectTemplates;
 
@@ -82,8 +83,8 @@ public class PlayerFactory extends MobFactory {
     }
 
     @Override
-    public Player createServerSide(MobSpawnType spawnType, Object... creationData) { // mob spawn type doesnt matter for player
-        var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
+    public Player createServerSide(ServerContext ctx, MobSpawnType spawnType, Object... creationData) { // mob spawn type doesnt matter for player
+        var serverLevelManager = ctx.getLevelManager();
         PlayerClass pc = PlayerClass.getClassByIndex((int) creationData[0]);
         Player p = createPlayer(pc);
         DestructibleUtils.attachDestructibleToNode(p, mobsNode, playerSpawnpoint);

@@ -15,6 +15,7 @@ public class ServerStoryGameManager extends ServerGameManager {
     public void startGame() {
         setupLevelManager();
         levelManager.jumpToLevel(new BaseJumpToLevelData(0,levelManager.getLevelSeeds()[0],levelManager.getLevelTypes()[0]));
+        levelManager.instantiatePlayersAndNotify(serverContext);
     }
 
     @Override

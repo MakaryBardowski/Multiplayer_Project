@@ -8,6 +8,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import game.entities.Entity;
 import game.entities.grenades.ClientThrownGrenadeRotateControl;
 import game.entities.grenades.ServerThrownGrenadeControl;
 import game.entities.grenades.ThrownGrenade;
@@ -19,6 +20,8 @@ import lombok.Getter;
 import lombok.Setter;
 import messages.items.MobItemInteractionMessage;
 import static messages.messageListeners.ServerMessageListener.enqueueExecutionServer;
+
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -67,20 +70,16 @@ public class GrenadeThrownMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        System.out.println("got id "+id);
-        int grenadeId = server.getAndIncreaseNextEntityId();
-                System.out.println("new grenade id "+grenadeId);
-
-        ThrownGrenade thrownGrenade = new ThrownSmokeGrenade(grenadeId, "Thrown Smoke Grenade", new Node());
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        ThrownGrenade thrownGrenade = new ThrownSmokeGrenade(Entity.NOT_DETERMINED_ID, "Thrown Smoke Grenade", new Node());
         
-        Grenade originGrenade = ((Grenade) getEntityByIdServer(id));
+        Grenade originGrenade = ((Grenade) getEntityByIdServer(ctx,id));
         float speed = originGrenade.getThrowSpeed();
         Node gnode = thrownGrenade.getNode();
-        Node root = server.getCurrentGamemode().getLevelManager().getRootNode();
-        var grenadeControl = new ServerThrownGrenadeControl(thrownGrenade, getDirection(), speed);
+        Node root = ctx.getRootNode();
+        var grenadeControl = new ServerThrownGrenadeControl(ctx,thrownGrenade, getDirection(), speed);
 
-        ((HumanMob) server.getLevelManagerMobs().get(throwingMobId)).unequipServer(
+        ((HumanMob) ctx.getEntity(throwingMobId)).unequipServer(ctx,
                 originGrenade
         );
 
@@ -90,19 +89,17 @@ public class GrenadeThrownMessage extends TwoWayMessage {
             gnode.addControl(grenadeControl);
         });
 
-        ServerGameAppState.removeItemFromMobEquipmentServer(throwingMobId, id);
-        removeEntityByIdServer(originGrenade.getId());
-        server.getLevelManagerMobs().put(thrownGrenade.getId(), thrownGrenade);
+        ServerGameAppState.removeItemFromMobEquipmentServer(ctx,throwingMobId, id);
+        removeEntityByIdServer(ctx,originGrenade.getId());
+        ctx.addEntity(thrownGrenade);
 
         MobItemInteractionMessage imsg = new MobItemInteractionMessage(originGrenade.getId(), throwingMobId, MobItemInteractionMessage.ItemInteractionType.DESTROY);
         imsg.setReliable(true);
-        server.getServer().broadcast(imsg);
+        ctx.notifyAllClients(imsg);
 
         GrenadeThrownMessage msg = new GrenadeThrownMessage(throwingMobId, thrownGrenade.getId(), getPos(), getDirection());
         msg.setReliable(true);
-        server.getServer().broadcast(msg);
-                System.out.println("server thrown grenade id "+id);
-
+        ctx.notifyAllClients(msg);
     }
 
     @Override

@@ -3,6 +3,7 @@ package game.entities;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import lombok.Getter;
+import server.ServerContext;
 
 @Getter
 public abstract class AttachedEntity extends Entity {
@@ -17,5 +18,5 @@ public abstract class AttachedEntity extends Entity {
     }
 
     public abstract void setPositionClient(Vector3f newPos);
-    public abstract void setPositionServer(Vector3f newPos);
+    public abstract void setPositionServer(ServerContext ctx, Vector3f newPos);
 }

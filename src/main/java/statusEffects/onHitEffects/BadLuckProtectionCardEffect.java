@@ -4,6 +4,7 @@ import data.DamageReceiveData;
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -18,9 +19,8 @@ public class BadLuckProtectionCardEffect extends OnHitEffect{
     }
 
     @Override
-    public DamageReceiveData applyServer(DamageReceiveData input) {
-        var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
-        var victim = (Destructible) serverLevelManager.getEntitiesById().get(input.getVictimId());
+    public DamageReceiveData applyServer(ServerContext ctx, DamageReceiveData input) {
+        var victim = (Destructible) ctx.getEntity(input.getVictimId());
 
         input.setRawDamage(input.getRawDamage()*DAMAGE_MULTIPLIER);
         return input;

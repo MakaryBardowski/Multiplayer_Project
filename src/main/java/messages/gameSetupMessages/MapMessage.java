@@ -8,6 +8,7 @@ import messages.TwoWayMessage;
 import net.jpountz.lz4.LZ4Compressor;
 import net.jpountz.lz4.LZ4Factory;
 import net.jpountz.lz4.LZ4FastDecompressor;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 import java.io.UnsupportedEncodingException;
@@ -46,7 +47,7 @@ public class MapMessage extends TwoWayMessage {
 
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection sender) {}
+    public void handleServer(ServerContext ctx, HostedConnection sender) {}
 
     @Override
     public void handleClient(ClientGameAppState client) {

@@ -12,6 +12,7 @@ import itemSystem.ItemTemplates.BootsTemplate;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewBootsMessage;
+import server.ServerContext;
 
 public class Boots extends Armor {
 
@@ -110,12 +111,12 @@ public class Boots extends Armor {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setBoots(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getBoots() == this) {
             m.setBoots(m.getBoots());
         }

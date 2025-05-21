@@ -1,5 +1,6 @@
 package itemSystem;
 
+import Utils.TriConsumer;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import events.GameEvent;
@@ -20,6 +21,7 @@ import java.util.function.BiConsumer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 import statusEffects.EffectTemplates;
 import statusEffects.onEnterLevelEffects.CornucopiaEffect;
 
@@ -233,10 +235,9 @@ public class ItemTemplates {
         templates.add(SECRET_SOCIETY_HOOD_1.getTemplateIndex(), SECRET_SOCIETY_HOOD_1);
 
         ARTIFACT_CORNUCOPIA.isServerGameEventListener = true;
-        ARTIFACT_CORNUCOPIA.setServerGameEventHandler((event,entity) -> {
+        ARTIFACT_CORNUCOPIA.setServerGameEventHandler((context,event,entity) -> {
             if(event instanceof NewLevelEnteredEvent && entity instanceof Item item){
-
-                item.getOnEnterLevelEffects().forEach(effect -> effect.applyServer(null));
+                item.getOnEnterLevelEffects().forEach(effect -> effect.applyServer(context,null));
             }
         });
         ARTIFACT_CORNUCOPIA.setServerOnPickupHandler((i,mob) -> {
@@ -286,7 +287,7 @@ public class ItemTemplates {
 
         @Getter
         @Setter
-        protected BiConsumer<GameEvent, Entity> serverGameEventHandler;
+        protected TriConsumer<ServerContext,GameEvent, Entity> serverGameEventHandler;
 
         public ItemTemplate(String name, String description, String fpPath, String iconPath, String dropPath, DropOffsetData dropData, ThirdPersonOffsetData thirdPersonOffsetData, ItemType type, int templateIndex) {
             this.name = name;

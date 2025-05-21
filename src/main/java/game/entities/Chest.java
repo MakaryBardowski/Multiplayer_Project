@@ -19,6 +19,7 @@ import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewChestMessage;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -99,15 +100,15 @@ public class Chest extends StatusEffectContainer {
     }
 
     @Override
-    public void receiveDamageServer(DamageReceiveData damageData) {
+    public void receiveDamageServer(ServerContext ctx, DamageReceiveData damageData) {
         for(var onDamageReceivedEffect : onDamageReceivedEffects){
-            onDamageReceivedEffect.applyServer(damageData);
+            onDamageReceivedEffect.applyServer(ctx,damageData);
         }
 
         setHealth(getHealth()-damageData.getRawDamage());
 
         if (getHealth() <= 0) {
-            destroyServer();
+            destroyServer(ctx);
             onDeathServer();
         }
     }
@@ -162,8 +163,8 @@ public class Chest extends StatusEffectContainer {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
-        WorldGrid grid = ServerGameAppState.getInstance().getGrid();
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
+        WorldGrid grid = ctx.getCollisionGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
@@ -193,19 +194,18 @@ public class Chest extends StatusEffectContainer {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
     }
 
     @Override
-    public void destroyServer() {
-        var server = ServerGameAppState.getInstance();
-        server.getGrid().remove(this);
+    public void destroyServer(ServerContext ctx) {
+        ctx.getCollisionGrid().remove(this);
         if (node.getParent() != null) {
             Main.getInstance().enqueue(() -> {
                 node.removeFromParent();
             });
         }
-        removeEntityByIdServer(id);
+        removeEntityByIdServer(ctx,id);
     }
 
     @Override

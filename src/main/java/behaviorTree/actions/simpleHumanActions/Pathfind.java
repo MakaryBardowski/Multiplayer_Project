@@ -14,13 +14,13 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import game.constants.SharedConstants;
 import pathfinding.AStar;
 import server.ServerGameAppState;
 
 public class Pathfind extends NodeAction{
         private final Random random = new Random();
-    
-        private static final int BLOCK_SIZE = ServerGameAppState.getInstance().getBLOCK_SIZE();
 
         @Override
         public NodeCompletionStatus execute(Context context) {
@@ -35,9 +35,9 @@ public class Pathfind extends NodeAction{
         }
 
         public void pathfindClose(SimpleHumanMobContext context) {
-            var x = random.nextInt(-9 * BLOCK_SIZE, 10 * BLOCK_SIZE);
+            var x = random.nextInt(-9 * SharedConstants.BLOCK_SIZE, 10 * SharedConstants.BLOCK_SIZE);
             var y = 0;
-            var z = random.nextInt(-9 * BLOCK_SIZE, 10 * BLOCK_SIZE);
+            var z = random.nextInt(-9 * SharedConstants.BLOCK_SIZE, 10 * SharedConstants.BLOCK_SIZE);
 
             var targetX = x;
             var targetY = y;
@@ -109,9 +109,9 @@ public class Pathfind extends NodeAction{
             var hitboxSize = 0.5f+0.1f; /*hitbox width + offset to avoid getting stuck in float imprecision. Remember that this assumes
             that the last node lies exactly on cell center (check path smoothing etc..)*/
             cellCenter.addLocal(
-                    random.nextFloat(-(BLOCK_SIZE / 2 - hitboxSize), (BLOCK_SIZE / 2 - hitboxSize)), 
+                    random.nextFloat(-(SharedConstants.BLOCK_SIZE / 2 - hitboxSize), (SharedConstants.BLOCK_SIZE / 2 - hitboxSize)),
                     0, 
-                    random.nextFloat(-(BLOCK_SIZE / 2 - hitboxSize), (BLOCK_SIZE / 2 - hitboxSize))
+                    random.nextFloat(-(SharedConstants.BLOCK_SIZE / 2 - hitboxSize), (SharedConstants.BLOCK_SIZE / 2 - hitboxSize))
             );
             return path;
         }

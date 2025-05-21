@@ -5,6 +5,7 @@ import LevelLoadSystem.entitySpawnData.EntitySpawnData;
 import java.util.List;
 import java.util.Random;
 
+import server.ServerContext;
 import server.ServerGameAppState;
 
 public class EntitySpawner {
@@ -18,13 +19,12 @@ public class EntitySpawner {
     }
 
 
-    public void spawnNewLevelEntities(List<EntitySpawnData> entitySpawnData){
+    public void spawnNewLevelEntities(ServerContext ctx, List<EntitySpawnData> entitySpawnData){
         for(var entitySpawnInfo : entitySpawnData){
-            var server = ServerGameAppState.getInstance();
-            var serverLevelManager = server.getCurrentGamemode().getLevelManager();
+            var serverLevelManager = ctx.getLevelManager();
             entitySpawnInfo.getPosition().multLocal(blockSize);
 
-            var spawnedEntity =entitySpawnInfo.serverSpawn(serverLevelManager);
+            var spawnedEntity =entitySpawnInfo.serverSpawn(ctx,serverLevelManager);
             if(spawnedEntity != null){
                 serverLevelManager.broadcastEntityOnNextLevel(spawnedEntity);
             }

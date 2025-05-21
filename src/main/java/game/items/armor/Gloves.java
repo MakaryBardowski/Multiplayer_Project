@@ -20,6 +20,7 @@ import java.nio.FloatBuffer;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGlovesMessage;
+import server.ServerContext;
 
 public class Gloves extends Armor {
 
@@ -101,12 +102,12 @@ public class Gloves extends Armor {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setGloves(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getGloves() == this) {
             m.setGloves(m.getGloves());
         }

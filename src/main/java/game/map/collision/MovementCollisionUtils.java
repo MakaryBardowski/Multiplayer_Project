@@ -5,6 +5,8 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import game.entities.Collidable;
 import game.entities.mobs.Mob;
+import server.ServerContext;
+
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -14,8 +16,8 @@ public class MovementCollisionUtils {
         return m.doesNotCollideWithEntitiesAtPositionServer(newPos, grid, solidCollidables);
     }
 
-    public static void checkPassableCollisions(Mob m, WorldGrid grid, ArrayList<Collidable> passableCollidables) {
-         m.checkPassableCollisionsServer(grid, passableCollidables);
+    public static void checkPassableCollisions(ServerContext ctx, Mob m, WorldGrid grid, ArrayList<Collidable> passableCollidables) {
+         m.checkPassableCollisionsServer(ctx, grid, passableCollidables);
     }
 
     public static void sortByPassability(Set<Collidable> all, ArrayList<Collidable> solid, ArrayList<Collidable> passable) {

@@ -8,6 +8,7 @@ import data.jumpToLevelData.BaseJumpToLevelData;
 import data.jumpToLevelData.ClientJumpToLevelData;
 import game.map.MapType;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 import java.util.Map;
@@ -40,18 +41,17 @@ public class NextLevelMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        var levelManager = server.getCurrentGamemode().getLevelManager();
-        var currentLevelIndexOnServer = levelManager.getCurrentLevelIndex();
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        var currentLevelIndexOnServer = ctx.getCurrentLevelIndex();
         // ignore if old message arrived (lagged user)
         if(currentLevelIndex != currentLevelIndexOnServer){
             return;
         }
-        nextLevelIndex = levelManager.getCurrentLevelIndex()+1;
-        nextLevelSeed = levelManager.getLevelSeeds()[nextLevelIndex];
+        nextLevelIndex = ctx.getCurrentLevelIndex()+1;
+        nextLevelSeed = ctx.getLevelSeeds()[nextLevelIndex];
 
-        nextMapTypeOrdinal = levelManager.getLevelTypes()[nextLevelIndex].ordinal();
-        levelManager.jumpToLevel(new BaseJumpToLevelData(nextLevelIndex,nextLevelSeed,getMapType()));
+        nextMapTypeOrdinal = ctx.getLevelTypes()[nextLevelIndex].ordinal();
+        ctx.jumpToLevel(new BaseJumpToLevelData(nextLevelIndex,nextLevelSeed,getMapType()));
     }
 
     @Override

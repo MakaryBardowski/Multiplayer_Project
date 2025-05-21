@@ -10,6 +10,7 @@ import game.entities.Collidable;
 import lombok.Getter;
 import lombok.Setter;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -40,7 +41,7 @@ public abstract class ThrownGrenade extends Collidable {
 
     public abstract void explodeClient();
 
-    public abstract void explodeServer();
+    public abstract void explodeServer(ServerContext ctx);
 
     @Override
     public void onCollisionClient(Collidable other) {
@@ -48,7 +49,7 @@ public abstract class ThrownGrenade extends Collidable {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -63,7 +64,7 @@ public abstract class ThrownGrenade extends Collidable {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -83,15 +84,14 @@ public abstract class ThrownGrenade extends Collidable {
     }
 
     @Override
-    public void destroyServer() {
-        var server = ServerGameAppState.getInstance();
+    public void destroyServer(ServerContext ctx) {
         if (node.getParent() != null) {
             Main.getInstance().enqueue(() -> {
 //                server.getGrid().remove(this);
                 node.removeFromParent();
             });
         }
-        removeEntityByIdServer(id);
+        removeEntityByIdServer(ctx,id);
     }
 
     @Override

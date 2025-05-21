@@ -4,6 +4,7 @@ import game.entities.StatusEffectContainer;
 import lombok.Getter;
 import messages.DestructibleHealReceiveMessage;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -30,7 +31,7 @@ public class HealOverTimeEffect extends RepeatedTemporaryEffect {
     }
 
     @Override
-    public Void applyServer(Void input) {
+    public Void applyServer(ServerContext ctx, Void input) {
         ticks++;
 
         if (ticks % (ticksPerProc) == 0) {
@@ -42,7 +43,7 @@ public class HealOverTimeEffect extends RepeatedTemporaryEffect {
 
             DestructibleHealReceiveMessage hpUpd = new DestructibleHealReceiveMessage(target.getId(), healingDone);
             hpUpd.setReliable(true);
-            ServerGameAppState.getInstance().getServer().broadcast(hpUpd);
+            ctx.notifyAllClients(hpUpd);
         }
         return null;
     }

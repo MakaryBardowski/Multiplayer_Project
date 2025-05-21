@@ -1,11 +1,10 @@
 package server;
 
-import Utils.Ansi;
 import com.jme3.app.Application;
 import com.jme3.network.serializing.Serializer;
+import game.constants.ServerConstants;
 import game.entities.mobs.Mob;
 import game.map.MapDataModel.Map;
-import lombok.Setter;
 import messages.messageListeners.ServerMessageListener;
 import messages.MobPosRotUpdateMessage;
 
@@ -13,7 +12,6 @@ import com.jme3.app.state.AbstractAppState;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 
-import com.jme3.network.HostedConnection;
 import com.jme3.network.Network;
 import com.jme3.network.Server;
 import networkingUtils.NetworkingInitialization;
@@ -25,17 +23,20 @@ import game.entities.grenades.ThrownGrenade;
 import game.entities.mobs.AiSteerable;
 import game.items.Item;
 import game.map.collision.WorldGrid;
+
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import lombok.Getter;
 import messages.GrenadePosUpdateMessage;
 import messages.lobby.GameStartedMessage;
 
 public class ServerGameAppState extends AbstractAppState {
+    private ServerContext context;
+
     private static final String SERVER_CLOSE_MESSAGE = "Host player has quit the game.";
 
     public static final byte MAX_PLAYERS = 4;
@@ -45,15 +46,8 @@ public class ServerGameAppState extends AbstractAppState {
     private Server server;
 
     @Getter
-    private final HashMap<Integer, HostedConnection> hostsByPlayerId = new HashMap<>(MAX_PLAYERS);
-
-    @Getter
-    @Setter
-    private static ServerGameAppState instance;
-
-    @Getter
     private final int TICKS_PER_SECOND = 64;
-    private final float TIME_PER_TICK = 1f/TICKS_PER_SECOND;
+    private final float TIME_PER_TICK = 1f / ServerConstants.TICKS_PER_SECOND;
     private float tickTimer;
 
     @Getter
@@ -77,15 +71,17 @@ public class ServerGameAppState extends AbstractAppState {
     private ServerGameManager currentGamemode;
 
     public ServerGameAppState(AssetManager assetManager, RenderManager renderManager) {
-
-        instance = this;
     }
 
     @Override
     public void initialize(AppStateManager stateManager, Application app) {
-        super.initialize(stateManager,app);
-        startServer();
-        currentGamemode = new ServerStoryGameManager(new ServerContext(server,null));
+        super.initialize(stateManager, app);
+        createServer();
+        context = new ServerContext(server, null);
+        currentGamemode = new ServerStoryGameManager(context);
+        server.addConnectionListener(new ServerConnectionListener());
+        server.addMessageListener(new ServerMessageListener(context));
+        server.start();
     }
 
     @Override // the whole update method should be on another thread
@@ -103,7 +99,7 @@ public class ServerGameAppState extends AbstractAppState {
                 if (serverTick) {
                     if (i instanceof Destructible d) {
                         if (d instanceof StatusEffectContainer c) {
-                            c.updateTemporaryEffectsServer();
+                            c.updateTemporaryEffectsServer(context);
                         }
                         if (d instanceof Mob x) {
                             if (x.getRotationChangedOnServer().get() == true || x.getPositionChangedOnServer().get() == true) {
@@ -131,56 +127,32 @@ public class ServerGameAppState extends AbstractAppState {
     public void startGame() {
         currentGamemode.startGame();
 
-        // notify players about game starting
-        server.getConnections().forEach(hc -> {
-            var newPlayer = currentGamemode.levelManager.createAndRegisterPlayer(hc);
-            hostsByPlayerId.put(newPlayer.getId(), hc);
-            System.out.println(Ansi.withAnsiColor("[SERVER] added player " + newPlayer.getId(),Ansi.BRIGHT_BLUE));
-        });
-
-        currentGamemode.levelManager.notifyPlayersAboutNonMobEntities();
-
-        hostsByPlayerId.forEach( (id,hc) -> {
-            currentGamemode.levelManager.notifyPlayerAboutInitialGameState(id,hc);
-        });
-
         var gameStartedMsg = new GameStartedMessage();
         server.broadcast(gameStartedMsg);
         serverPaused = false;
     }
 
 
-
-    private void startServer() {
+    private void createServer() {
         try {
-
             Serializer.initialize();
             NetworkingInitialization.initializeSerializables();
 
             server = Network.createServer(NetworkingInitialization.PORT);
-            server.addConnectionListener(new ServerConnectionListener());
-            server.addMessageListener(new ServerMessageListener(this));
-            server.start();
+
         } catch (IOException ex) {
             Logger.getLogger(ServerGameAppState.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    public int getAndIncreaseNextEntityId() {
-        return currentGamemode.getLevelManager().getAndIncreaseNextEntityId();
+    public static void removeEntityByIdServer(ServerContext context, int id) {
+
+        context.removeEntity(id);
     }
 
-    public int getNextEntityId() {
-        return currentGamemode.getLevelManager().getNextEntityId();
-    }
-
-    public static void removeEntityByIdServer(int id) {
-        instance.getLevelManagerMobs().remove(id);
-    }
-
-    public static void removeItemFromMobEquipmentServer(int mobId, int itemId) {
-        var mob = (Mob) instance.getLevelManagerMobs().get(mobId);
-        var item = (Item) instance.getLevelManagerMobs().get(itemId);
+    public static void removeItemFromMobEquipmentServer(ServerContext context, int mobId, int itemId) {
+        var mob = (Mob) context.getEntity(mobId);
+        var item = (Item) context.getEntity(itemId);
         var mobEquipment = mob.getEquipment();
         mobEquipment.removeItem(item);
     }
@@ -190,11 +162,11 @@ public class ServerGameAppState extends AbstractAppState {
     }
 
     public WorldGrid getGrid() {
-        return currentGamemode.getLevelManager().getGrid();
+        return currentGamemode.getLevelManager().getCollisionGrid();
     }
 
     public Map getMap() {
-        return currentGamemode.getLevelManager().getMap();
+        return currentGamemode.getLevelManager().getCurrentMap();
     }
 
     public boolean containsEntityWithId(int id) {
@@ -205,13 +177,11 @@ public class ServerGameAppState extends AbstractAppState {
     public void stateDetached(AppStateManager stateManager) {
         super.stateDetached(stateManager);
 
-        var server = ServerGameAppState.getInstance().getServer();
         server.getConnections().forEach(hc -> hc.close(SERVER_CLOSE_MESSAGE));
 
 //        ServerSerializerRegistrationsService ssr = server.getServices().getService( ServerSerializerRegistrationsService.class );
 //        server.getServices().removeService(ssr);
         server.close();
         currentGamemode.getLevelManager().cleanup();
-        ServerGameAppState.setInstance(null);
     }
 }

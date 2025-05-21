@@ -34,6 +34,7 @@ import lombok.Getter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -76,7 +77,7 @@ public class MudBeetle extends Mob {
 //        node.attachChild(radiusVisualizer);
     }
 
-    public void addAi() {
+    public void addAi(ServerContext ctx) {
         var attack = new LeafNode(new Attack());
 
         List<BehaviorNode> children = Arrays.asList(
@@ -112,7 +113,7 @@ public class MudBeetle extends Mob {
         );
 
         var rootNode = new ParallelNode(children);
-        var context = new MudBeetleContext(this);
+        var context = new MudBeetleContext(ctx,this);
         behaviorTree = new BehaviorTree(rootNode, context);
 
     }
@@ -137,12 +138,12 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void dealDamageServer(DamageReceiveData damageReceiveData, Destructible target) {
+    public void dealDamageServer(ServerContext ctx, DamageReceiveData damageReceiveData, Destructible target) {
         for(var onHitEffect : onDealDamageEffects){
-            onHitEffect.applyServer(damageReceiveData);
+            onHitEffect.applyServer(ctx,damageReceiveData);
         }
 
-        target.receiveDamageServer(damageReceiveData);
+        target.receiveDamageServer(ctx,damageReceiveData);
     }
 
     @Override
@@ -165,7 +166,7 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
     }
 
     @Override
@@ -184,8 +185,8 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
-        WorldGrid grid = ServerGameAppState.getInstance().getGrid();
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
+        WorldGrid grid = ctx.getCollisionGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
@@ -226,15 +227,15 @@ public class MudBeetle extends Mob {
     }
     
     @Override
-    public void receiveDamageServer(DamageReceiveData damageData) {
+    public void receiveDamageServer(ServerContext ctx, DamageReceiveData damageData) {
         for(var onDamageReceivedEffect : onDamageReceivedEffects){
-            onDamageReceivedEffect.applyServer(damageData);
+            onDamageReceivedEffect.applyServer(ctx, damageData);
         }
 
         setHealth(getHealth()-calculateDamage(damageData.getRawDamage()));
 
         if (getHealth() <= 0) {
-            destroyServer();
+            destroyServer(ctx);
             onDeathServer();
         }
     }
@@ -283,12 +284,12 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void equipServer(Item e) {
+    public void equipServer(ServerContext ctx, Item e) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
-    public void unequipServer(Item e) {
+    public void unequipServer(ServerContext ctx, Item e) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -298,16 +299,15 @@ public class MudBeetle extends Mob {
     }
 
     @Override
-    public void moveServer(Vector3f moveVec) {
-        super.moveServer(moveVec);
+    public void moveServer(ServerContext ctx, Vector3f moveVec) {
+        super.moveServer(ctx, moveVec);
         positionChangedOnServer.set(true);
     }
 
     @Override
-    public void destroyServer() {
-        removeEntityByIdServer(id);
-        var server = ServerGameAppState.getInstance();
-        server.getGrid().remove(this);
+    public void destroyServer(ServerContext ctx) {
+        removeEntityByIdServer(ctx,id);
+        ctx.getCollisionGrid().remove(this);
         if (node.getParent() != null) {
             Main.getInstance().enqueue(() -> {
                 node.removeFromParent();

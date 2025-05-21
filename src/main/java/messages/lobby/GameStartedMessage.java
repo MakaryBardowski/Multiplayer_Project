@@ -6,6 +6,7 @@ import client.MainMenuController;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -20,7 +21,7 @@ public class GameStartedMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState serverGameAppState, HostedConnection hc) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
     }
 
     @Override

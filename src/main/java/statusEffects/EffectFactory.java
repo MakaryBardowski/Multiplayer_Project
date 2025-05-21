@@ -1,5 +1,6 @@
 package statusEffects;
 
+import game.constants.ServerConstants;
 import game.entities.StatusEffectContainer;
 import server.ServerGameAppState;
 import statusEffects.onDamagedEffects.HardnessCardEffect;
@@ -14,7 +15,7 @@ public class EffectFactory {
     public static StatusEffect createEffect(EffectTemplates.EffectTemplate effectTemplate, int newEffectId, StatusEffectContainer target){
         if(effectTemplate == EffectTemplates.DEFAULT_REGENERATION){
             var procsEverySeconds = 15;
-            return createRegenerationEffect(newEffectId,"Default regeneration",target,1,-1,procsEverySeconds* ServerGameAppState.getInstance().getTICKS_PER_SECOND());
+            return createRegenerationEffect(newEffectId,"Default regeneration",target,1,-1,procsEverySeconds* ServerConstants.TICKS_PER_SECOND);
         } else if (effectTemplate == EffectTemplates.DEADEYE_CARD_CRIT){
             return createDeadeyeCritChanceEffect(newEffectId,"Deadeye card effect",target);
         } else if (effectTemplate == EffectTemplates.CUTDOWN_CARD_EXECUTE){

@@ -10,6 +10,7 @@ import game.effects.VfxType;
 import game.entities.mobs.Mob;
 import game.items.weapons.Rifle;
 import lombok.Getter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -50,9 +51,9 @@ public class HitscanTrailMessage extends EntityUpdateMessage {
     public VfxType getVfxType() { return VfxType.values()[vfxTypeOrdinal];}
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
 //            HostedConnection hc = ServerMain.getInstance().getServer().getConnection(clientId);
-            ServerGameAppState.getInstance().getServer().broadcast(Filters.notIn(hc), this);
+            ctx.notifySelectClients(this,Filters.notIn(hc));
     }
 
     @Override

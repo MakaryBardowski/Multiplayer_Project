@@ -10,6 +10,7 @@ import game.entities.mobs.Mob;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -37,14 +38,14 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        Entity victim = getEntityByIdServer(id);
-        Entity attacker = getEntityByIdServer(attackerId);
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        Entity victim = getEntityByIdServer(ctx,id);
+        Entity attacker = getEntityByIdServer(ctx,attackerId);
         if (victim != null && attacker != null) { // if the mob doesnt exist, it means the
             // info was sent from a lagged user - dont forward it to others
             Mob attackerMob = ((Mob) attacker);
             Destructible victimMob = ((Destructible) victim);
-            applyDestructibleDamageAndNotifyClients(victimMob,attackerMob, ServerGameAppState.getInstance());
+            applyDestructibleDamageAndNotifyClients(victimMob,attackerMob, ctx);
 
         }
     }
@@ -60,15 +61,15 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
         );
     }
 
-    public void applyDestructibleDamageAndNotifyClients(Destructible target, Mob attacker, ServerGameAppState serverApp) {
+    public void applyDestructibleDamageAndNotifyClients(Destructible target, Mob attacker,ServerContext ctx) {
             enqueueExecution(()->{
                 var damageReceiveData = getDamageReceiveData();
-                attacker.dealDamageServer(damageReceiveData,target); // can be modified inside
+                attacker.dealDamageServer(ctx,damageReceiveData,target); // can be modified inside
 
                 this.setDamage(damageReceiveData.getRawDamage());
 
                 this.setReliable(true);
-                serverApp.getServer().broadcast(this);
+                ctx.notifyAllClients(this);
             });
     }
 }

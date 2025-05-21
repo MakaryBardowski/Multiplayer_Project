@@ -5,6 +5,7 @@ import data.DamageReceiveData;
 import game.entities.mobs.Mob;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 
 @Getter
 @Setter
@@ -29,7 +30,7 @@ public abstract class Destructible extends Collidable {
     public void onDeathClient() {};
 
     public abstract void receiveDamageClient(DamageReceiveData damageData);
-    public abstract void receiveDamageServer(DamageReceiveData damageData);
+    public abstract void receiveDamageServer(ServerContext ctx, DamageReceiveData damageData);
     
     public abstract void notifyServerAboutReceivingDamage(DamageReceiveData damageReceiveData);
 

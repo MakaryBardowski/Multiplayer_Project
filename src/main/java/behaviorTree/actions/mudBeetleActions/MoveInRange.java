@@ -46,7 +46,7 @@ public class MoveInRange extends NodeAction {
         moveVec.multLocal(moveDistance);
 
         Main.getInstance().enqueue(() -> {
-            human.moveServer(moveVec);
+            human.moveServer(hc.getServerContext(),moveVec);
         });
 
         if (human.getNode().getWorldTranslation().distance(target.getNode().getWorldTranslation()) <= TEST_WEAPON_RANGE) {

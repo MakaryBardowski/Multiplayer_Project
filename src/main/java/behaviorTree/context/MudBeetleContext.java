@@ -13,6 +13,7 @@ import java.util.concurrent.Future;
 import game.entities.mobs.MudBeetle;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 public class MudBeetleContext extends Context {
@@ -23,6 +24,9 @@ public class MudBeetleContext extends Context {
     public static int TARGET_DESTRUCTIBLE = 2;
     public static int CURRENT_PATH = 3;
     public static int LAST_KNOWN_TARGET_POSITION = 4;
+
+    @Getter
+    private ServerContext serverContext;
 
     private Future pathfindingFuture;
 
@@ -57,12 +61,12 @@ public class MudBeetleContext extends Context {
     //    private long lastLoweredAggroTimestamp = 0;
 //    private final float lowerAggroEveryMillis = 1000;
 //    private final float aggroPointsFallofPerSecond = 1;
-    public MudBeetleContext(MudBeetle mob) {
+    public MudBeetleContext(ServerContext serverContext, MudBeetle mob) {
         blackboard.put(STEERED_MUD_BEETLE, mob);
         blackboard.put(INTERRUPT_WALKING, false);
         blackboard.put(TARGET_DESTRUCTIBLE, null);
         blackboard.put(CURRENT_PATH, null);
-
+        this.serverContext = serverContext;
     }
 
     // makes the mob forget what it was doing.
@@ -174,7 +178,7 @@ public class MudBeetleContext extends Context {
     }
 
     @Override
-    public void receiveEventNotification(GameEvent gameEvent) {
+    public void receiveEventNotificationServer(ServerContext ctx,GameEvent gameEvent) {
         if (gameEvent instanceof DamageReceivedEvent dre) {
             handleDamageReceivedEvent(dre);
         }
@@ -188,7 +192,7 @@ public class MudBeetleContext extends Context {
     }
 
     public void handleDamageReceivedEvent(DamageReceivedEvent dre) {
-        var attacker = ServerGameAppState.getInstance().getLevelManagerMobs().get(dre.getDamageData().getAttackerId());
+        var attacker = serverContext.getEntity(dre.getDamageData().getAttackerId());
         if (!(attacker instanceof Destructible destructibleTarget)) {
             return;
         }

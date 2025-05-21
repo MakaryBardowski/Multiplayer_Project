@@ -9,6 +9,7 @@ import com.jme3.network.serializing.Serializable;
 import de.lessvoid.nifty.controls.Label;
 import lombok.Setter;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -31,14 +32,13 @@ public class HostJoinedLobbyMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState serverGameAppState, HostedConnection senderHc) {
-        var server = ServerGameAppState.getInstance().getServer();
-        var newHc = server.getConnection(connectionId);
-        if (server.getConnections().size() >= 5) {
+    public void handleServer(ServerContext ctx, HostedConnection senderHc) {
+        var newHc = ctx.getConnectedClient(connectionId);
+        if (ctx.getConnectedClients().size() >= 5) {
             newHc.close("Lobby is full.");
         }
 
-        if (server.getConnections().size() == 1) {
+        if (ctx.getConnectedClients().size() == 1) {
             newHc.setAttribute("isHost", true);
             setHost(true);
         } else {
@@ -46,15 +46,15 @@ public class HostJoinedLobbyMessage extends TwoWayMessage {
         }
         newHc.setAttribute("nick", nick);
 
-        server.broadcast(Filters.notEqualTo(newHc), this);
+        ctx.notifySelectClients(this,Filters.notEqualTo(newHc));
 
-        server.getConnections().forEach(hc -> {
+        ctx.getConnectedClients().forEach(hc -> {
             String playerNick = (String) hc.getAttribute("nick");
 //            System.out.println("sending "+connectionId+" nick => "+playerNick);
             var msg = new HostJoinedLobbyMessage(hc.getId(), playerNick);
             boolean isHost = (boolean) hc.getAttribute("isHost");
             msg.setHost(isHost);
-            server.broadcast(Filters.in(newHc), msg);
+            ctx.notifySelectClients(msg, Filters.in(newHc));
         });
     }
 

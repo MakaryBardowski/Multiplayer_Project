@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Random;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 import settings.GlobalSettings;
 
 public abstract class Mob extends StatusEffectContainer implements MobInterface, Animated {
@@ -74,10 +75,10 @@ public abstract class Mob extends StatusEffectContainer implements MobInterface,
         return true;
     }
 
-    public void checkPassableCollisionsServer(WorldGrid grid, ArrayList<Collidable> passableCollidables) {
+    public void checkPassableCollisionsServer(ServerContext ctx, WorldGrid grid, ArrayList<Collidable> passableCollidables) {
         for (Collidable m : passableCollidables) {
             if (this != m && collisionShape.wouldCollideAtPosition(m.getCollisionShape(), this.getNode().getWorldTranslation())) {
-                m.onCollisionServer(this);
+                m.onCollisionServer(ctx,this);
             }
         }
     }
@@ -146,5 +147,5 @@ public abstract class Mob extends StatusEffectContainer implements MobInterface,
     public void playAnimation(Animation anim) {}
 
     public abstract void dealDamageClient(float damage, Destructible target);
-    public abstract void dealDamageServer(DamageReceiveData damageReceiveData, Destructible target);
+    public abstract void dealDamageServer(ServerContext ctx, DamageReceiveData damageReceiveData, Destructible target);
 }

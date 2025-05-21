@@ -78,7 +78,6 @@ public class LobbyTeamViewAppState extends BaseAppState {
 
         var startCamLoc = getApplication().getCamera().getLocation().clone().setY(6).setZ(6.1f);
         getApplication().getCamera().setLocation(startCamLoc);
-        System.out.println(getApplication().getCamera().getRotation());
         changeClass(0);
     }
 
@@ -192,7 +191,6 @@ public class LobbyTeamViewAppState extends BaseAppState {
         player.rotate(0, FastMath.DEG_TO_RAD * 30, 0);
         var classChangedMsg = new HostChangedPlayerClassMessage(client.getClient().getId(), classIndex);
         client.getClient().send(classChangedMsg);
-
     }
 
     public static Node loadPlayerDummy(HelmetTemplate helmetTemplate, ItemTemplate vestTemplate, ItemTemplate glovesTemplate, ItemTemplate bootsTemplate) {

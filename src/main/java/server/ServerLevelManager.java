@@ -6,15 +6,15 @@ import cards.CardChoiceSession;
 import client.Main;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
-import com.jme3.network.AbstractMessage;
 import com.jme3.network.Filter;
 import com.jme3.network.Filters;
 import com.jme3.network.HostedConnection;
-import com.jme3.network.Server;
 import com.jme3.renderer.RenderManager;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import data.jumpToLevelData.BaseJumpToLevelData;
+import events.ServerEventPublisher;
+import events.ServerEventSubscriber;
 import events.GameEvent;
 import events.NewLevelEnteredEvent;
 import game.entities.*;
@@ -46,9 +46,7 @@ import game.map.collision.WorldGrid;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
-import lombok.Setter;
 import messages.PlayerJoinedMessage;
 import messages.SetPlayerMessage;
 import messages.TwoWayMessage;
@@ -64,39 +62,24 @@ import pathfinding.AStar;
 import statusEffects.EffectFactory;
 import statusEffects.EffectTemplates;
 import statusEffects.StatusEffect;
-import subscriber.EventSubscriber;
 
 import static server.ServerGameAppState.MAX_PLAYERS;
 
-public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
-    private final ArrayList<EventSubscriber> subscribers = new ArrayList<>();
+public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> implements ServerEventPublisher {
+    private final ArrayList<ServerEventSubscriber> subscribers = new ArrayList<>();
 
     private final ServerContext serverContext;
 
+    @Getter
+    private final HashMap<Integer, HostedConnection> hostsByPlayerId = new HashMap<>(MAX_PLAYERS);
 
     private final List<Player> players = new ArrayList<>(MAX_PLAYERS);
-
-    @Getter
-    private Map map;
-
-    @Getter
-    @Setter
-    protected long[] levelSeeds;
-
-    @Getter
-    @Setter
-    protected MapType[] levelTypes;
 
     private static final String LEVEL_INDEX_OUT_OF_BOUNDS_MESSAGE = "Level index out of bounds. Provided: ";
 
     private final Random RANDOM = new Random();
     private final AssetManager assetManager;
     private final RenderManager renderManager;
-
-    @Getter
-    private final Node rootNode;
-
-    private int currentMaxId = 0;
 
     @Getter
     private final int BLOCK_SIZE = 3;
@@ -110,20 +93,17 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     @Getter
     private final int MAP_SIZE_Y = 20;
 
-    @Getter
-    private WorldGrid grid;
-
     private final Vector<Entity> entitiesBroadcastedAtNextLevel = new Vector<>();
 
     @Getter
     private final List<CardChoiceSession> cardChoiceSessions = new ArrayList<>(10);
 
     public ServerLevelManager(int levelCount, ServerContext serverContext) {
+        super(new Node("server rootNode"));
         this.serverContext = serverContext;
         serverContext.setLevelManager(this);
         this.assetManager = Main.getInstance().getAssetManager();
         this.renderManager = Main.getInstance().getRenderManager();
-        this.rootNode = new Node("server rootNode");
         this.rootNode.setCullHint(Spatial.CullHint.Always);
         Main.getInstance().getRootNode().attachChild(this.rootNode);
         levelSeeds = new long[levelCount];
@@ -156,13 +136,27 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
 
     }
 
+    public void instantiatePlayersAndNotify(ServerContext ctx){
+        ctx.getConnectedClients().forEach(hc -> {
+            var newPlayer = createAndRegisterPlayer(hc);
+            hostsByPlayerId.put(newPlayer.getId(), hc);
+            System.out.println(Ansi.withAnsiColor("[SERVER] added player " + newPlayer.getId(),Ansi.BRIGHT_BLUE));
+        });
+
+        notifyPlayersAboutNonMobEntities();
+
+        hostsByPlayerId.forEach( (id,hc) -> {
+            notifyPlayerAboutInitialGameState(id,hc);
+        });
+    }
+
     public void movePlayersToSpawnpoints(java.util.Map<Integer,Vector3f> playerSpawnpoints){
             for(var entry : playerSpawnpoints.entrySet()){
                 var player = (Player) entitiesById.get(entry.getKey());
 
-                grid.remove(player);
+                collisionGrid.remove(player);
                 player.getNode().setLocalTranslation(entry.getValue());
-                grid.insert(player);
+                collisionGrid.insert(player);
             }
     }
 
@@ -178,7 +172,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     }
 
     private void initializeCollisionGrid() {
-        grid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+        collisionGrid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
     }
 
     private boolean levelIndexOutOfBounds(int levelIndex) {
@@ -195,8 +189,6 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         currentLevelIndex = newLevelIndex;
 
         if(newLevelIndex == 3 || newLevelIndex == 5){
-            var hostsByPlayerId = ServerGameAppState.getInstance().getHostsByPlayerId();
-
             var cardSession = new CardChoiceSession(cardChoiceSessions.size());
             cardChoiceSessions.add(cardSession);
 
@@ -242,22 +234,22 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
             try {
                 var levelGenerator = new ServerLevelGenerator(newLevelSeed,newLevelType,newLevelIndex);
                 var levelGenerationResult = levelGenerator.generateLevel(MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
-                this.map = levelGenerationResult.getLogicMap();
+                this.currentMap = levelGenerationResult.getLogicMap();
 
                 if(newLevelType.equals(MapType.FILE)) {
-                    notifyAboutMap(map);
+                    notifyAboutMap(currentMap);
                 }
                 var playerSpawnpoints = levelGenerationResult.getPlayerSpawnpoints();
                 var spawnpointsByPlayerId = assignSpawnpointsToPlayerIds(playerSpawnpoints);
 
                 movePlayersToSpawnpoints(spawnpointsByPlayerId);
 
-                AStar.setPathfindingMap(map,MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
+                AStar.setPathfindingMap(currentMap,MAP_SIZE_XZ,MAP_SIZE_Y,MAP_SIZE_XZ);
                 EntitySpawner mg = new EntitySpawner(newLevelSeed, BLOCK_SIZE);
-                mg.spawnNewLevelEntities(levelGenerationResult.getEntitySpawnData());
+                mg.spawnNewLevelEntities(serverContext,levelGenerationResult.getEntitySpawnData());
                 notifyPlayersAboutNewLevelEntities();
                 serverContext.notifyAllClients(new NextLevelMessage(currentLevelIndex,newLevelSeed,newLevelType,spawnpointsByPlayerId));
-                notifyEventSubscribers(new NewLevelEnteredEvent(currentLevelIndex));
+                notifyEventSubscribersServer(serverContext,new NewLevelEnteredEvent(currentLevelIndex));
             }catch (IOException exception){
                 System.err.println(Ansi.withAnsiColor("Server could not load level of type "+newLevelType +" with seed "+newLevelSeed+". Reason: "+exception.getMessage(),Ansi.BRIGHT_YELLOW));
             }
@@ -294,27 +286,27 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
             template = DecorationTemplates.MINE;
         }
 
-        DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(currentMaxId++, rootNode, pos, template, assetManager);
+        DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(nextEntityId++, rootNode, pos, template, assetManager);
         registerEntityLocal(d);
         insertIntoCollisionGrid(d);
     }
     
     public DestructibleDecoration createAndRegisterDestructibleDecoration(DecorationTemplates.DecorationTemplate template, Vector3f pos) {
-        DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(currentMaxId++, rootNode,pos, template, assetManager);
+        DestructibleDecoration d = DecorationFactory.createDestructibleDecoration(nextEntityId++, rootNode,pos, template, assetManager);
         registerEntityLocal(d);
         insertIntoCollisionGrid(d);
         return d;
     }
 
     public IndestructibleDecoration createAndRegisterIndestructibleDecoration(DecorationTemplates.DecorationTemplate template, Vector3f pos) {
-        IndestructibleDecoration d = DecorationFactory.createIndestructibleDecoration(currentMaxId++, rootNode,pos, template, assetManager);
+        IndestructibleDecoration d = DecorationFactory.createIndestructibleDecoration(nextEntityId++, rootNode,pos, template, assetManager);
         registerEntityLocal(d);
         insertIntoCollisionGrid(d);
         return d;
     }
 
     public Mob createAndRegisterMob(MobSpawnType spawnType) {
-        Mob mob = new AllMobFactory(currentMaxId++, assetManager, rootNode).createServerSide(spawnType);
+        Mob mob = new AllMobFactory(nextEntityId++, assetManager, rootNode).createServerSide(serverContext,spawnType);
         insertIntoCollisionGrid(mob);
         return registerEntityLocal(mob);
     }
@@ -326,7 +318,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
 
     public Player createAndRegisterPlayer(HostedConnection hc) {
         int playerClassIndex = (int) hc.getAttribute("class");
-        Player player = new PlayerFactory(currentMaxId++, assetManager, rootNode, renderManager).createServerSide(null, playerClassIndex);
+        Player player = new PlayerFactory(nextEntityId++, assetManager, rootNode, renderManager).createServerSide(serverContext,null, playerClassIndex);
 
         player.setName(hc.getAttribute("nick"));
 
@@ -341,10 +333,10 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         player.setDefaultBoots(defaultBoots);
 
         // player starts naked (equips bare body parts. overriden by starting eq later)
-        player.equipServer(defaultHead);
-        player.equipServer(defaultVest);
-        player.equipServer(defaultGloves);
-        player.equipServer(defaultBoots);
+        player.equipServer(serverContext,defaultHead);
+        player.equipServer(serverContext,defaultVest);
+        player.equipServer(serverContext,defaultGloves);
+        player.equipServer(serverContext,defaultBoots);
 
         List<ItemTemplates.ItemTemplate> startingEquipmentTemplates = player.getPlayerClass().getStartingEquipmentTemplates();
 
@@ -354,7 +346,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
             player.getEquipment().addItem(item);
 
             if (item instanceof Armor) {
-                player.equipServer(item);
+                player.equipServer(serverContext,item);
             }
         }
 
@@ -365,7 +357,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     }
 
     public Chest createAndRegisterRandomChest(Vector3f offset) {
-        Chest chest = Chest.createRandomChestServer(currentMaxId++, rootNode, offset, assetManager);
+        Chest chest = Chest.createRandomChestServer(nextEntityId++, rootNode, offset, assetManager);
         Random r = new Random();
         int randomValue = r.nextInt(16);
         if (randomValue < 2) {
@@ -479,7 +471,6 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     }
 
     public void notifyPlayersAboutNewLevelEntities() {
-        var hostsByPlayerId = ServerGameAppState.getInstance().getHostsByPlayerId();
 
         List<Item> itemsInGame = entitiesBroadcastedAtNextLevel.stream()
                 .filter(entry -> entry instanceof Item)
@@ -651,7 +642,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         );
         var template = DecorationTemplates.EXIT_CAR;
         System.out.println("posCAR " + pos);
-        var id = DecorationFactory.createIndestructibleDecoration(currentMaxId++, rootNode, pos, template, assetManager);
+        var id = DecorationFactory.createIndestructibleDecoration(nextEntityId++, rootNode, pos, template, assetManager);
         insertIntoCollisionGrid(id);
         registerEntityLocal(id);
         var idm = new NewIndestructibleDecorationMessage(id);
@@ -659,15 +650,15 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     }
 
     private boolean canNotPlaceCar(int[] exitPositionOnMapIntArray) {
-        return map.isPositionNotEmpty(exitPositionOnMapIntArray[0], exitPositionOnMapIntArray[1], exitPositionOnMapIntArray[2]);
+        return currentMap.isPositionNotEmpty(exitPositionOnMapIntArray[0], exitPositionOnMapIntArray[1], exitPositionOnMapIntArray[2]);
     }
 
     public int getAndIncreaseNextEntityId() {
-        return currentMaxId++;
+        return nextEntityId++;
     }
 
     public int getNextEntityId() {
-        return currentMaxId;
+        return nextEntityId;
     }
 
     private void clearEntities(ServerContext context) {
@@ -703,7 +694,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
     }
 
     public void insertIntoCollisionGrid(Collidable c) {
-        grid.insert(c);
+        collisionGrid.insert(c);
     }
 
     public Item registerUndroppedItemAndNotifyClients(ItemTemplates.ItemTemplate template, boolean droppable, Filter<HostedConnection> notificationFilter) {
@@ -755,17 +746,20 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> {
         entitiesBroadcastedAtNextLevel.clear();
     }
 
-    public final void addEventSubscriber(EventSubscriber eventSubscriber){
+    @Override
+    public final void addEventSubscriber(ServerEventSubscriber eventSubscriber){
         subscribers.add(eventSubscriber);
     }
 
-    public void removeEventSubscriber(EventSubscriber eventSubscriber){
+    @Override
+    public void removeEventSubscriber(ServerEventSubscriber eventSubscriber){
         subscribers.remove(eventSubscriber);
     }
 
-    public void notifyEventSubscribers(GameEvent gameEvent){
+    @Override
+    public void notifyEventSubscribersServer(ServerContext ctx,GameEvent gameEvent){
         for(var subscriber : subscribers){
-            subscriber.receiveEventNotification(gameEvent);
+            subscriber.receiveEventNotificationServer(ctx,gameEvent);
         }
     }
 

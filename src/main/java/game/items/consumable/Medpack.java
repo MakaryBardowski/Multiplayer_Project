@@ -12,6 +12,7 @@ import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
 import com.jme3.network.Filters;
 import messages.DestructibleHealReceiveMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -43,12 +44,12 @@ public class Medpack extends ThrowableWeapon {
     }
 
     @Override
-    public void attack(Mob m) {
+    public void attackServer(ServerContext ctx, Mob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public void playerAttack(Player p) {
+    public void playerAttackServer(Player p) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -137,28 +138,24 @@ public class Medpack extends ThrowableWeapon {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
-        var sm = ServerGameAppState.getInstance();
-        var hc = sm.getHostsByPlayerId().get(m.getId());
-        Filters.notEqualTo(hc);
-
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         var heal = Math.min(healing, m.getMaxHealth() - m.getHealth());
         m.setHealth(m.getHealth() + heal);
 
         var msg = new DestructibleHealReceiveMessage(m.getId(), heal);
         msg.setReliable(true);
-        sm.getServer().broadcast(msg);
+        ctx.notifyAllClients(msg);
 
-        ServerGameAppState.removeItemFromMobEquipmentServer(m.getId(), id);
-        removeEntityByIdServer(id);
+        ServerGameAppState.removeItemFromMobEquipmentServer(ctx,m.getId(), id);
+        removeEntityByIdServer(ctx,id);
 
         MobItemInteractionMessage imsg = new MobItemInteractionMessage(id, m.getId(), MobItemInteractionMessage.ItemInteractionType.DESTROY);
         imsg.setReliable(true);
-        sm.getServer().broadcast(imsg);
+        ctx.notifyAllClients(imsg);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
 //        m.setEquippedRightHand(null);
     }
 

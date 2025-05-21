@@ -12,6 +12,7 @@ import itemSystem.ItemTemplates.VestTemplate;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewVestMessage;
+import server.ServerContext;
 
 public class Vest extends Armor {
 
@@ -86,12 +87,12 @@ public class Vest extends Armor {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setVest(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getVest() == this) {
             m.setVest(m.getDefaultVest());
         }

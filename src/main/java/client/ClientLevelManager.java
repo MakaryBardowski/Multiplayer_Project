@@ -29,7 +29,7 @@ import game.map.MapDataModel.Map;
 import game.map.collision.WorldGrid;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
+
 import lombok.Getter;
 import lombok.Setter;
 import server.LevelManager;
@@ -56,9 +56,6 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
     private Player player;
 
     @Getter
-    private WorldGrid grid;
-
-    @Getter
     private game.map.Level level;
 
     @Getter
@@ -75,9 +72,6 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
 
     @Getter
     private final int MAP_SIZE_Y = 20;
-
-    @Getter
-    private final Node rootNode = new Node("ROOT NODE");
 
     @Getter
     private final Node worldNode = new Node("WORLD NODE");
@@ -105,6 +99,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
     private volatile Map nextStaticMap; // cached from server
 
     public ClientLevelManager() {
+        super(new Node("ROOT NODE"));
         this.assetManager = MAIN_INSTANCE.getAssetManager();
         this.renderManager = MAIN_INSTANCE.getRenderManager();
         this.inputManager = MAIN_INSTANCE.getInputManager();
@@ -137,7 +132,7 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
         AmbientLight equipmentPreviewModelLight = new AmbientLight();
         equipmentPreviewModelLight.setColor(ColorRGBA.White.mult(0.5f));
         equipmentPreviewNode.addLight(equipmentPreviewModelLight);
-        grid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
+        collisionGrid = new WorldGrid(MAP_SIZE_XZ, BLOCK_SIZE, COLLISION_GRID_CELL_SIZE);
 //        DebugUtils.drawGrid();
 
     }
@@ -241,9 +236,9 @@ public class ClientLevelManager extends LevelManager<ClientJumpToLevelData> {
         entitiesById.values().forEach(x -> {
             if (x instanceof Mob m && x != player) {
                 if (!m.getNode().getWorldTranslation().equals(m.getServerLocation())) {
-                    grid.remove(m);
+                    collisionGrid.remove(m);
                     interpolateMobPosition(m, tpf);
-                    grid.insert(m);
+                    collisionGrid.insert(m);
                 }
                 m.interpolateRotation(tpf);
             } else if (x instanceof ThrownGrenade g) {

@@ -5,6 +5,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Entity;
 import lombok.Getter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 import java.util.Map;
@@ -29,9 +30,9 @@ public class BatchSetFloatAttributeMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        var entity = server.getLevelManagerMobs().get(entityId);
-        entity.setFloatAttributesAndNotifyClients(attributesByAttributeId);
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        var entity = ctx.getEntity(entityId);
+        entity.setFloatAttributesAndNotifyClients(ctx,attributesByAttributeId);
     }
 
     @Override

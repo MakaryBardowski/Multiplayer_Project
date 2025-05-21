@@ -5,6 +5,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Destructible;
 import lombok.Getter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -22,7 +23,7 @@ public class DestructibleHealReceiveMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
         throw new UnsupportedOperationException("not implemented yet.");
     }
 

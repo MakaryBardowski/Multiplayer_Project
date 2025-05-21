@@ -174,9 +174,6 @@ public class InputController {
 //                }
                 if (name.equals("K") && !keyPressed) {
 //                    GlobalSettings.isAiDebug = !GlobalSettings.isAiDebug;
-                    if(ServerGameAppState.getInstance() != null) {
-                        ServerGameAppState.getInstance().getLevelManagerMobs().forEach((key, value) -> System.err.println(value));
-                    }
 
                     var msg = new NextLevelMessage(ClientGameAppState.getInstance().getCurrentGamemode().getLevelManager().getCurrentLevelIndex());
                     ClientGameAppState.getInstance().getClient().send(msg);

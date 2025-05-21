@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 
 public abstract class Movable extends AttachedEntity {
 
@@ -24,7 +25,7 @@ public abstract class Movable extends AttachedEntity {
 
     public abstract void moveClient(float tpf);
 
-    public abstract void moveServer(Vector3f moveVec);
+    public abstract void moveServer(ServerContext ctx, Vector3f moveVec);
 
     public boolean isAbleToMove() {
         return true;

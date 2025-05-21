@@ -6,6 +6,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import lombok.Getter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -21,7 +22,7 @@ public class NewGrenadeMessage extends NewItemMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

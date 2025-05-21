@@ -11,6 +11,8 @@ import game.entities.mobs.player.Player;
 import game.map.collision.MovementCollisionUtils;
 import game.map.collision.WorldGrid;
 import java.util.ArrayList;
+
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -41,42 +43,41 @@ public class PlayerPosUpdateRequest extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        if(server.getCurrentGamemode().getLevelManager().getCurrentLevelIndex() != levelIndex){
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        if(ctx.getCurrentLevelIndex() != levelIndex){
             return;
         }
-        if (entityExistsLocallyServer(id)) {
-            var serverApp = ServerGameAppState.getInstance();
-            Player p = (Player) serverApp.getLevelManagerMobs().get(id);
+        if (entityExistsLocallyServer(ctx,id)) {
+            Player p = (Player) ctx.getEntity(id);
             if(!p.isAbleToMove()){
                 return;
             }
 
-            var allCollidables = serverApp.getGrid().getNearbyAtPosition(p, getPos());
+            var grid = ctx.getCollisionGrid();
+            var allCollidables = grid.getNearbyAtPosition(p, getPos());
             var solid = new ArrayList<Collidable>();
             var passable = new ArrayList<Collidable>();
             MovementCollisionUtils.sortByPassability(allCollidables, solid, passable);
 
-            if (MovementCollisionUtils.isValidMobMovement(p, getPos(), serverApp.getGrid(), solid)) {
+            if (MovementCollisionUtils.isValidMobMovement(p, getPos(), grid, solid)) {
                 // this whole thing should be moved to moveServer override in player
-                WorldGrid grid = serverApp.getGrid();
                 grid.remove(p);
 
                 Main.getInstance().enqueue(() -> {
-                    if (!ServerGameAppState.getInstance().containsEntityWithId(id)) {
+                    if (!ctx.hasEntity(id)) {
                         return;
                     }
                     var newPos = getPos();
                     p.getNode().setLocalTranslation(newPos);
                     grid.insert(p);
                     
-                    MovementCollisionUtils.checkPassableCollisions(p, grid, passable);
+                    MovementCollisionUtils.checkPassableCollisions(ctx, p, grid, passable);
                     p.getPositionChangedOnServer().set(true);
 
                 });
             } else {
                 InstantEntityPosCorrectionMessage corrMsg = new InstantEntityPosCorrectionMessage(p, p.getNode().getWorldTranslation());
-                serverApp.getServer().broadcast(Filters.in(getHostedConnectionByPlayer(p)), corrMsg);
+                ctx.notifySelectClients(corrMsg, Filters.in(getHostedConnectionByPlayer(ctx,p)));
             }
 
         }

@@ -7,6 +7,7 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.StatusEffectContainer;
 import lombok.Getter;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Getter
@@ -26,28 +27,28 @@ public class ChooseCardMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection sender) {
-        if(entityNotExistsLocallyServer(playerId)) {
+    public void handleServer(ServerContext ctx, HostedConnection sender) {
+        if(entityNotExistsLocallyServer(ctx,playerId)) {
             System.err.println("[SERVER]" + playerId + " does not exist in registered mobs to choose a card!");
             return;
         }
-            var mob = getEntityByIdServer(playerId);
+            var mob = getEntityByIdServer(ctx,playerId);
             if(!(mob instanceof StatusEffectContainer player)){
                 System.err.println("[SERVER]" + playerId + " is not a player, but wants to choose a card!");
                 return;
             }
-        var currentCardChoice = server.getCurrentGamemode().getLevelManager().getCardChoiceSessions().get(cardChoiceSessionId);
+        var currentCardChoice = ctx.getLevelManager().getCardChoiceSessions().get(cardChoiceSessionId);
         if(currentCardChoice.isPlayerAlreadyChosenCard(playerId)){
             System.err.println("[SERVER]" + playerId + " has already chosen a card!!");
             return;
         }
 
         var card = AugmentCardsTemplateRegistry.getCardById(chosenCardId);
-        card.chooseCardServer(player);
+        card.chooseCardServer(ctx,player);
 
         currentCardChoice.registerCardChosenByPlayer(playerId,card);
 
-        server.getServer().broadcast(this);
+        ctx.notifyAllClients(this);
     }
 
     @Override

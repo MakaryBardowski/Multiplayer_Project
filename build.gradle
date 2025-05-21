@@ -50,11 +50,11 @@ dependencies {
             branch = "master"
         }
     }
-    implementation  ('org.mccurry:game-lib-events') {
-        version {
-            branch = "master"
-        }
-    }
+//    implementation  ('org.mccurry:game-lib-events') {
+//        version {
+//            branch = "master"
+//        }
+//    }
 
 
     implementation 'org.lz4:lz4-java:1.8.0'

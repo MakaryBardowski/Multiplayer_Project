@@ -6,6 +6,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.Animated;
 import game.entities.Animation;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -26,8 +27,8 @@ public class AnimationPlayedMessage extends EntityUpdateMessage {
 
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        server.getServer().broadcast(Filters.notEqualTo(hc),this);
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        ctx.notifySelectClients(this,Filters.notEqualTo(hc));
     }
 
     @Override

@@ -25,6 +25,7 @@ import game.effects.TimedSpatialRemoveControl;
 import game.entities.Collidable;
 import messages.ThrownGrenadeExplodedMessage;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -70,7 +71,7 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -85,7 +86,7 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) { // grenades are managed by the server, so we never set position explicitly through this method
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) { // grenades are managed by the server, so we never set position explicitly through this method
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -106,13 +107,13 @@ public class ThrownSmokeGrenade extends ThrownGrenade {
     }
 
     @Override
-    public void explodeServer() {
+    public void explodeServer(ServerContext ctx) {
         ThrownGrenadeExplodedMessage gemsg = new ThrownGrenadeExplodedMessage(id, node.getWorldTranslation());
         gemsg.setReliable(true);
-        ServerGameAppState.getInstance().getServer().broadcast(gemsg);
+        ctx.notifyAllClients(gemsg);
         node.removeFromParent();
 
-        removeEntityByIdServer(id);
+        removeEntityByIdServer(ctx,id);
     }
 
     public Emitter addLowerSmoke() {

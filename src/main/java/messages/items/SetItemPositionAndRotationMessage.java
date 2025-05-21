@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -36,7 +37,7 @@ public class SetItemPositionAndRotationMessage extends TwoWayMessage {
 
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection sender) {
+    public void handleServer(ServerContext ctx, HostedConnection sender) {
 
     }
 

@@ -3,6 +3,7 @@ package statusEffects.onDamagedEffects;
 import data.DamageReceiveData;
 import game.entities.StatusEffectContainer;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import statusEffects.EffectProcType;
 
 public class HardnessCardEffect extends OnDamagedEffect {
@@ -13,7 +14,7 @@ public class HardnessCardEffect extends OnDamagedEffect {
     }
 
     @Override
-    public DamageReceiveData applyServer(DamageReceiveData input) {
+    public DamageReceiveData applyServer(ServerContext ctx, DamageReceiveData input) {
         input.setRawDamage(input.getRawDamage()-FLAT_DAMAGE_BLOCK);
         return input;
     }

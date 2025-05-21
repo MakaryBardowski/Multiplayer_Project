@@ -11,6 +11,7 @@ import game.map.collision.WorldGrid;
 import lombok.Getter;
 import messages.NewIndestructibleDecorationMessage;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -41,15 +42,15 @@ public class IndestructibleDecoration extends Collidable {
 
     @Override
     public void setPositionClient(Vector3f newPos) {
-        WorldGrid grid = ServerGameAppState.getInstance().getGrid();
+        WorldGrid grid = ClientGameAppState.getInstance().getGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
-        WorldGrid grid = ServerGameAppState.getInstance().getGrid();
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
+        WorldGrid grid = ctx.getCollisionGrid();
         grid.remove(this);
         node.setLocalTranslation(newPos);
         grid.insert(this);
@@ -67,7 +68,7 @@ public class IndestructibleDecoration extends Collidable {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
     }
 
     @Override
@@ -76,15 +77,14 @@ public class IndestructibleDecoration extends Collidable {
     }
 
     @Override
-    public void destroyServer() {
-        var server = ServerGameAppState.getInstance();
-        server.getGrid().remove(this);
+    public void destroyServer(ServerContext ctx) {
+        ctx.getCollisionGrid().remove(this);
         if (node.getParent() != null) {
             Main.getInstance().enqueue(() -> {
                 node.removeFromParent();
             });
         }
-        removeEntityByIdServer(id);
+        removeEntityByIdServer(ctx,id);
     }
 
     @Override

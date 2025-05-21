@@ -28,6 +28,7 @@ import messages.AnimationPlayedMessage;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewMeleeWeaponMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 public class Knife extends MeleeWeapon {
@@ -110,12 +111,12 @@ public class Knife extends MeleeWeapon {
     @Override
     public void playerUseInRightHand(Player p) {
         if (currentAttackCooldown >= attackCooldown) {
-            playerAttack(p);
+            playerAttackServer(p);
         }
     }
 
     @Override
-    public void playerAttack(Player p) {
+    public void playerAttackServer(Player p) {
         var idle = new InvokeMethodTween(() -> {
             composer.setCurrentAction("HoldKnife");
         });
@@ -264,21 +265,21 @@ public class Knife extends MeleeWeapon {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setEquippedRightHand(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getEquippedRightHand() == this) {
             m.setEquippedRightHand(null);
         }
     }
 
     @Override
-    public void attack(Mob m) {
+    public void attackServer(ServerContext ctx, Mob m) {
         var apm = new AnimationPlayedMessage(m.getId(), HUMAN_ATTACK_MELEE);
-        ServerGameAppState.getInstance().getServer().broadcast(apm);
+        ctx.notifyAllClients(apm);
         slashMob(m);
     }
 

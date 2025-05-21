@@ -1,19 +1,16 @@
 package Utils;
 
 import com.jme3.math.Vector3f;
-import server.ServerGameAppState;
+import game.constants.SharedConstants;
 
 public class GridUtils {
 
-    private static final int BLOCK_SIZE = ServerGameAppState.getInstance().getBLOCK_SIZE();
-//    private static final byte[][][] grid = ServerMain.getInstance().getMap();
-
     public static int worldToGridCoordinate(float coordinate) {
-        return (int) (Math.floor(coordinate / BLOCK_SIZE));
+        return (int) (Math.floor(coordinate / SharedConstants.BLOCK_SIZE));
     }
 
     public static float worldToWorldCellCenterCoordinate(float coordinate) {
-        return (worldToGridCoordinate(coordinate) * BLOCK_SIZE) + 0.5f * BLOCK_SIZE;
+        return (worldToGridCoordinate(coordinate) * SharedConstants.BLOCK_SIZE) + 0.5f * SharedConstants.BLOCK_SIZE;
     }
 
     public static boolean isSpotEmpty(Vector3f coordinates, byte[][][] map) {

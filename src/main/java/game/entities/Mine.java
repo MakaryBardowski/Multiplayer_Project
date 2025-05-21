@@ -23,6 +23,7 @@ import game.effects.TimedSpatialRemoveControl;
 import game.map.collision.CollisionDebugUtils;
 import game.map.collision.RectangleOBB;
 import messages.DestructibleDamageReceiveMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static game.effects.DecalProjector.projectFromTo;
 
@@ -89,16 +90,16 @@ public class Mine extends DestructibleDecoration {
     }
 
     @Override
-    public void receiveDamageServer(DamageReceiveData damageData) {
+    public void receiveDamageServer(ServerContext ctx, DamageReceiveData damageData) {
         for(var onDamageReceivedEffect : onDamageReceivedEffects){
-            onDamageReceivedEffect.applyServer(damageData);
+            onDamageReceivedEffect.applyServer(ctx, damageData);
         }
 
         setHealth(getHealth()-calculateDamage(damageData.getRawDamage()));
 
 
         if (getHealth() <= 0) {
-            destroyServer();
+            destroyServer(ctx);
             onDeathServer();
         }
     }
@@ -108,8 +109,8 @@ public class Mine extends DestructibleDecoration {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
-        selfDestruct();
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
+        selfDestruct(ctx);
     }
 
     private void explode() {
@@ -127,17 +128,16 @@ public class Mine extends DestructibleDecoration {
 //        }
     }
 
-    private void selfDestruct() {
-        ServerGameAppState serverApp = ServerGameAppState.getInstance();
+    private void selfDestruct(ServerContext ctx) {
         Destructible d = this;
         float selfDestructDmg = 5000;
 
         var damageReceiveData = new DamageReceiveData(id,id,selfDestructDmg);
-        receiveDamageServer(damageReceiveData);
+        receiveDamageServer(ctx,damageReceiveData);
 
         var hmsg = new DestructibleDamageReceiveMessage(damageReceiveData);
         hmsg.setReliable(true);
-        serverApp.getServer().broadcast(hmsg);
+        ctx.notifyAllClients(hmsg);
     }
 
     private void spawnExplosionVisuals() {

@@ -7,6 +7,7 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.entities.AttachedEntity;
 import game.entities.Movable;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -38,10 +39,10 @@ public class MobRotUpdateMessage extends EntityUpdateMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
-        if (entityExistsLocallyServer(id) ) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
+        if (entityExistsLocallyServer(ctx,id) ) {
             Main.getInstance().enqueue(() -> {
-                var entity = (AttachedEntity) ServerGameAppState.getInstance().getLevelManagerMobs().get(id);
+                var entity = (AttachedEntity) ctx.getEntity(id);
                 if (entity != null) {
                     entity.getNode().setLocalRotation(getRot());
                     if (entity instanceof Movable movable) {

@@ -7,6 +7,7 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.grenades.ThrownGrenade;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 @Serializable
@@ -36,7 +37,7 @@ public class ThrownGrenadeExplodedMessage extends TwoWayMessage {
     }
 
     @Override
-    public void handleServer(ServerGameAppState server, HostedConnection hc) {
+    public void handleServer(ServerContext ctx, HostedConnection hc) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 

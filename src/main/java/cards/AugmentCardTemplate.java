@@ -3,6 +3,7 @@ package cards;
 import game.entities.StatusEffectContainer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import server.ServerContext;
 
 @AllArgsConstructor
 @Getter
@@ -14,5 +15,5 @@ public abstract class AugmentCardTemplate {
     private final String iconPath;
 
     public abstract void chooseCardClient(StatusEffectContainer statusEffectContainer);
-    public abstract void chooseCardServer(StatusEffectContainer statusEffectContainer);
+    public abstract void chooseCardServer(ServerContext ctx, StatusEffectContainer statusEffectContainer);
 }

@@ -25,6 +25,7 @@ import com.jme3.anim.tween.action.ClipAction;
 import de.lessvoid.nifty.controls.label.LabelControl;
 import static game.entities.DestructibleUtils.setupModelShootability;
 import game.items.Holdable;
+import server.ServerContext;
 
 public class Grenade extends ThrowableWeapon {
 
@@ -58,12 +59,12 @@ public class Grenade extends ThrowableWeapon {
     }
 
     @Override
-    public void attack(Mob m) {
+    public void attackServer(ServerContext ctx, Mob m) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
     @Override
-    public void playerAttack(Player p) {
+    public void playerAttackServer(Player p) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -166,12 +167,12 @@ public class Grenade extends ThrowableWeapon {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setEquippedRightHand(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getEquippedRightHand() == this) {
             m.setEquippedRightHand(null);
         }

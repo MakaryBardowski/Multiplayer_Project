@@ -16,6 +16,7 @@ import static game.entities.DestructibleUtils.setupModelShootability;
 
 import itemSystem.ItemTemplates.ItemTemplate;
 import lombok.Getter;
+import server.ServerContext;
 import statusEffects.StatusEffect;
 import statusEffects.onDamagedEffects.OnDamagedEffect;
 import statusEffects.onEnterLevelEffects.OnEnterLevelEffect;
@@ -109,14 +110,14 @@ public abstract class Item extends AttachedEntity {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
         throw new StackOverflowError("item.setPositionServer not supported");
     }
 
     public abstract String getDescription();
 
     @Override
-    public void destroyServer() {
+    public void destroyServer(ServerContext ctx) {
         // does it ever execute on server?
         if (droppedItemNode != null && droppedItemNode.getParent() != null) {
             Main.getInstance().enqueue(() -> {
@@ -124,7 +125,7 @@ public abstract class Item extends AttachedEntity {
             });
         }
         //
-        removeEntityByIdServer(id);
+        removeEntityByIdServer(ctx,id);
     }
 
     @Override

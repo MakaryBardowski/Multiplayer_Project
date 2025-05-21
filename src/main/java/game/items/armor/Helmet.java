@@ -14,6 +14,7 @@ import itemSystem.ItemTemplates.HelmetTemplate;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewHelmetMessage;
+import server.ServerContext;
 
 public class Helmet extends Armor {
 
@@ -113,12 +114,12 @@ public class Helmet extends Armor {
     }
 
     @Override
-    public void serverEquip(HumanMob m) {
+    public void serverEquip(ServerContext ctx, HumanMob m) {
         m.setHelmet(this);
     }
 
     @Override
-    public void serverUnequip(HumanMob m) {
+    public void serverUnequip(ServerContext ctx, HumanMob m) {
         if(m.getHelmet() == this) {
             m.setHelmet(m.getDefaultHelmet());
         }

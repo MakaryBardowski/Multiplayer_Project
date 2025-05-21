@@ -5,6 +5,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import game.entities.DecorationTemplates.DecorationTemplate;
 import messages.gameSetupMessages.NextLevelMessage;
+import server.ServerContext;
 
 public class LevelExit extends IndestructibleDecoration {
     public LevelExit(int id, String name, Node node, DecorationTemplate template) {
@@ -23,7 +24,7 @@ public class LevelExit extends IndestructibleDecoration {
     }
 
     @Override
-    public void onCollisionServer(Collidable other) {
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
 //        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 
@@ -48,7 +49,7 @@ public class LevelExit extends IndestructibleDecoration {
     }
 
     @Override
-    public void setPositionServer(Vector3f newPos) {
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
         throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
     }
 }

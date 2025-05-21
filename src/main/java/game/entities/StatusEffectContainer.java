@@ -4,6 +4,7 @@ import com.jme3.scene.Node;
 
 import java.util.HashSet;
 import lombok.Getter;
+import server.ServerContext;
 import statusEffects.StatusEffect;
 import statusEffects.onDamagedEffects.OnDamagedEffect;
 import statusEffects.onHitEffects.OnHitEffect;
@@ -32,14 +33,14 @@ public abstract class StatusEffectContainer extends Destructible {
         }
     }
 
-    public void updateTemporaryEffectsServer() {
+    public void updateTemporaryEffectsServer(ServerContext ctx) {
         var it = temporaryEffects.iterator();
         while (it.hasNext()) {
             var e = it.next();
             if (e.shouldBeRemoved()) {
                 it.remove();
             }
-            e.applyServer(null);
+            e.applyServer(ctx,null);
         }
     }
 

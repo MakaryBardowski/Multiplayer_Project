@@ -12,16 +12,21 @@ import java.util.Random;
 import java.util.concurrent.Future;
 import lombok.Getter;
 import lombok.Setter;
+import server.ServerContext;
 import server.ServerGameAppState;
 
 public class SimpleHumanMobContext extends Context {
 
     private final Random random = new Random();
+
     public static int STEERED_HUMAN = 0;
     public static int INTERRUPT_WALKING = 1;
     public static int TARGET_DESTRUCTIBLE = 2;
     public static int CURRENT_PATH = 3;
     public static int LAST_KNOWN_TARGET_POSITION = 4;
+
+    @Getter
+    private ServerContext serverContext;
 
     private Future pathfindingFuture;
 
@@ -56,12 +61,12 @@ public class SimpleHumanMobContext extends Context {
 //    private long lastLoweredAggroTimestamp = 0;
 //    private final float lowerAggroEveryMillis = 1000;
 //    private final float aggroPointsFallofPerSecond = 1;
-    public SimpleHumanMobContext(HumanMob mob) {
+    public SimpleHumanMobContext(ServerContext serverContext, HumanMob mob) {
         blackboard.put(STEERED_HUMAN, mob);
         blackboard.put(INTERRUPT_WALKING, false);
         blackboard.put(TARGET_DESTRUCTIBLE, null);
         blackboard.put(CURRENT_PATH, null);
-
+        this.serverContext = serverContext;
     }
 
     // makes the mob forget what it was doing.
@@ -173,7 +178,7 @@ public class SimpleHumanMobContext extends Context {
     }
 
     @Override
-    public void receiveEventNotification(GameEvent gameEvent) {
+    public void receiveEventNotificationServer(ServerContext ctx,GameEvent gameEvent) {
         if (gameEvent instanceof DamageReceivedEvent dre) {
             handleDamageReceivedEvent(dre);
         }
@@ -187,7 +192,7 @@ public class SimpleHumanMobContext extends Context {
     }
 
     public void handleDamageReceivedEvent(DamageReceivedEvent dre) {
-        var attacker = ServerGameAppState.getInstance().getLevelManagerMobs().get(dre.getDamageData().getAttackerId());
+        var attacker = serverContext.getEntity(dre.getDamageData().getAttackerId());
         if (attacker == null || !(attacker instanceof Destructible destructibleTarget)) {
             return;
         }

@@ -2,8 +2,9 @@ package game.items.weapons;
 
 import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
+import server.ServerContext;
 
 public interface Attacks {
-    void attack(Mob m);
-    void playerAttack(Player p);
+    void attackServer(ServerContext ctx, Mob m);
+    void playerAttackServer(Player p);
 }

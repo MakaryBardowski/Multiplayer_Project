@@ -1,11 +1,11 @@
 package behaviorTree.context;
 
-import subscriber.EventSubscriber;
+import events.ServerEventSubscriber;
 
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class Context implements EventSubscriber {
+public abstract class Context implements ServerEventSubscriber {
     protected final Map<Integer,Object> blackboard = new HashMap<>();
 
     public Map<Integer, Object> getBlackboard() {

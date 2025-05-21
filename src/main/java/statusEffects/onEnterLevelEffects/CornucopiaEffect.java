@@ -7,6 +7,7 @@ import itemSystem.DropTable;
 import itemSystem.ItemTemplates;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -26,19 +27,19 @@ public class CornucopiaEffect extends OnEnterLevelEffect{
     }
 
     @Override
-    public Void applyServer(Void input) {
+    public Void applyServer(ServerContext ctx, Void input) {
         if(target != null && target instanceof Mob mobTarget){
-            var cornucopiaItem = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager().registerItemLocal(dropTable.getDrop(),true);
+            var cornucopiaItem = ctx.getLevelManager().registerItemLocal(dropTable.getDrop(),true);
             mobTarget.getEquipment().addItem(cornucopiaItem);
 
 
             var newItemMsg = cornucopiaItem.createNewEntityMessage();
             newItemMsg.setReliable(true);
-            ServerGameAppState.getInstance().getServer().broadcast(newItemMsg);
+            ctx.notifyAllClients(newItemMsg);
 
 
             MobItemInteractionMessage msg = new MobItemInteractionMessage(cornucopiaItem, mobTarget, MobItemInteractionMessage.ItemInteractionType.PICK_UP);
-            ServerGameAppState.getInstance().getServer().broadcast(msg);
+            ctx.notifyAllClients(msg);
         }
         return null;
     }

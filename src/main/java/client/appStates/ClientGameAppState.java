@@ -1,5 +1,6 @@
 package client.appStates;
 
+import Utils.Ansi;
 import client.ClientGameManager;
 import client.ClientStoryGameManager;
 import client.Main;
@@ -8,7 +9,6 @@ import com.jme3.network.service.serializer.ClientSerializerRegistrationsService;
 import game.cameraAndInput.InputController;
 import menu.MenuStateMachine;
 import messages.messageListeners.ClientMessageListener;
-import com.jme3.app.SimpleApplication;
 import com.jme3.network.Client;
 import com.jme3.network.Network;
 import com.jme3.system.AppSettings;
@@ -183,7 +183,7 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
     }
 
     public WorldGrid getGrid() {
-        return currentGamemode.getLevelManager().getGrid();
+        return currentGamemode.getLevelManager().getCollisionGrid();
     }
 
     public Camera getCamera() {
@@ -207,9 +207,10 @@ public class ClientGameAppState extends AbstractAppState implements ClientStateL
             client = Network.connectToServer(serverIp, NetworkingInitialization.PORT);
             client.addClientStateListener(this);
             client.start();
-
+            System.out.println(Ansi.withAnsiColor("Client connected to server.",Ansi.BRIGHT_GREEN));
         } catch (IOException ex) {
             Logger.getLogger(ClientGameAppState.class.getName()).log(SEVERE, null, ex);
+            System.out.println(Ansi.withAnsiColor("Client failed to connect to server.",Ansi.BRIGHT_GREEN));
         }
     }
 

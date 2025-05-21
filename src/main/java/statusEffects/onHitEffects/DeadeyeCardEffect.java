@@ -1,9 +1,11 @@
 package statusEffects.onHitEffects;
 
 import data.DamageReceiveData;
+import game.constants.SharedConstants;
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
 import messages.TwoWayMessage;
+import server.ServerContext;
 import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
@@ -21,14 +23,13 @@ public class DeadeyeCardEffect extends OnHitEffect{
     }
 
     @Override
-    public DamageReceiveData applyServer(DamageReceiveData input) {
-        var serverLevelManager = ServerGameAppState.getInstance().getCurrentGamemode().getLevelManager();
-        var attacker = (Destructible) serverLevelManager.getEntitiesById().get(input.getAttackerId());
-        var victim = (Destructible) serverLevelManager.getEntitiesById().get(input.getVictimId());
+    public DamageReceiveData applyServer(ServerContext ctx, DamageReceiveData input) {
+        var attacker = (Destructible) ctx.getEntity(input.getAttackerId());
+        var victim = (Destructible) ctx.getEntity(input.getVictimId());
 
         // additional 1 percent per tile
         var additionalCritChanceForDistance = (
-                (int)(attacker.getNode().getWorldTranslation().distance(victim.getNode().getWorldTranslation()) / serverLevelManager.getBLOCK_SIZE())
+                (int)(attacker.getNode().getWorldTranslation().distance(victim.getNode().getWorldTranslation()) / SharedConstants.BLOCK_SIZE)
         )*(PERCENT_CHANCE_PER_TILE/100);
         var totalChance = CRIT_CHANCE + additionalCritChanceForDistance;
 

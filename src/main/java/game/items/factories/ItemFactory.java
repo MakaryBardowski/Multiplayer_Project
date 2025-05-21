@@ -95,7 +95,7 @@ public class ItemFactory {
                 default:
                     break;
             }
-            item.setGameEventHandler(template.getServerGameEventHandler());
+            item.setServerGameEventHandler(template.getServerGameEventHandler());
             return item;
         }
         return null;

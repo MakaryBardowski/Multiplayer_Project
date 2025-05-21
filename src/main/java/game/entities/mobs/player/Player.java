@@ -33,6 +33,7 @@ import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
 import messages.PlayerPosUpdateRequest;
+import server.ServerContext;
 import server.ServerGameAppState;
 import static server.ServerGameAppState.removeEntityByIdServer;
 
@@ -133,16 +134,16 @@ public class Player extends HumanMob {
     }
 
     @Override
-    public void equipServer(Item e) {
+    public void equipServer(ServerContext ctx, Item e) {
         if (e instanceof Equippable equippableItem) {
-            equippableItem.serverEquip(this);
+            equippableItem.serverEquip(ctx,this);
         }
     }
 
     @Override
-    public void unequipServer(Item e) {
+    public void unequipServer(ServerContext ctx, Item e) {
         if (e instanceof Equippable equippableItem) {
-            equippableItem.serverUnequip(this);
+            equippableItem.serverUnequip(ctx,this);
         }
     }
 
@@ -355,12 +356,11 @@ public class Player extends HumanMob {
     }
 
     @Override
-    public void destroyServer() {
+    public void destroyServer(ServerContext ctx) {
         /* cant leak player into grid because it removes the player from mob list immediately, and re-insert on move checks if the mobs still is in hashmap
         and the mob hashmap is thread safe */
-        removeEntityByIdServer(id);
-        var server = ServerGameAppState.getInstance();
-        server.getGrid().remove(this);
+        removeEntityByIdServer(ctx,id);
+        ctx.getCollisionGrid().remove(this);
         if (node.getParent() != null) {
             Main.getInstance().enqueue(() -> {
                 node.removeFromParent();
