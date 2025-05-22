@@ -64,10 +64,10 @@ public class PauseMenuState implements MenuState{
                 stateMgr.attach(mms);
                 gs.getMenuStateMachine().requestState(null);
                 // if you try to start new game too fast the then sometimes port may not be free again yet (fix later)
-//                if (ServerGameAppState.getInstance() != null) {
-//                    var serverState = stateMgr.getState(ServerGameAppState.class);
-//                    stateMgr.detach(serverState);
-//                }
+                if (stateMgr.getState(ServerGameAppState.class) != null) {
+                    var serverState = stateMgr.getState(ServerGameAppState.class);
+                    stateMgr.detach(serverState);
+                }
             });
         };
 
