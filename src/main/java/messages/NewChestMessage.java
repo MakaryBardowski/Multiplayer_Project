@@ -7,7 +7,6 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.Chest;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class NewChestMessage extends TwoWayMessage {

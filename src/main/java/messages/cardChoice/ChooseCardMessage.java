@@ -8,7 +8,6 @@ import game.entities.StatusEffectContainer;
 import lombok.Getter;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Getter
 @Serializable

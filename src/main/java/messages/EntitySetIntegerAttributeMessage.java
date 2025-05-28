@@ -6,7 +6,6 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.Entity;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class EntitySetIntegerAttributeMessage extends TwoWayMessage {

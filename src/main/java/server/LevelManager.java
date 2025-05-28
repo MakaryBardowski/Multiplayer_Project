@@ -3,7 +3,7 @@ package server;
 import com.jme3.scene.Node;
 import data.jumpToLevelData.BaseJumpToLevelData;
 import game.entities.Entity;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
 import game.map.MapType;
 import game.map.collision.WorldGrid;
 import lombok.Getter;

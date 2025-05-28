@@ -10,7 +10,6 @@ import game.entities.mobs.Mob;
 import game.map.blocks.VoxelLighting;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class NewMobMessage extends TwoWayMessage {

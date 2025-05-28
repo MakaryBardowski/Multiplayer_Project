@@ -11,7 +11,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.jme3.math.Vector3f;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
+
 import game.map.MapDataModel.RoomPrefab;
 import jme3utilities.math.Vector3i;
 

@@ -8,7 +8,6 @@ import itemSystem.ItemTemplates;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
 public class CornucopiaEffect extends OnEnterLevelEffect{

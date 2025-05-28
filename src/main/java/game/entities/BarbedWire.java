@@ -6,7 +6,6 @@ import game.entities.mobs.Mob;
 import game.map.collision.CollisionDebugUtils;
 import game.map.collision.RectangleOBB;
 import server.ServerContext;
-import server.ServerGameAppState;
 import statusEffects.temporaryEffects.DamageOverTimeEffect;
 import statusEffects.EffectFactory;
 

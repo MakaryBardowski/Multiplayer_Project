@@ -9,7 +9,6 @@ import data.jumpToLevelData.ClientJumpToLevelData;
 import game.map.MapType;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 import java.util.Map;
 

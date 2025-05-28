@@ -8,7 +8,6 @@ import game.items.Item;
 import lombok.Getter;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class ChestItemInteractionMessage extends TwoWayMessage {

@@ -7,7 +7,6 @@ import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 @Getter

@@ -12,7 +12,7 @@ import lombok.Getter;
 import messages.NewIndestructibleDecorationMessage;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
+
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public class IndestructibleDecoration extends Collidable {

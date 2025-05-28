@@ -1,5 +1,6 @@
 package game.map.MapDataModel;
 
+import com.mccurry.map.model.TileMap;
 import lombok.Getter;
 
 @Getter
@@ -8,7 +9,7 @@ public class PlacedRoomPrefab extends RoomPrefab{
     private final byte posY;
     private final byte posZ;
     public PlacedRoomPrefab(RoomPrefab prefab, int x, int y, int z) {
-        super(prefab.logicMap,prefab.mapSizeX,prefab.mapSizeY,prefab.mapSizeZ);
+        super(prefab.getLogicMap(),prefab.getMapSizeX(),prefab.getMapSizeY(),prefab.getMapSizeZ());
         this.joinPoints.addAll(prefab.getJoinPoints());
         this.entitySpawnData.addAll(prefab.getEntitySpawnData());
         this.entitySpawnDataPrototypesByResultId.putAll(prefab.getEntitySpawnDataPrototypesByResultId()); // MUTABLE!!
@@ -33,11 +34,11 @@ public class PlacedRoomPrefab extends RoomPrefab{
         float tMaxZ = posZ + mapSizeZ - shrinkBorder;
 
         float oMinX = otherPosX + shrinkBorder;
-        float oMaxX = otherPosX + otherPrefab.mapSizeX - shrinkBorder;
+        float oMaxX = otherPosX + otherPrefab.getMapSizeX() - shrinkBorder;
         float oMinY = otherPosY + shrinkBorder;
-        float oMaxY = otherPosY + otherPrefab.mapSizeY - shrinkBorder;
+        float oMaxY = otherPosY + otherPrefab.getMapSizeY() - shrinkBorder;
         float oMinZ = otherPosZ + shrinkBorder;
-        float oMaxZ = otherPosZ + otherPrefab.mapSizeZ - shrinkBorder;
+        float oMaxZ = otherPosZ + otherPrefab.getMapSizeZ() - shrinkBorder;
 
         if (tMaxX < oMinX || tMinX > oMaxX
                 || tMaxY < oMinY || tMinY > oMaxY

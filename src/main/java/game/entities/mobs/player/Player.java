@@ -34,7 +34,7 @@ import lombok.Getter;
 import lombok.Setter;
 import messages.PlayerPosUpdateRequest;
 import server.ServerContext;
-import server.ServerGameAppState;
+
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public class Player extends HumanMob {

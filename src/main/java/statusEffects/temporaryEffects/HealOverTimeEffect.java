@@ -5,7 +5,6 @@ import lombok.Getter;
 import messages.DestructibleHealReceiveMessage;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
 public class HealOverTimeEffect extends RepeatedTemporaryEffect {

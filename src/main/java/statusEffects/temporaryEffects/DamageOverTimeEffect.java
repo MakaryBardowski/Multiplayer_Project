@@ -2,13 +2,11 @@ package statusEffects.temporaryEffects;
 
 import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
-import game.map.collision.WorldGrid;
 import lombok.Getter;
 import lombok.Setter;
 import messages.DestructibleDamageReceiveMessage;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
 public class DamageOverTimeEffect extends RepeatedTemporaryEffect {

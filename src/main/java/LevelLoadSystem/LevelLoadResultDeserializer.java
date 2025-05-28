@@ -7,7 +7,8 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import com.jme3.math.Vector3f;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
+
 
 import java.io.IOException;
 import java.util.ArrayList;

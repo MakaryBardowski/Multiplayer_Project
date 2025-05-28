@@ -7,7 +7,7 @@ import com.jme3.scene.Node;
 import core.GameContext;
 import data.jumpToLevelData.BaseJumpToLevelData;
 import game.entities.Entity;
-import game.map.MapDataModel.Map;
+
 import game.map.MapType;
 import game.map.collision.WorldGrid;
 
@@ -16,6 +16,8 @@ import messages.TwoWayMessage;
 
 import java.util.Collection;
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.mccurry.map.model.Map;
 
 public class ServerContext extends GameContext {
     private final Server networkServer;

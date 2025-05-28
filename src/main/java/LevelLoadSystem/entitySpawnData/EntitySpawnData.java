@@ -6,7 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.ToString;
 import server.ServerContext;
-import server.ServerLevelManager;
 
 @Getter
 @ToString
@@ -15,7 +14,7 @@ public abstract class EntitySpawnData implements Cloneable {
     protected int templateIndex;
     protected Vector3f position;
 
-    public abstract Entity serverSpawn(ServerContext ctx, ServerLevelManager serverLevelManager);
+    public abstract Entity serverSpawn(ServerContext ctx);
 
     @Override
     public EntitySpawnData clone() {

@@ -7,7 +7,6 @@ import lombok.Getter;
 import menu.states.CardChoiceMenuState;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Getter
 @Serializable

@@ -22,7 +22,7 @@ import game.entities.mobs.HumanMob;
 import itemSystem.ItemTemplates;
 import itemSystem.ItemTemplates.HelmetTemplate;
 import itemSystem.ItemTemplates.ItemTemplate;
-import game.map.blocks.BlockType;
+import com.mccurry.map.model.BlockType;
 import static game.map.blocks.VoxelLighting.setupModelLight;
 import java.nio.FloatBuffer;
 import lombok.Setter;

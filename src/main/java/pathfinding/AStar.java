@@ -2,7 +2,8 @@ package pathfinding;
 
 import Utils.GridUtils;
 import com.jme3.math.Vector3f;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
+
 
 import java.util.*;
 

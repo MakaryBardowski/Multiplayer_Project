@@ -6,6 +6,7 @@ import LevelLoadSystem.roomPrefabs.RoomPrefabDeserializer;
 import Utils.Ansi;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.jme3.math.Vector3f;
+import com.mccurry.map.model.TileMap;
 import jme3utilities.math.Vector3i;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,7 +18,7 @@ import java.util.Map;
 
 @Getter
 @JsonDeserialize(using = RoomPrefabDeserializer.class)
-public class RoomPrefab extends TileMap{
+public class RoomPrefab extends TileMap {
 
     protected List<Vector3i> joinPoints = new ArrayList<>();
     protected List<EntitySpawnData> entitySpawnData = new ArrayList<>();

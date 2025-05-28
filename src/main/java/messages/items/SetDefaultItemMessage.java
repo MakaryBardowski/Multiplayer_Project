@@ -12,7 +12,6 @@ import game.items.armor.Vest;
 import lombok.Getter;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class SetDefaultItemMessage extends TwoWayMessage {

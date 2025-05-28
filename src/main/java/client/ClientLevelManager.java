@@ -25,7 +25,7 @@ import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import game.map.ClientLevelGenerator;
 import game.map.MapType;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
 import game.map.collision.WorldGrid;
 
 import java.io.IOException;

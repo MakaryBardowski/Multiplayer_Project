@@ -39,7 +39,7 @@ import game.items.weapons.Rifle;
 import game.map.ServerLevelGenerator;
 import game.map.MapType;
 import game.map.EntitySpawner;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
 import lombok.Getter;
 import game.map.collision.WorldGrid;
 
@@ -757,7 +757,7 @@ public class ServerLevelManager extends LevelManager<BaseJumpToLevelData> implem
     }
 
     @Override
-    public void notifyEventSubscribersServer(ServerContext ctx,GameEvent gameEvent){
+    public void notifyEventSubscribersServer(ServerContext ctx, GameEvent gameEvent){
         for(var subscriber : subscribers){
             subscriber.receiveEventNotificationServer(ctx,gameEvent);
         }

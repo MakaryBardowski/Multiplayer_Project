@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import game.entities.DecorationTemplates;
 import game.entities.Entity;
 import server.ServerContext;
-import server.ServerLevelManager;
 
 public class DestructibleDecorationSpawnData extends EntitySpawnData{
     public DestructibleDecorationSpawnData(int templateIndex, Vector3f position) {
@@ -12,7 +11,7 @@ public class DestructibleDecorationSpawnData extends EntitySpawnData{
     }
 
     @Override
-    public Entity serverSpawn(ServerContext ctx, ServerLevelManager serverLevelManager) {
-        return serverLevelManager.createAndRegisterDestructibleDecoration(DecorationTemplates.getTemplateByIndex(templateIndex),this.getPosition());
+    public Entity serverSpawn(ServerContext ctx) {
+        return ctx.getLevelManager().createAndRegisterDestructibleDecoration(DecorationTemplates.getTemplateByIndex(templateIndex),this.getPosition());
     }
 }

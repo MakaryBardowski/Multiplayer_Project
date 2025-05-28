@@ -11,7 +11,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 @Getter
@@ -61,7 +60,7 @@ public class DestructibleDamageReceiveMessage extends EntityUpdateMessage {
         );
     }
 
-    public void applyDestructibleDamageAndNotifyClients(Destructible target, Mob attacker,ServerContext ctx) {
+    public void applyDestructibleDamageAndNotifyClients(Destructible target, Mob attacker, ServerContext ctx) {
             enqueueExecution(()->{
                 var damageReceiveData = getDamageReceiveData();
                 attacker.dealDamageServer(ctx,damageReceiveData,target); // can be modified inside

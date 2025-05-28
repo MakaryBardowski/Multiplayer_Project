@@ -4,7 +4,6 @@ import com.jme3.app.Application;
 import com.jme3.network.serializing.Serializer;
 import game.constants.ServerConstants;
 import game.entities.mobs.Mob;
-import game.map.MapDataModel.Map;
 import messages.messageListeners.ServerMessageListener;
 import messages.MobPosRotUpdateMessage;
 
@@ -33,6 +32,7 @@ import java.util.logging.Logger;
 import lombok.Getter;
 import messages.GrenadePosUpdateMessage;
 import messages.lobby.GameStartedMessage;
+import com.mccurry.map.model.Map;
 
 public class ServerGameAppState extends AbstractAppState {
     private ServerContext context;

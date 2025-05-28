@@ -9,7 +9,6 @@ import game.entities.IndestructibleDecoration;
 import game.entities.factories.DecorationFactory;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class NewIndestructibleDecorationMessage extends TwoWayMessage {

@@ -24,7 +24,7 @@ import game.map.collision.CollisionDebugUtils;
 import game.map.collision.RectangleOBB;
 import messages.DestructibleDamageReceiveMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
+
 import static game.effects.DecalProjector.projectFromTo;
 
 public class Mine extends DestructibleDecoration {

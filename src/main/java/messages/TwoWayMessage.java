@@ -13,7 +13,6 @@ import game.entities.mobs.Mob;
 import game.entities.mobs.player.Player;
 import game.items.Item;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public abstract class TwoWayMessage extends AbstractMessage {
@@ -30,19 +29,19 @@ public abstract class TwoWayMessage extends AbstractMessage {
         return ((Chest) ctx.getEntity(id));
     }
 
-    protected Entity getEntityByIdServer(ServerContext ctx,int id) {
+    protected Entity getEntityByIdServer(ServerContext ctx, int id) {
         return ctx.getEntity(id);
     }
 
-    protected Mob getMobByIdServer(ServerContext ctx,int id) {
+    protected Mob getMobByIdServer(ServerContext ctx, int id) {
         return ((Mob) ctx.getEntity(id));
     }
 
-    protected Item getItemByIdServer(ServerContext ctx,int id) {
+    protected Item getItemByIdServer(ServerContext ctx, int id) {
         return ((Item) ctx.getEntity(id));
     }
 
-    protected Destructible getDestructibleByIdServer(ServerContext ctx,int id) {
+    protected Destructible getDestructibleByIdServer(ServerContext ctx, int id) {
         return ((Destructible) ctx.getEntity(id));
     }
 
@@ -73,7 +72,7 @@ public abstract class TwoWayMessage extends AbstractMessage {
         return ClientGameAppState.getInstance().getMobs().get(mobId) != null;
     }
 
-    protected boolean entityExistsLocallyServer(ServerContext ctx,int mobId) {
+    protected boolean entityExistsLocallyServer(ServerContext ctx, int mobId) {
         return  null != ctx.getEntity(mobId);
     }
 
@@ -81,11 +80,11 @@ public abstract class TwoWayMessage extends AbstractMessage {
         return ClientGameAppState.getInstance().getMobs().get(mobId) == null;
     }
 
-    protected boolean entityNotExistsLocallyServer(ServerContext ctx,int mobId) {
+    protected boolean entityNotExistsLocallyServer(ServerContext ctx, int mobId) {
         return ctx.getEntity(mobId) == null;
     }
 
-    protected HostedConnection getHostedConnectionByPlayer(ServerContext ctx,Player p) {
+    protected HostedConnection getHostedConnectionByPlayer(ServerContext ctx, Player p) {
         return ctx.getConnectionByPlayerEntityId(p.getId());
     }
 

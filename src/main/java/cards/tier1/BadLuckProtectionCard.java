@@ -4,7 +4,6 @@ import Utils.Ansi;
 import cards.AugmentCardTemplate;
 import game.entities.StatusEffectContainer;
 import server.ServerContext;
-import server.ServerGameAppState;
 import statusEffects.EffectTemplates;
 
 public class BadLuckProtectionCard extends AugmentCardTemplate {

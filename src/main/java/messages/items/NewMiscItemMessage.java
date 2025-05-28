@@ -6,7 +6,6 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import game.items.Item;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class NewMiscItemMessage extends NewItemMessage{

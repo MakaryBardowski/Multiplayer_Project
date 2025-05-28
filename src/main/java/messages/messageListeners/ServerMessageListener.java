@@ -4,7 +4,6 @@ import client.Main;
 import com.jme3.network.Message;
 import com.jme3.network.MessageListener;
 import server.ServerContext;
-import server.ServerGameAppState;
 import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import messages.TwoWayMessage;

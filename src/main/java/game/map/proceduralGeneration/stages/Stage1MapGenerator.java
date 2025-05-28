@@ -4,13 +4,17 @@ import LevelLoadSystem.entitySpawnData.EntitySpawnData;
 import LevelLoadSystem.entitySpawnData.IndestructibleDecorationSpawnData;
 import Utils.Ansi;
 import client.appStates.ClientGameAppState;
+import com.mccurry.map.model.BlockType;
+import com.mccurry.map.model.TileMap;
 import data.ChanceEntry;
 import game.map.AxisAlignedRotation;
 import game.map.MapDataModel.PlacedRoomPrefab;
 import game.map.MapDataModel.RoomPrefabs;
+
 import game.map.MapGenerationResult;
-import game.map.MapDataModel.Map;
-import game.map.blocks.BlockType;
+import com.mccurry.map.model.Map;
+
+
 import game.map.proceduralGeneration.MapGenerator;
 import game.map.proceduralGeneration.Room;
 import generators.PercentageRandomGenerator;
@@ -51,7 +55,10 @@ public class Stage1MapGenerator extends MapGenerator {
         var playerRoomPosY = 0;
         var playerRoomPosZ = mapSizeZ / 2;
 
-        var isPlayerRoomSuccessfullyPlaced = logicMap.placePrefabIfPossible(playerRoomPosX, playerRoomPosY, playerRoomPosZ, playerRoom, alreadyPlacedPrefabs);
+        var isPlayerRoomSuccessfullyPlaced = false;
+        if(prefabNotOverlapsWithAlreadyPlacedPrefabs(playerRoomPosX, playerRoomPosY, playerRoomPosZ, playerRoom, alreadyPlacedPrefabs)){
+            isPlayerRoomSuccessfullyPlaced = logicMap.placePrefabIfPossible(playerRoomPosX, playerRoomPosY, playerRoomPosZ, playerRoom);
+        }
 
         if (isPlayerRoomSuccessfullyPlaced) {
             for (var joinPoint : playerRoom.getJoinPoints()) {
@@ -85,7 +92,7 @@ public class Stage1MapGenerator extends MapGenerator {
             var joinPointZ = remainingJoinPoint.z();
 
             if(logicMap.isPositionNotEmpty(joinPointX,joinPointY,joinPointZ)){
-                logicMap.setBlockIdAtPosition(joinPointX,joinPointY,joinPointZ,BlockType.OFFICE_FLOOR.blockId); // air
+                logicMap.setBlockIdAtPosition(joinPointX,joinPointY,joinPointZ, BlockType.OFFICE_FLOOR.blockId); // air
             }else {
                 logicMap.setBlockIdAtPosition(joinPointX, joinPointY, joinPointZ, BlockType.WATER.blockId); // some block
             }
@@ -168,7 +175,10 @@ public class Stage1MapGenerator extends MapGenerator {
             var testedPrefabPosY = 0;
             var testedPrefabPosZ = pointToConnectNewPrefabTo.z() - testedPrefabRandomJoinPoint.z();
 
-            var successPlacing = logicMap.placePrefabIfPossible(testedPrefabPosX, testedPrefabPosY, testedPrefabPosZ, testedPrefab,alreadyPlacedPrefabs);
+            var successPlacing = false;
+            if(prefabNotOverlapsWithAlreadyPlacedPrefabs(testedPrefabPosX, testedPrefabPosY, testedPrefabPosZ, testedPrefab,alreadyPlacedPrefabs)){
+                successPlacing = logicMap.placePrefabIfPossible(testedPrefabPosX, testedPrefabPosY, testedPrefabPosZ, testedPrefab);
+            }
 
             if (successPlacing) {
                 openJoinPoints.remove(pointToConnectNewPrefabTo);
@@ -186,5 +196,14 @@ public class Stage1MapGenerator extends MapGenerator {
             // try to place room
         }
         return false;
+    }
+
+    private boolean prefabNotOverlapsWithAlreadyPlacedPrefabs(int prefabPosX, int prefabPosY, int prefabPosZ, TileMap prefab, List<PlacedRoomPrefab> alreadyPlacedPrefabs){
+        for (var alreadyPlacedPrefab : alreadyPlacedPrefabs) {
+            if (alreadyPlacedPrefab.overlapsPrefab(prefab, prefabPosX, prefabPosY, prefabPosZ, 1)) {
+                return false;
+            }
+        }
+        return true;
     }
 }

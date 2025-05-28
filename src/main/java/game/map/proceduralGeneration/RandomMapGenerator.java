@@ -1,13 +1,14 @@
 package game.map.proceduralGeneration;
 
 import client.appStates.ClientGameAppState;
+import com.mccurry.map.model.BlockType;
 import game.map.MapGenerationResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import game.map.blocks.BlockType;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
+
 import jme3utilities.math.Vector3i;
 
 public class RandomMapGenerator extends MapGenerator{
@@ -61,7 +62,7 @@ public class RandomMapGenerator extends MapGenerator{
                 for (int x = roomPosX; x < roomPosX + roomSizeX; x++) {
                     for (int y = roomPosY; y < roomPosY + roomSizeY; y++) {
                         for (int z = roomPosZ; z < roomPosZ + roomSizeZ; z++) {
-                            logicMap.setBlockIdAtPosition(x,y,z,BlockType.STONE.blockId);
+                            logicMap.setBlockIdAtPosition(x,y,z, BlockType.STONE.blockId);
                             // hardcode dla podlogi
                             if (y == 0) {
                                 logicMap.setBlockIdAtPosition(x,y,z,BlockType.DIRT.blockId);

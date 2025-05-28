@@ -11,7 +11,7 @@ import lombok.Getter;
 import lombok.Setter;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
+
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public abstract class ThrownGrenade extends Collidable {

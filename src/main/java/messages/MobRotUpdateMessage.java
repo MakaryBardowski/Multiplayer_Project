@@ -8,7 +8,6 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.AttachedEntity;
 import game.entities.Movable;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class MobRotUpdateMessage extends EntityUpdateMessage {

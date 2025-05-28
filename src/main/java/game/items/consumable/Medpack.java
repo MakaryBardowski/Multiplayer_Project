@@ -10,7 +10,6 @@ import itemSystem.ItemTemplates;
 import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewGrenadeMessage;
-import com.jme3.network.Filters;
 import messages.DestructibleHealReceiveMessage;
 import server.ServerContext;
 import server.ServerGameAppState;

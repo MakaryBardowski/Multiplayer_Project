@@ -10,7 +10,6 @@ import de.lessvoid.nifty.controls.Label;
 import lombok.Setter;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class HostJoinedLobbyMessage extends TwoWayMessage {

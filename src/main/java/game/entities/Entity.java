@@ -59,19 +59,19 @@ public abstract class Entity implements ServerEventPublisher, ServerEventSubscri
         ctx.notifyAllClients(msg);
     }
 
-    public void setIntegerAttributeAndNotifyClients(ServerContext ctx,int attributeId, int val) {
+    public void setIntegerAttributeAndNotifyClients(ServerContext ctx, int attributeId, int val) {
         setIntegerAttribute(attributeId, val);
         var msg = new EntitySetIntegerAttributeMessage(this, attributeId, val);
         ctx.notifyAllClients(msg);
     }
 
-    public void setFloatAttributesAndNotifyClients(ServerContext ctx,Map<Integer,Float> floatAttributesById) {
+    public void setFloatAttributesAndNotifyClients(ServerContext ctx, Map<Integer,Float> floatAttributesById) {
         setFloatAttributes(floatAttributesById);
         var msg = new BatchSetFloatAttributeMessage(this, floatAttributesById);
         ctx.notifyAllClients(msg);
     }
 
-    public void setIntegerAttributesAndNotifyClients(ServerContext ctx,Map<Integer,Integer> integerAttributesById) {
+    public void setIntegerAttributesAndNotifyClients(ServerContext ctx, Map<Integer,Integer> integerAttributesById) {
         setIntegerAttributes(integerAttributesById);
         var msg = new BatchSetIntegerAttributeMessage(this, integerAttributesById);
         ctx.notifyAllClients(msg);
@@ -132,7 +132,7 @@ public abstract class Entity implements ServerEventPublisher, ServerEventSubscri
     }
 
     @Override
-    public void receiveEventNotificationServer(ServerContext ctx,GameEvent gameEvent) {
+    public void receiveEventNotificationServer(ServerContext ctx, GameEvent gameEvent) {
         if(serverGameEventHandler != null){
             serverGameEventHandler.accept(ctx,gameEvent,this);
         }

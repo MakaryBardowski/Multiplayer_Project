@@ -8,7 +8,6 @@ import game.entities.grenades.ThrownGrenade;
 import lombok.Getter;
 import lombok.Setter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class ThrownGrenadeExplodedMessage extends TwoWayMessage {

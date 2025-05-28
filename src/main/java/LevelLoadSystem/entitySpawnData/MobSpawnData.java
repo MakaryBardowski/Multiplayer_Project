@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import game.entities.Entity;
 import game.entities.factories.MobSpawnType;
 import server.ServerContext;
-import server.ServerLevelManager;
 
 public class MobSpawnData extends EntitySpawnData{
     public MobSpawnData(int templateIndex, Vector3f position) {
@@ -16,8 +15,8 @@ public class MobSpawnData extends EntitySpawnData{
     }
 
     @Override
-    public Entity serverSpawn(ServerContext ctx, ServerLevelManager serverLevelManager) {
-        var mob = serverLevelManager.createAndRegisterMob(MobSpawnType.values()[templateIndex]);
+    public Entity serverSpawn(ServerContext ctx) {
+        var mob = ctx.getLevelManager().createAndRegisterMob(MobSpawnType.values()[templateIndex]);
         mob.setPositionServer(ctx,getPosition());
         return mob;
     }

@@ -2,7 +2,7 @@ package game.map;
 
 import LevelLoadSystem.entitySpawnData.EntitySpawnData;
 import com.jme3.math.Vector3f;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

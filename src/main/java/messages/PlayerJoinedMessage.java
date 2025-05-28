@@ -7,7 +7,6 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.mobs.player.Player;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class PlayerJoinedMessage extends TwoWayMessage {

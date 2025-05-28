@@ -1,8 +1,6 @@
 package game.map.proceduralGeneration;
 
 import game.map.MapGenerationResult;
-import game.map.blocks.BlockType;
-import game.map.MapDataModel.Map;
 
 import java.util.Random;
 

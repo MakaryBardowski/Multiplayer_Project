@@ -35,7 +35,7 @@ import messages.DestructibleDamageReceiveMessage;
 import messages.NewMobMessage;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
+
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public class MudBeetle extends Mob {

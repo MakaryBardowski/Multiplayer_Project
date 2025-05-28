@@ -1,9 +1,9 @@
 package game.map.proceduralGeneration;
 
 import client.appStates.ClientGameAppState;
+import com.mccurry.map.model.BlockType;
 import game.map.MapGenerationResult;
-import game.map.blocks.BlockType;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
 
 
 public class CellularAutomataMapGenerator extends MapGenerator{

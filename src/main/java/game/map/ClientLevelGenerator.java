@@ -3,13 +3,14 @@ package game.map;
 import client.appStates.ClientGameAppState;
 import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
-import game.map.MapDataModel.Map;
+
 import game.map.proceduralGeneration.BspMapGenerator;
 import game.map.proceduralGeneration.CellularAutomataMapGenerator;
 import game.map.proceduralGeneration.RandomMapGenerator;
 
 import java.io.IOException;
-import java.util.Arrays;
+import com.mccurry.map.model.Map;
+
 
 public class ClientLevelGenerator {
     private final long levelSeed;

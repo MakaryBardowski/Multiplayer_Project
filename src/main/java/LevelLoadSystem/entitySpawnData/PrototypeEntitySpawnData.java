@@ -4,7 +4,6 @@ import LevelLoadSystem.entitySpawnData.entityPrototypeData.EntitySpawnDataProtot
 import com.jme3.math.Vector3f;
 import game.entities.Entity;
 import server.ServerContext;
-import server.ServerLevelManager;
 
 public class PrototypeEntitySpawnData extends EntitySpawnData{
     private final EntitySpawnDataPrototype<?> prototype;
@@ -14,12 +13,12 @@ public class PrototypeEntitySpawnData extends EntitySpawnData{
     }
 
     @Override
-    public Entity serverSpawn(ServerContext ctx, ServerLevelManager serverLevelManager) {
+    public Entity serverSpawn(ServerContext ctx) {
         var resolved = prototype.resolve();
         if(resolved == null ){
             return null; // resolved to no entity - for example no item in randomization
         }
         resolved.getPosition().set(position);
-        return resolved.serverSpawn(ctx, serverLevelManager);
+        return resolved.serverSpawn(ctx);
     }
 }

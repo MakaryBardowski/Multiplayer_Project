@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Random;
 
 import server.ServerContext;
-import server.ServerGameAppState;
 
 public class EntitySpawner {
 
@@ -24,7 +23,7 @@ public class EntitySpawner {
             var serverLevelManager = ctx.getLevelManager();
             entitySpawnInfo.getPosition().multLocal(blockSize);
 
-            var spawnedEntity =entitySpawnInfo.serverSpawn(ctx,serverLevelManager);
+            var spawnedEntity =entitySpawnInfo.serverSpawn(ctx);
             if(spawnedEntity != null){
                 serverLevelManager.broadcastEntityOnNextLevel(spawnedEntity);
             }

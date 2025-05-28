@@ -7,7 +7,6 @@ import com.jme3.network.serializing.Serializable;
 import game.entities.Animated;
 import game.entities.Animation;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class AnimationPlayedMessage extends EntityUpdateMessage {

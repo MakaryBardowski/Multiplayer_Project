@@ -29,7 +29,6 @@ import messages.TwoWayMessage;
 import messages.items.MobItemInteractionMessage;
 import messages.items.NewMeleeWeaponMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 public class Knife extends MeleeWeapon {
 

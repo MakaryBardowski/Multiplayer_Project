@@ -13,7 +13,6 @@ import java.util.concurrent.Future;
 import lombok.Getter;
 import lombok.Setter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 public class SimpleHumanMobContext extends Context {
 
@@ -178,7 +177,7 @@ public class SimpleHumanMobContext extends Context {
     }
 
     @Override
-    public void receiveEventNotificationServer(ServerContext ctx,GameEvent gameEvent) {
+    public void receiveEventNotificationServer(ServerContext ctx, GameEvent gameEvent) {
         if (gameEvent instanceof DamageReceivedEvent dre) {
             handleDamageReceivedEvent(dre);
         }

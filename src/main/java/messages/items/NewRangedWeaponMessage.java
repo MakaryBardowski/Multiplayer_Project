@@ -8,7 +8,6 @@ import game.entities.IntegerAttribute;
 import game.items.weapons.RangedWeapon;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 @Getter

@@ -1,7 +1,8 @@
 package game.map;
 
 import LevelLoadSystem.entitySpawnData.EntitySpawnData;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.Map;
+
 import game.map.proceduralGeneration.Room;
 
 import java.util.List;

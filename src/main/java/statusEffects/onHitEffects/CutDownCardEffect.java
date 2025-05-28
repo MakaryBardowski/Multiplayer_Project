@@ -5,7 +5,6 @@ import game.entities.Destructible;
 import game.entities.StatusEffectContainer;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 import statusEffects.EffectProcType;
 
 public class CutDownCardEffect extends OnHitEffect{

@@ -7,7 +7,6 @@ import messages.TwoWayMessage;
 import static messages.lobby.HostJoinedLobbyMessage.updateLobby;
 
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class HostChangedNicknameMessage extends TwoWayMessage {

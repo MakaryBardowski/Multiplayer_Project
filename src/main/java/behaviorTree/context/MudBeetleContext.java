@@ -14,7 +14,6 @@ import game.entities.mobs.MudBeetle;
 import lombok.Getter;
 import lombok.Setter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 public class MudBeetleContext extends Context {
 
@@ -178,7 +177,7 @@ public class MudBeetleContext extends Context {
     }
 
     @Override
-    public void receiveEventNotificationServer(ServerContext ctx,GameEvent gameEvent) {
+    public void receiveEventNotificationServer(ServerContext ctx, GameEvent gameEvent) {
         if (gameEvent instanceof DamageReceivedEvent dre) {
             handleDamageReceivedEvent(dre);
         }

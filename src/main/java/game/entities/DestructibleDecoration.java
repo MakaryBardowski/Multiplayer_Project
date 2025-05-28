@@ -15,7 +15,7 @@ import messages.DestructibleDamageReceiveMessage;
 import messages.NewDestructibleDecorationMessage;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
+
 import static server.ServerGameAppState.removeEntityByIdServer;
 
 public class DestructibleDecoration extends StatusEffectContainer {

@@ -3,8 +3,8 @@ package game.map.proceduralGeneration;
 import Utils.Pair;
 import client.appStates.ClientGameAppState;
 import game.map.MapGenerationResult;
-import game.map.blocks.BlockType;
-import game.map.MapDataModel.Map;
+import com.mccurry.map.model.BlockType;
+import com.mccurry.map.model.Map;
 import jme3utilities.math.Vector3i;
 
 import java.util.ArrayList;

@@ -11,7 +11,6 @@ import game.entities.mobs.Mob;
 import game.items.weapons.Rifle;
 import lombok.Getter;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class HitscanTrailMessage extends EntityUpdateMessage {

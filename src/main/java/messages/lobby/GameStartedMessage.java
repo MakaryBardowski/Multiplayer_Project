@@ -7,7 +7,6 @@ import com.jme3.network.HostedConnection;
 import com.jme3.network.serializing.Serializable;
 import messages.TwoWayMessage;
 import server.ServerContext;
-import server.ServerGameAppState;
 
 @Serializable
 public class GameStartedMessage extends TwoWayMessage {

@@ -4,7 +4,6 @@ import com.jme3.math.Vector3f;
 import game.entities.Entity;
 import itemSystem.ItemTemplates;
 import server.ServerContext;
-import server.ServerLevelManager;
 
 public class ItemSpawnData extends EntitySpawnData{
     private boolean isDropped;
@@ -17,8 +16,8 @@ public class ItemSpawnData extends EntitySpawnData{
     }
 
     @Override
-    public Entity serverSpawn(ServerContext ctx, ServerLevelManager serverLevelManager) {
-        var item = serverLevelManager.registerItemLocal(ItemTemplates.getTemplateByIndex(templateIndex),droppable);
+    public Entity serverSpawn(ServerContext ctx) {
+        var item = ctx.getLevelManager().registerItemLocal(ItemTemplates.getTemplateByIndex(templateIndex),droppable);
 
         if (isDropped) {
             item.setDroppedOnServer(true);
