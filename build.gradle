@@ -40,21 +40,11 @@ project(":assets") {
 }
 
 dependencies {
-    implementation  ('org.example:McCurryRandom:0.2') {
-        version {
-            branch = "master"
-        }
-    }
-    implementation  ('com.epagagames:particlemonkey:1.1.1') {
-        version {
-            branch = "master"
-        }
-    }
-    implementation  ('org.mccurry:game-lib-map') {
-        version {
-            branch = "master"
-        }
-    }
+
+    implementation 'com.epagagames:particlemonkey'
+    implementation 'org.mccurry:game-lib-map'
+    implementation 'org.mccurry:game-lib-serde'
+    implementation 'org.example:McCurryRandom'
 
 
     implementation 'org.lz4:lz4-java:1.8.0'

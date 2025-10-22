@@ -1,16 +1,26 @@
 rootProject.name = 'BulletHeavenMultiplayer'
 include 'assets'
 
-sourceControl {
-    gitRepository(new URI("https://github.com/MakaryBardowski/McCurryRandom.git")) {
-        producesModule("org.example:McCurryRandom")
-    }
-    gitRepository(new URI("https://github.com/MakaryBardowski/particlemonkey")) {
-        producesModule("com.epagagames:particlemonkey")
-    }
-
-    gitRepository(new URI("ssh://git@github.com/MakaryBardowski/game-libs.git")) {
-        producesModule("org.mccurry:game-lib-map")
-        rootDir = "game-lib-map"
+def cloneIfMissing(String url, String dir, String branch = "master") {
+    def target = file(dir)
+    if (!target.exists()) {
+        System.out.println("Cloning $url -> $dir")
+        exec {
+            commandLine 'git', 'clone', '--depth', '1', '--branch', branch, url, dir
+        }
+    } else {
+        System.err.println("NOT PULLING NEWEST $url - already exists locally")
     }
 }
+
+def libsDir = file("$rootDir/libs")
+if (!libsDir.exists()) libsDir.mkdirs()
+
+cloneIfMissing('ssh://git@github.com/MakaryBardowski/game-libs.git', "$rootDir/libs/game-libs", 'master')
+cloneIfMissing('https://github.com/MakaryBardowski/particlemonkey', "$rootDir/libs/mccurry_particlemonkey", 'master')
+cloneIfMissing('https://github.com/MakaryBardowski/McCurryRandom.git', "$rootDir/libs/mccurry_random", 'master')
+
+includeBuild("libs/game-libs/game-lib-map")
+includeBuild("libs/game-libs/game-lib-serde")
+includeBuild("libs/mccurry_particlemonkey")
+includeBuild("libs/mccurry_random")
