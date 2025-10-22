@@ -4,8 +4,8 @@
 **/*.jar
 **/*.lock
 **/*.log
-/.gradle/nb-cache/
 /.idea/
 *.class
 /build
 /libs/
+/.gradle
