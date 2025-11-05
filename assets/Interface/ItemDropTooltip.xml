@@ -5,7 +5,7 @@
     <useStyles filename="nifty-default-styles.xml" />
     <useControls filename="nifty-default-controls.xml" />
 
-    <screen id="tooltipScreen" controller="client.MainMenuController">
+    <screen id="tooltipScreen" controller="dirty.client.MainMenuController">
 
         <layer id="backgroundLayer" childLayout="center" backgroundImage="Textures/GUI/itemTooltip.png">
 

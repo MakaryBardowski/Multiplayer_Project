@@ -22,5 +22,6 @@ cloneIfMissing('https://github.com/MakaryBardowski/McCurryRandom.git', "$rootDir
 
 includeBuild("libs/game-libs/game-lib-map")
 includeBuild("libs/game-libs/game-lib-serde")
+includeBuild("libs/game-libs/game-lib-events")
 includeBuild("libs/mccurry_particlemonkey")
 includeBuild("libs/mccurry_random")

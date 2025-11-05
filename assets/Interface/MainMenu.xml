@@ -5,7 +5,7 @@
     <useStyles filename="nifty-default-styles.xml" />
     <useControls filename="nifty-default-controls.xml" />
 
-    <screen id="MainMenu" controller="client.MainMenuController">
+    <screen id="MainMenu" controller="dirty.client.MainMenuController">
         <layer childLayout="center">
 
             <!--backgroundColor="#55a5"-->
@@ -29,7 +29,7 @@
     
     
     
-    <screen id="LobbyHost" controller="client.MainMenuController" >
+    <screen id="LobbyHost" controller="dirty.client.MainMenuController" >
         <layer childLayout="center" >
             <panel id = "classRow1" childLayout="horizontal" width="${CALL.getClassPanelWidth()}" height="${CALL.getClassPanelHeight()}" marginTop="30%" marginLeft = "-25%">
                 <image name="image" id="button1" label="Button 1" width="33.33%" height="100%" filename="Interface/Icons/assault.png">
@@ -91,7 +91,7 @@
     
     
     
-    <screen id="LobbyClient" controller="client.MainMenuController">
+    <screen id="LobbyClient" controller="dirty.client.MainMenuController">
         <layer childLayout="center">
                         <panel id = "classRow1" childLayout="horizontal" width="${CALL.getClassPanelWidth()}" height="${CALL.getClassPanelHeight()}" marginTop="30%" marginLeft = "-25%">
                 <image name="image" id="button1" label="Button 1" width="33.33%" height="100%" filename="Interface/Icons/assault.png">

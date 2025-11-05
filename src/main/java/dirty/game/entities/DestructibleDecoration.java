@@ -1,0 +1,158 @@
+package dirty.game.entities;
+
+import dirty.client.appStates.ClientGameAppState;
+import static dirty.client.appStates.ClientGameAppState.removeEntityByIdClient;
+import dirty.client.Main;
+import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
+import dirty.data.DamageReceiveData;
+import dirty.game.entities.DecorationTemplates.DecorationTemplate;
+import dirty.game.entities.mobs.Mob;
+import dirty.game.map.collision.RectangleAABB;
+import dirty.game.map.collision.WorldGrid;
+import lombok.Getter;
+import dirty.messages.DestructibleDamageReceiveMessage;
+import dirty.messages.NewDestructibleDecorationMessage;
+import dirty.messages.TwoWayMessage;
+import dirty.server.ServerContext;
+
+import static dirty.server.ServerGameAppState.removeEntityByIdServer;
+
+public class DestructibleDecoration extends StatusEffectContainer {
+
+    @Getter
+    protected DecorationTemplate template;
+
+    public DestructibleDecoration(int id, String name, Node node, DecorationTemplate template) {
+        super(id, name, node);
+        this.template = template;
+        createHitbox();
+    }
+
+    @Override
+    protected void createHitbox() {
+        float hitboxWidth = template.getCollisionShapeWidth();
+        float hitboxHeight = template.getCollisionShapeHeight();
+        float hitboxLength = template.getCollisionShapeLength();
+        hitboxNode.move(0, hitboxHeight, 0);
+        collisionShape = new RectangleAABB(hitboxNode.getWorldTranslation(), hitboxWidth, hitboxHeight, hitboxLength);
+        showHitboxIndicator();
+    }
+
+    @Override
+    public void onInteract() {
+    }
+
+    @Override
+    public void onAttacked(Mob shooter, DamageReceiveData damageReceiveData) {
+        notifyServerAboutReceivingDamage(damageReceiveData);
+    }
+
+    @Override
+    public void setPositionClient(Vector3f newPos) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void setPositionServer(ServerContext ctx, Vector3f newPos) {
+        WorldGrid grid = ctx.getCollisionGrid();
+        grid.remove(this);
+        node.setLocalTranslation(newPos);
+        grid.insert(this);
+    }
+
+    @Override
+    public TwoWayMessage createNewEntityMessage() {
+        NewDestructibleDecorationMessage msg = new NewDestructibleDecorationMessage(this);
+        msg.setReliable(true);
+        return msg;
+    }
+
+    @Override
+    public void receiveDamageClient(DamageReceiveData damageData) {
+        for(var onDamageReceivedEffect : onDamageReceivedEffects){
+            onDamageReceivedEffect.applyClient(damageData);
+        }
+
+        setHealth(getHealth()-damageData.getRawDamage());
+        if (getHealth() <= 0) {
+            die();
+            destroyClient();
+            onDeathClient();
+        }
+    }
+
+    @Override
+    public void receiveDamageServer(ServerContext ctx, DamageReceiveData damageData) {
+        for(var onDamageReceivedEffect : onDamageReceivedEffects){
+            onDamageReceivedEffect.applyServer(ctx,damageData);
+        }
+
+        setHealth(getHealth()-damageData.getRawDamage());
+
+        if (getHealth() <= 0) {
+            destroyServer(ctx);
+            onDeathServer();
+        }
+    }
+
+    @Override
+    public void die() {
+        node.removeFromParent();
+        ClientGameAppState.getInstance().getGrid().remove(this);
+        hideHitboxIndicator();
+    }
+
+    @Override
+    public float getArmorValue() {
+        return 0;
+    }
+
+    @Override
+    public float calculateDamage(float damage) {
+        float reducedDmg = damage - getArmorValue();
+        return reducedDmg > 0 ? reducedDmg : 0;
+    }
+
+    @Override
+    public void notifyServerAboutReceivingDamage(DamageReceiveData damageReceiveData) {
+        DestructibleDamageReceiveMessage hpUpd = new DestructibleDamageReceiveMessage(damageReceiveData);
+        hpUpd.setReliable(true);
+        ClientGameAppState.getInstance().getClient().send(hpUpd);
+    }
+
+    @Override
+    public void onCollisionClient(Collidable other) {
+    }
+
+    @Override
+    public void onCollisionServer(ServerContext ctx, Collidable other) {
+    }
+
+    @Override
+    public void moveClient(float tpf) {
+        throw new UnsupportedOperationException("Not supported yet."); // Generated from nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    }
+
+    @Override
+    public void destroyServer(ServerContext ctx) {
+        ctx.getCollisionGrid().remove(this);
+        if (node.getParent() != null) {
+            Main.getInstance().enqueue(() -> {
+                node.removeFromParent();
+            });
+        }
+        removeEntityByIdServer(ctx,id);
+    }
+
+    @Override
+    public void destroyClient() {
+        var client = ClientGameAppState.getInstance();
+        client.getGrid().remove(this);
+        Main.getInstance().enqueue(() -> {
+            node.removeFromParent();
+        });
+        removeEntityByIdClient(id);
+    }
+
+}

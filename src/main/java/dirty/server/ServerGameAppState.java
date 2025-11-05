@@ -1,0 +1,187 @@
+package dirty.server;
+
+import com.jme3.app.Application;
+import com.jme3.network.serializing.Serializer;
+import dirty.game.constants.ServerConstants;
+import dirty.game.entities.mobs.Mob;
+import dirty.messages.messageListeners.ServerMessageListener;
+import dirty.messages.MobPosRotUpdateMessage;
+
+import com.jme3.app.state.AbstractAppState;
+import com.jme3.app.state.AppStateManager;
+import com.jme3.asset.AssetManager;
+
+import com.jme3.network.Network;
+import com.jme3.network.Server;
+import dirty.networkingUtils.NetworkingInitialization;
+import com.jme3.renderer.RenderManager;
+import dirty.game.entities.Destructible;
+import dirty.game.entities.Entity;
+import dirty.game.entities.StatusEffectContainer;
+import dirty.game.entities.grenades.ThrownGrenade;
+import dirty.game.entities.mobs.AiSteerable;
+import dirty.game.items.Item;
+import dirty.game.map.collision.WorldGrid;
+
+import java.io.IOException;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import lombok.Getter;
+import dirty.messages.GrenadePosUpdateMessage;
+import dirty.messages.lobby.GameStartedMessage;
+import com.mccurry.map.model.Map;
+
+public class ServerGameAppState extends AbstractAppState {
+    private ServerContext context;
+
+    private static final String SERVER_CLOSE_MESSAGE = "Host player has quit the game.";
+
+    public static final byte MAX_PLAYERS = 4;
+
+    // server variables
+    @Getter
+    private Server server;
+
+    @Getter
+    private final int TICKS_PER_SECOND = 64;
+    private final float TIME_PER_TICK = 1f / ServerConstants.TICKS_PER_SECOND;
+    private float tickTimer;
+
+    @Getter
+    private final int BLOCK_SIZE = 3; //4
+
+    @Getter
+    private final int COLLISION_GRID_CELL_SIZE = 18; //16
+
+    @Getter
+    private final int MAP_SIZE = 39;
+
+    @Getter
+    public static ScheduledThreadPoolExecutor pathfindingExecutor = new ScheduledThreadPoolExecutor(1);
+
+    @Getter
+    private static float timePerFrame;
+    private boolean serverTick = false;
+    private boolean serverPaused = true;
+
+    @Getter
+    private ServerGameManager currentGamemode;
+
+    public ServerGameAppState(AssetManager assetManager, RenderManager renderManager) {
+    }
+
+    @Override
+    public void initialize(AppStateManager stateManager, Application app) {
+        super.initialize(stateManager, app);
+        createServer();
+        context = new ServerContext(server, null);
+        currentGamemode = new ServerStoryGameManager(context);
+        server.addConnectionListener(new ServerConnectionListener());
+        server.addMessageListener(new ServerMessageListener(context));
+        server.start();
+    }
+
+    @Override // the whole update method should be on another thread
+    public void update(float tpf) {
+        timePerFrame = tpf;
+
+        if (!serverPaused) {
+            tickTimer += timePerFrame;
+            serverTick = tickTimer >= TIME_PER_TICK;
+            for (var i : getLevelManagerMobs().values()) {
+                if (i instanceof AiSteerable agent) {
+                    agent.updateAi();
+                }
+
+                if (serverTick) {
+                    if (i instanceof Destructible d) {
+                        if (d instanceof StatusEffectContainer c) {
+                            c.updateTemporaryEffectsServer(context);
+                        }
+                        if (d instanceof Mob x) {
+                            if (x.getRotationChangedOnServer().get() == true || x.getPositionChangedOnServer().get() == true) {
+                                server.broadcast(new MobPosRotUpdateMessage(x.getId(), x.getNode().getWorldTranslation(), x.getNode().getLocalRotation()));
+                                x.getPositionChangedOnServer().set(false);
+                                x.getRotationChangedOnServer().set(false);
+                            }
+                        }
+
+                    } else if (i instanceof ThrownGrenade x) {
+                        server.broadcast(new GrenadePosUpdateMessage(x.getId(), x.getNode().getWorldTranslation()));
+                    }
+
+                }
+
+            }
+
+            if (serverTick) {
+                tickTimer = 0;
+            }
+
+        }
+    }
+
+    public void startGame() {
+        currentGamemode.startGame();
+
+        var gameStartedMsg = new GameStartedMessage();
+        server.broadcast(gameStartedMsg);
+        serverPaused = false;
+    }
+
+
+    private void createServer() {
+        try {
+            Serializer.initialize();
+            NetworkingInitialization.initializeSerializables();
+
+            server = Network.createServer(NetworkingInitialization.PORT);
+
+        } catch (IOException ex) {
+            Logger.getLogger(ServerGameAppState.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    public static void removeEntityByIdServer(ServerContext context, int id) {
+
+        context.removeEntity(id);
+    }
+
+    public static void removeItemFromMobEquipmentServer(ServerContext context, int mobId, int itemId) {
+        var mob = (Mob) context.getEntity(mobId);
+        var item = (Item) context.getEntity(itemId);
+        var mobEquipment = mob.getEquipment();
+        mobEquipment.removeItem(item);
+    }
+
+    public ConcurrentHashMap<Integer, Entity> getLevelManagerMobs() {
+        return currentGamemode.getLevelManager().getEntitiesById();
+    }
+
+    public WorldGrid getGrid() {
+        return currentGamemode.getLevelManager().getCollisionGrid();
+    }
+
+    public Map getMap() {
+        return currentGamemode.getLevelManager().getCurrentMap();
+    }
+
+    public boolean containsEntityWithId(int id) {
+        return currentGamemode.getLevelManager().getEntitiesById().get(id) != null;
+    }
+
+    @Override
+    public void stateDetached(AppStateManager stateManager) {
+        super.stateDetached(stateManager);
+
+        server.getConnections().forEach(hc -> hc.close(SERVER_CLOSE_MESSAGE));
+
+//        ServerSerializerRegistrationsService ssr = server.getServices().getService( ServerSerializerRegistrationsService.class );
+//        server.getServices().removeService(ssr);
+        server.close();
+        currentGamemode.getLevelManager().cleanup();
+    }
+}
