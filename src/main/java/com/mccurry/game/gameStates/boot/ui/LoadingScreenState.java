@@ -3,49 +3,87 @@ package com.mccurry.game.gameStates.boot.ui;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.font.BitmapText;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector2f;
+import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
+import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
+import com.jme3.system.AppSettings;
+import com.jme3.texture.Texture;
+
+import com.mccurry.events.core.EventBus;
+import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
+import com.mccurry.game.gameStates.boot.events.AssetLoadingPercentAdvanceEvent;
 import com.mccurry.game.gameStates.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
-import com.mccurry.game.gameStates.orchestrator.GameStateEventContext;
+import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
+import com.mccurry.game.shared.util.event.EventSubscribers;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LoadingScreenState extends BaseAppState implements SyncEventHandler<InitialBootCompleteEvent, GameStateEventContext> {
-    private Geometry blackOverlayGeom;
+public class LoadingScreenState extends BaseAppState implements SyncEventHandler<InitialBootCompleteEvent, GameOrchestrationContext> {
+    private final Node stateGuiNode = new Node("Loading screen gui node");
+    private BitmapText loadingText;
+    private Geometry progressBarGeom;
+    private final Vector2f loadingProgressMaterialVector = new Vector2f();
 
     @Override
     protected void initialize(Application application) {
-        var orchestrationBus = getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
-        orchestrationBus.subscribe(InitialBootCompleteEvent.class,this);
-
         var simpleApplication = (SimpleApplication) application;
         var settings = simpleApplication.getContext().getSettings();
+
+        var orchestrationBus = getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
+        orchestrationBus.subscribe(InitialBootCompleteEvent.class, this);
+        loadingProgressUpdateSubscriber(orchestrationBus, simpleApplication).subscribe(orchestrationBus);
 
         float width = settings.getWidth();
         float height = settings.getHeight();
 
+        var guiNode = simpleApplication.getGuiNode();
+
         var quad = new Quad(width, height);
-        blackOverlayGeom = new Geometry("BlackQuad", quad);
+        Geometry blackOverlayGeom = new Geometry("BlackQuad", quad);
 
         var mat = new Material(simpleApplication.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Red);
+        mat.setColor("Color", ColorRGBA.Black);
         blackOverlayGeom.setMaterial(mat);
-        simpleApplication.getGuiNode().attachChild(blackOverlayGeom);
+        stateGuiNode.attachChild(blackOverlayGeom);
+
+        progressBarGeom = createLoadingBarNode(simpleApplication);
+
+        var loadingBarPos = new Vector3f(
+                (width-getProgressBarWidth(settings))*0.5f,
+                (height-getProgressBarHeight(settings))*0.5f,
+                1
+        );
+
+        progressBarGeom.setLocalTranslation(loadingBarPos);
+        stateGuiNode.attachChild(progressBarGeom);
+
+
+        loadingText = createLoadingText(simpleApplication);
+
+        loadingText.setLocalTranslation(getLoadingTextPos(settings));
+        stateGuiNode.attachChild(loadingText);
+
+        stateGuiNode.setLocalTranslation(blackOverlayGeom.getLocalTranslation().clone().setZ(Float.MAX_VALUE));
+        guiNode.attachChild(stateGuiNode);
 
         System.out.println("[LoadingScreenState] Loading screen initialized");
-        orchestrationBus.publish(new BootUiStateSetupCompleteEvent(), new GameStateEventContext(),null);
+        orchestrationBus.publish(new BootUiStateSetupCompleteEvent(), new GameOrchestrationContext(), null);
     }
 
     @Override
     protected void cleanup(Application application) {
-        blackOverlayGeom.removeFromParent();
+        stateGuiNode.removeFromParent();
+        stateGuiNode.detachAllChildren();
     }
 
     @Override
@@ -59,11 +97,80 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
     }
 
     @Override
-    public void handle(@NonNull InitialBootCompleteEvent event, @NonNull GameStateEventContext eventContext, @Nullable EventLifecycleManager<InitialBootCompleteEvent> lifecycleManager) {
+    public void handle(@NonNull InitialBootCompleteEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<InitialBootCompleteEvent> lifecycleManager) {
         var orchestrationBus = getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         orchestrationBus.unsubscribe(InitialBootCompleteEvent.class, this);
-        orchestrationBus.publish(new StartScreenFadeOutEvent(2f), new GameStateEventContext(), null);
+        orchestrationBus.publish(new StartScreenFadeOutEvent(2f), new GameOrchestrationContext(), null);
         System.out.println("[LoadingScreenState] Detaching loading screen.");
         getStateManager().detach(this);
+    }
+
+    private BitmapText createLoadingText(SimpleApplication application) {
+        var loadingTextFont = application.getAssetManager().loadFont("Interface/Fonts/pixelFlat11.fnt");
+        var loadingText = new BitmapText(loadingTextFont);
+        loadingText.setSize(loadingTextFont.getCharSet().getRenderedSize() * 1);
+        loadingText.setText("Loading...");
+        return loadingText;
+    }
+
+
+    private Geometry createLoadingBarNode(SimpleApplication app) {
+        var assetManager = app.getAssetManager();
+        var settings = app.getContext().getSettings();
+
+        Quad quad = new Quad(getProgressBarWidth(settings), getProgressBarHeight(settings));
+        Geometry geo = new Geometry("OurQuad", quad);
+        Material mat = new Material(assetManager, "Shaders/PlayerHealthbar/SimpleColor.j3md");
+        var emptyHpBar = assetManager.loadTexture("Textures/GUI/HUD/playerHealthbar/healthbar_background.png");
+        var fullWithoutFrame = assetManager.loadTexture("Textures/GUI/HUD/playerHealthbar/healthbar.png");
+
+        emptyHpBar.setMagFilter(Texture.MagFilter.Nearest);
+        fullWithoutFrame.setMagFilter(Texture.MagFilter.Nearest);
+
+        mat.setTexture("emptyHealthBar", emptyHpBar);
+        mat.setTexture("fullHealthBarWithoutFrame", fullWithoutFrame);
+        mat.setVector2("healthPercent", loadingProgressMaterialVector);
+
+        mat.setColor("tint", new ColorRGBA(154f / 255f, 0f / 255f, 0f / 255f, 1f / 255f));
+        geo.setMaterial(mat);
+        return geo;
+    }
+
+    private float getProgressBarWidth(AppSettings settings) {
+        return settings.getWidth() * 0.20f;
+    }
+
+    private float getProgressBarHeight(AppSettings settings) {
+        return settings.getWidth() * 0.03f;
+    }
+
+    private Vector3f getLoadingTextPos(AppSettings settings){
+        return new Vector3f(
+                (settings.getWidth()-loadingText.getLineWidth())*0.5f,
+                progressBarGeom.getLocalTranslation().clone().subtractLocal(0,loadingText.getHeight(),0).getY(),
+                1
+        );
+    }
+
+    private EventSubscriber<GameOrchestrationContext> loadingProgressUpdateSubscriber(EventBus<GameOrchestrationContext> orchestrationBus, SimpleApplication application){
+        return EventSubscribers.syncUnsubscribingOnCondition(
+                AssetLoadingPercentAdvanceEvent.class,
+                orchestrationBus,
+                assetLoadingPercentAdvanceEvent -> {
+                    application.enqueue( () -> { // because asset loading happens on other thread
+                        var normalizedLoadingPercent = assetLoadingPercentAdvanceEvent.getNormalizedLoadPercent();
+                        loadingProgressMaterialVector.setX(normalizedLoadingPercent);
+                        if(normalizedLoadingPercent != 1) {
+                            loadingText.setText("Loading %s%%".formatted((int) Math.floor(normalizedLoadingPercent * 100)));
+                        } else {
+                            loadingText.setText("Loading done :D");
+                        }
+                        loadingText.setLocalTranslation(getLoadingTextPos(application.getContext().getSettings()));
+                    });
+                },
+                assetLoadingPercentAdvanceEvent -> {
+                    return assetLoadingPercentAdvanceEvent.getNormalizedLoadPercent() == 1;
+                }
+        );
     }
 }

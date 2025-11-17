@@ -44,6 +44,7 @@ public class AutoDetachingScreenFadeOutState extends BaseAppState {
         mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
         overlayGeom.setMaterial(mat);
         overlayGeom.setQueueBucket(RenderQueue.Bucket.Gui);
+        overlayGeom.getLocalTranslation().setZ(Float.MAX_VALUE);
         simpleApplication.getGuiNode().attachChild(overlayGeom);
 
         System.out.println("[AutoDetachingScreenFadeInState] Starting fade out...");

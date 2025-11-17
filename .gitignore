@@ -9,3 +9,5 @@
 /build
 /libs/
 /.gradle
+/.gradle
+/settings.json

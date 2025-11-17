@@ -5,23 +5,34 @@ import com.jme3.app.state.BaseAppState;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
+import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.gameStates.boot.InitialBootState;
 import com.mccurry.game.gameStates.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
-import com.mccurry.game.gameStates.orchestrator.service.MainMenuLauncher;
+import com.mccurry.game.gameStates.mainMenu.MainMenuState;
+import com.mccurry.game.gameStates.mainMenu.events.MainMenuOpenRequest;
+import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
+import com.mccurry.game.shared.settings.service.UserSettingsService;
+import com.mccurry.game.shared.ui.service.UiResolutionSettingsService;
 import com.mccurry.game.shared.ui.transition.ScreenTransitionService;
 import lombok.Getter;
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
+@Getter
+@RequiredArgsConstructor
 public class GameStateOrchestrator extends BaseAppState {
 
-    @Getter
-    private final EventBus<GameStateEventContext> gameOrchestrationBus = new EventBus<>();
+    private final EventBus<GameOrchestrationContext> gameOrchestrationBus;
+    private final UserSettingsService userSettingsService;
 
     @Override
     protected void initialize(Application application) {
         new ScreenTransitionService(application.getStateManager()).subscribe(gameOrchestrationBus);
-        var bootDoneHandler = new MainMenuLauncher(getStateManager(), gameOrchestrationBus);
+        registerMainMenuLauncher();
+
+        var bootDoneHandler = new OnAssetLoadingDoneMainMenuLauncher(gameOrchestrationBus);
         gameOrchestrationBus.subscribe(AssetLoadingCompleteEvent.class, bootDoneHandler);
 
         var initialBootState = new InitialBootState();
@@ -31,31 +42,71 @@ public class GameStateOrchestrator extends BaseAppState {
     }
 
     @Override
-    protected void cleanup(Application application) {}
+    protected void cleanup(Application application) {
+    }
 
     @Override
-    protected void onEnable() {}
+    protected void onEnable() {
+    }
 
     @Override
-    protected void onDisable() {}
+    protected void onDisable() {
+    }
 
-    private EventSubscriber<GameStateEventContext> closeInitialBootStateSubscriber(InitialBootState initialBootState){
+    private EventSubscriber<GameOrchestrationContext> closeInitialBootStateSubscriber(InitialBootState initialBootState) {
         return new EventSubscriber<>() {
-            private final SyncEventHandler<InitialBootCompleteEvent,GameStateEventContext> handler = (event, ctx, lifecycleManager) -> {
+            private final SyncEventHandler<InitialBootCompleteEvent, GameOrchestrationContext> handler = (event, ctx, lifecycleManager) -> {
                 getStateManager().detach(initialBootState);
                 unsubscribe(gameOrchestrationBus);
                 System.out.println("[GameStateOrchestrator] Initial boot complete. Detaching initial boot state");
             };
 
             @Override
-            public void subscribe(@NonNull EventBus<GameStateEventContext> eventBus) {
+            public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
                 eventBus.subscribe(InitialBootCompleteEvent.class, handler);
             }
 
             @Override
-            public void unsubscribe(@NonNull EventBus<GameStateEventContext> eventBus) {
+            public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
                 eventBus.unsubscribe(InitialBootCompleteEvent.class, handler);
             }
         };
+    }
+
+    @Override
+    public void update(float tpf) {}
+
+    private void registerMainMenuLauncher() {
+        var launcherHandler = new SyncEventHandler<MainMenuOpenRequest, GameOrchestrationContext>() {
+            private MainMenuState mainMenuState;
+
+            @Override
+            public void handle(@NonNull MainMenuOpenRequest event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainMenuOpenRequest> lifecycleManager) {
+                if (mainMenuState == null) {
+                    mainMenuState = new MainMenuState();
+                }
+                var stateManager = getStateManager();
+                if(stateManager.hasState(mainMenuState)){
+                    return;
+                }
+                getApplication().enqueue(()->{
+                    stateManager.attach(mainMenuState);
+                });
+            }
+        };
+
+        var launcher = new EventSubscriber<GameOrchestrationContext>() {
+            @Override
+            public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+                eventBus.subscribe(MainMenuOpenRequest.class, launcherHandler);
+            }
+
+            @Override
+            public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+                eventBus.unsubscribe(MainMenuOpenRequest.class, launcherHandler);
+            }
+        };
+
+        launcher.subscribe(gameOrchestrationBus);
     }
 }
