@@ -9,11 +9,10 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.gameStates.boot.InitialBootState;
 import com.mccurry.game.gameStates.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
-import com.mccurry.game.gameStates.mainMenu.MainMenuState;
-import com.mccurry.game.gameStates.mainMenu.events.MainMenuOpenRequest;
+import com.mccurry.game.gameStates.menu.main.MainMenuState;
+import com.mccurry.game.gameStates.menu.main.event.MainMenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
-import com.mccurry.game.shared.ui.service.UiResolutionSettingsService;
 import com.mccurry.game.shared.ui.transition.ScreenTransitionService;
 import lombok.Getter;
 import lombok.NonNull;
@@ -83,10 +82,10 @@ public class GameStateOrchestrator extends BaseAppState {
             @Override
             public void handle(@NonNull MainMenuOpenRequest event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainMenuOpenRequest> lifecycleManager) {
                 if (mainMenuState == null) {
-                    mainMenuState = new MainMenuState();
+                    mainMenuState = MainMenuState.getNew();
                 }
                 var stateManager = getStateManager();
-                if(stateManager.hasState(mainMenuState)){
+                if(stateManager.hasState(mainMenuState)){ // we check just to not enqueue additional stuff
                     return;
                 }
                 getApplication().enqueue(()->{

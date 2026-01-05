@@ -1,6 +1,7 @@
 package com.mccurry.game;
 
 import com.jme3.app.SimpleApplication;
+import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.math.ColorRGBA;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
@@ -19,6 +20,7 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         viewPort.setBackgroundColor(ColorRGBA.Black);
+        stateManager.attach(new ScreenshotAppState());
         System.out.println("\n\n\n\n[Main] Starting");
         stateManager.attach(new GameStateOrchestrator(orchestrationBus,userSettingsService));
     }
@@ -30,8 +32,8 @@ public class Main extends SimpleApplication {
         userSettingsService.subscribe(orchestrationBus);
 
         app.setUserSettingsService(userSettingsService);
-
-        app.setSettings(userSettingsService.getApplicationSettings());
+        var settings = userSettingsService.getApplicationSettings();
+        app.setSettings(settings);
         app.start();
     }
 }

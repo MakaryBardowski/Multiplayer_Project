@@ -8,14 +8,15 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UiResolutionSettingsService {
-    private static final int BASE_UI_SCALE = 4;
+    private static final ResolutionSettings BASE_UI_RESOLUTION = ResolutionSettings.R_640x360;
 
     private static final Map<ResolutionSettings, Integer> RESOLUTION_SETTINGS_TO_UI_SCALE = new HashMap<>(){{
-        put(ResolutionSettings.R_1280x720,BASE_UI_SCALE);
-        put(ResolutionSettings.R_1600x900,5);
-        put(ResolutionSettings.R_1920x1080,6);
-        put(ResolutionSettings.R_2560x1440,8);
-        put(ResolutionSettings.R_3840x2160,12);
+        put(ResolutionSettings.R_640x360,1);
+        put(ResolutionSettings.R_1280x720,2);
+        put(ResolutionSettings.R_1600x900,2);
+        put(ResolutionSettings.R_1920x1080,3);
+        put(ResolutionSettings.R_2560x1440,4);
+        put(ResolutionSettings.R_3840x2160,6);
 
     }};
 
@@ -25,11 +26,10 @@ public class UiResolutionSettingsService {
                 .width(resolutionSettings.getWidth())
                 .height(resolutionSettings.getHeight())
                 .uiScale(getUiScaleFor(resolutionSettings))
-                .baseUiScale(BASE_UI_SCALE)
                 .build();
     }
 
     private int getUiScaleFor(ResolutionSettings resolutionSetting){
-        return RESOLUTION_SETTINGS_TO_UI_SCALE.getOrDefault(resolutionSetting,BASE_UI_SCALE);
+        return RESOLUTION_SETTINGS_TO_UI_SCALE.getOrDefault(resolutionSetting,1);
     }
 }

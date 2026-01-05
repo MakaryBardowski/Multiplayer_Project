@@ -10,12 +10,11 @@ public class UiResolutionSettings {
     private int width;
     private int height;
     private int uiScale;
-    private int baseUiScale;
 
     public Vector3f getSizeFor(int nominalWidth, int nominalHeight, int z){
         return new Vector3f(
-                nominalWidth*uiScale/baseUiScale,
-                nominalHeight*uiScale/baseUiScale,
+                nominalWidth*uiScale,
+                nominalHeight*uiScale,
                 z
         );
     }

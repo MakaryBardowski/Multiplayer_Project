@@ -9,7 +9,7 @@ import com.mccurry.game.gameStates.boot.assetLoader.AssetLoader;
 import com.mccurry.game.gameStates.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.gameStates.boot.ui.LoadingScreenState;
-import com.mccurry.game.gameStates.mainMenu.events.MainMenuOpened;
+import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;

@@ -4,7 +4,7 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.gameStates.boot.events.AssetLoadingCompleteEvent;
-import com.mccurry.game.gameStates.mainMenu.events.MainMenuOpenRequest;
+import com.mccurry.game.gameStates.menu.main.event.MainMenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 

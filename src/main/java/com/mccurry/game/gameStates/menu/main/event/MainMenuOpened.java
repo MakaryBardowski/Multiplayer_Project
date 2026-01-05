@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.mainMenu.events;
+package com.mccurry.game.gameStates.menu.main.event;
 
 import com.mccurry.events.core.Event;
 

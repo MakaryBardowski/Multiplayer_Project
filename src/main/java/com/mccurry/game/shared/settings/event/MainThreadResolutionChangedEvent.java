@@ -7,6 +7,6 @@ import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class ResolutionChangedEvent implements Event {
+public class MainThreadResolutionChangedEvent implements Event {
     private final ResolutionSettings resolutionSetting;
 }
