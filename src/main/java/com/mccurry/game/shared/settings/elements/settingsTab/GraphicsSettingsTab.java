@@ -1,4 +1,4 @@
-package com.mccurry.game.shared.settings.elements;
+package com.mccurry.game.shared.settings.elements.settingsTab;
 
 import com.jme3.asset.AssetManager;
 import com.mccurry.events.core.EventBus;
@@ -6,7 +6,7 @@ import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.settings.elements.option.OptionDropdownSelector;
 import com.mccurry.game.shared.settings.event.MainThreadResolutionChangedEvent;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
-import com.mccurry.game.shared.ui.RedrawableContainer;
+import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.model.UiResolutionSettings;
 import com.mccurry.game.shared.ui.util.ContainerUtil;
 import com.simsilica.lemur.*;
@@ -15,18 +15,17 @@ import com.simsilica.lemur.core.VersionedList;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class GraphicsSettingsTab extends RedrawableContainer {
+public class GraphicsSettingsTab extends SettingsTab {
 
     private final OptionDropdownSelector<ResolutionSettings> resolutionOption;
 
     private Container paddingContainer;
 
-
     public GraphicsSettingsTab(
             EventBus<GameOrchestrationContext> orchestrationBus,
             AssetManager assetManager
     ) {
-        this.setBackground(null);
+        super(assetManager);
 
         var resolutionOptions = new ArrayList<>(Arrays.stream(ResolutionSettings.values()).toList());
         resolutionOption = new OptionDropdownSelector<>(
@@ -69,13 +68,8 @@ public class GraphicsSettingsTab extends RedrawableContainer {
         );
     }
 
-    private Insets3f calculateInsets(UiResolutionSettings resolutionSettings) {
-        var uiScale = resolutionSettings.getUiScale();
-        return new Insets3f(
-                5 * uiScale,
-                7 * uiScale,
-                5 * uiScale,
-                7 * uiScale
-        );
+    @Override
+    public void populateWithSettings(UserSettings userSettings) {
+        resolutionOption.setSelectedItem(userSettings.getResolutionSetting());
     }
 }

@@ -3,15 +3,16 @@ package com.mccurry.game.shared.settings.elements;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
-import com.jme3.math.Vector3f;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.shared.ui.RedrawableContainer;
+import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
+import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
+import com.mccurry.game.shared.settings.elements.settingsTab.SettingsTab;
+import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.RedrawableElement;
 import com.mccurry.game.shared.ui.model.UiResolutionSettings;
-import com.mccurry.game.shared.ui.util.ContainerUtil;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.BoxLayout;
@@ -24,9 +25,9 @@ import static com.mccurry.game.shared.ui.UiState.DATA_KEY_BASE_FONT_SIZE;
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
-public class UserSettingsPanel extends Container implements RedrawableElement {
+public class UserSettingsPanel extends Container implements RedrawableElement, UserSettingsPopulated {
 
-    private RedrawableContainer currentSelectedOptionsTab;
+    private SettingsTab currentSelectedOptionsTab;
 
     private final Label settingsLabel;
 
@@ -35,7 +36,7 @@ public class UserSettingsPanel extends Container implements RedrawableElement {
 
     private final List<Button> optionTabButtons;
     private final GraphicsSettingsTab graphicsSettingsTab;
-
+    private final ControlsSettingsTab controlsSettingsTab;
 
     private final Button cancelBtn;
     private final Button applyBtn;
@@ -74,7 +75,14 @@ public class UserSettingsPanel extends Container implements RedrawableElement {
 
         var settingTabContainer = noBackgroundContainer();
 
-        graphicsSettingsTab = new GraphicsSettingsTab(orchestrationBus, assetManager);
+        graphicsSettingsTab = new GraphicsSettingsTab(
+                orchestrationBus,
+                assetManager
+        );
+        controlsSettingsTab = new ControlsSettingsTab(
+                orchestrationBus,
+                assetManager
+        );
 
         settingsButtonsContainer = noBackgroundContainer();
 
@@ -97,7 +105,20 @@ public class UserSettingsPanel extends Container implements RedrawableElement {
 
         var soundBtn = settingsTabButton("Sound",assetManager,false,textColor);
         var gameplayBtn = settingsTabButton("Gameplay",assetManager,false,textColor);
-        var controlsBtn = settingsTabButton("Controls",assetManager,false,textColor);
+
+        var controlsBtn = settingsTabButton("Controls",assetManager,true,textColor);
+        controlsBtn.addClickCommands(new Command<Button>() {
+                                         @Override
+                                         public void execute(Button source) {
+                                             if (currentSelectedOptionsTab != null && currentSelectedOptionsTab != controlsSettingsTab) {
+                                                 currentSelectedOptionsTab.removeFromParent();
+                                             }
+                                             currentSelectedOptionsTab = controlsSettingsTab;
+                                             settingTabContainer.addChild(currentSelectedOptionsTab);
+                                             source.setColor(ColorRGBA.Red.clone());
+                                         }
+                                     }
+        );
 
         optionTabButtons = new ArrayList<Button>();
         optionTabButtons.add(graphicsBtn);
@@ -206,5 +227,12 @@ public class UserSettingsPanel extends Container implements RedrawableElement {
         settingsButtonsContainer.addChild(button);
 
         return button;
+    }
+
+
+    @Override
+    public void populateWithSettings(UserSettings userSettings) {
+        graphicsSettingsTab.populateWithSettings(userSettings);
+        controlsSettingsTab.populateWithSettings(userSettings);
     }
 }

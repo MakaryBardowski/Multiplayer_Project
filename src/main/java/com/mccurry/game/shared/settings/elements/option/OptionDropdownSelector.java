@@ -47,4 +47,8 @@ public class OptionDropdownSelector<T> extends OptionSelector {
     public Vector3f getMutableLabelSize(){
         return label.getPreferredSize();
     }
+
+    public void setSelectedItem(T dropdownItem){
+        selector.setSelectedItem(dropdownItem);
+    }
 }

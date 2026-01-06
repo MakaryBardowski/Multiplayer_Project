@@ -13,7 +13,6 @@ import com.mccurry.game.shared.settings.event.MainThreadResolutionChangedEvent;
 import com.mccurry.game.shared.settings.exception.UserSettingsException;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.event.MainThreadRefreshUiEvent;
-import com.simsilica.lemur.GuiGlobals;
 import lombok.Getter;
 import lombok.NonNull;
 
@@ -25,7 +24,6 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
 
     private final EventHandler<MainThreadResolutionChangedEvent, GameOrchestrationContext> onResolutionChanged;
 
-    @Getter
     private UserSettings currentSettings;
 
     public UserSettingsService(EventBus<GameOrchestrationContext> orchestrationBus, SimpleApplication application) {
@@ -131,5 +129,9 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
         app.getGuiViewPort().getCamera().resize(w, h,true);
         app.getViewPort().getCamera().resize(w, h,true);
         app.getViewPort().setBackgroundColor(app.getViewPort().getBackgroundColor());
+    }
+
+    public UserSettings getCurrentSettings(){
+        return currentSettings.toBuilder().build();
     }
 }

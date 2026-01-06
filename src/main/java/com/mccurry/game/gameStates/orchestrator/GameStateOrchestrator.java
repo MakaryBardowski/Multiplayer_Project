@@ -12,8 +12,10 @@ import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.gameStates.menu.main.MainMenuState;
 import com.mccurry.game.gameStates.menu.main.event.MainMenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
+import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.transition.ScreenTransitionService;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +26,8 @@ import org.jetbrains.annotations.Nullable;
 public class GameStateOrchestrator extends BaseAppState {
 
     private final EventBus<GameOrchestrationContext> gameOrchestrationBus;
+
+    @Getter(AccessLevel.NONE)
     private final UserSettingsService userSettingsService;
 
     @Override
@@ -107,5 +111,9 @@ public class GameStateOrchestrator extends BaseAppState {
         };
 
         launcher.subscribe(gameOrchestrationBus);
+    }
+
+    public UserSettings getUserSettings(){
+        return userSettingsService.getCurrentSettings();
     }
 }

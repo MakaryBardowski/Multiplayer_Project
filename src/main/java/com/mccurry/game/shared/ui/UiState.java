@@ -33,7 +33,7 @@ public abstract class UiState extends BaseAppState implements UiService, EventSu
         var orchestrator = application.getStateManager().getState(GameStateOrchestrator.class);
         var orchestrationBus = orchestrator.getGameOrchestrationBus();
 
-        var currentUserSettings = orchestrator.getUserSettingsService().getCurrentSettings();
+        var currentUserSettings = orchestrator.getUserSettings();
         var uiResolutionSettings = UI_RESOLUTION_SETTINGS_SERVICE.getFor(currentUserSettings);
 
         var simpleApp = (SimpleApplication) application;
