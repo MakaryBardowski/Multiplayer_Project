@@ -9,9 +9,9 @@ import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.BoxLayout;
 
 public abstract class OptionSelector extends Container {
-    public static final int OPTION_CONTAINER_INSETS_TOP_BOTTOM = 2;
-    private final int OPTION_CONTAINER_SIZE_X = 180;
-    private final int OPTION_CONTAINER_INSETS_LEFT = 60;
+    private static final int OPTION_CONTAINER_INSETS_TOP_BOTTOM = 1;
+    private static final int OPTION_CONTAINER_SIZE_X = 180;
+    private static final int OPTION_CONTAINER_INSETS_LEFT = 60;
     protected final int MAX_SELECTOR_SIZE_X = OPTION_CONTAINER_SIZE_X-OPTION_CONTAINER_INSETS_LEFT;
 
     protected final Label label;
@@ -54,7 +54,7 @@ public abstract class OptionSelector extends Container {
                         1
                 )
         );
-        this.setPreferredSize(new Vector3f(OPTION_CONTAINER_SIZE_X*2,12,1));
-//        this.setInsets(new Insets3f(OPTION_CONTAINER_INSETS_TOP_BOTTOM,0,OPTION_CONTAINER_INSETS_TOP_BOTTOM,0));
+        this.setPreferredSize(new Vector3f(OPTION_CONTAINER_SIZE_X*2,12+(OPTION_CONTAINER_INSETS_TOP_BOTTOM*2),1));
+        this.setInsets(new Insets3f(OPTION_CONTAINER_INSETS_TOP_BOTTOM,0,OPTION_CONTAINER_INSETS_TOP_BOTTOM,0));
     }
 }

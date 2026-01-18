@@ -27,6 +27,7 @@ public class OptionKeybindSelector extends OptionSelector {
         bindButton = new Button(keyBindingService.getKeyBindForAction(playerAction).getUiKeyName());
         bindButton.setColor(ColorRGBA.White);
         bindButton.setHighlightColor(ColorRGBA.Red);
+        bindButton.setFocusColor(ColorRGBA.Red);
         bindButton.setFont(font);
         bindButton.setBackground(new QuadBackgroundComponent(background));
         bindButton.setInsets(new Insets3f(0,0,0,0));

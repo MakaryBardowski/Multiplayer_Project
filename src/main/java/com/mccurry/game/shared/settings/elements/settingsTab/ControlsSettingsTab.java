@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mccurry.game.gameStates.keyBinding.model.PlayerAction.*;
-import static com.mccurry.game.shared.settings.elements.option.OptionSelector.OPTION_CONTAINER_INSETS_TOP_BOTTOM;
 
 public class ControlsSettingsTab extends SettingsTab{
     private List<OptionSelector> keybindOptionSelectors = new ArrayList<>();

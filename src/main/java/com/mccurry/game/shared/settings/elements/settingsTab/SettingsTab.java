@@ -15,9 +15,9 @@ public abstract class SettingsTab extends Container implements UserSettingsPopul
 
     protected Insets3f getTabInsets() {
         return new Insets3f(
-                5,
+                2,
                 7,
-                5,
+                2,
                 7
         );
     }

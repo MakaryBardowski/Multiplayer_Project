@@ -14,7 +14,6 @@ import com.simsilica.lemur.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static com.mccurry.game.shared.settings.elements.option.OptionSelector.OPTION_CONTAINER_INSETS_TOP_BOTTOM;
 
 public class GraphicsSettingsTab extends SettingsTab {
 
