@@ -5,8 +5,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.elements.UserSettingsPanel;
+import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.UiState;
-import com.mccurry.game.shared.ui.model.UiResolutionSettings;
 
 public class UserSettingsMenuState extends UiState {
     private static final UserSettingsMenuState instance = new UserSettingsMenuState();
@@ -16,22 +16,24 @@ public class UserSettingsMenuState extends UiState {
     private UserSettingsMenuState(){}
 
     @Override
-    public void createUi(SimpleApplication application, Node stateGuiNode, UiResolutionSettings uiResolutionSettings) {
+    public void createUi(SimpleApplication application, Node stateGuiNode) {
         var stateManager = application.getStateManager();
         var bus = stateManager.getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         userSettingsPanel = new UserSettingsPanel(bus,stateManager,application.getAssetManager());
         userSettingsPanel.populateWithSettings(stateManager.getState(GameStateOrchestrator.class).getUserSettings());
 
         stateGuiNode.attachChild(userSettingsPanel);
+        layout();
     }
 
-    @Override
-    public void layoutUi(UiResolutionSettings uiResolutionSettings) {
-        userSettingsPanel.resizeForResolution(uiResolutionSettings);
+
+    public void layout() {
+        var baseResolution = ResolutionSettings.R_640x360;
+
         var settingsPanelSize = userSettingsPanel.getPreferredSize();
         userSettingsPanel.setLocalTranslation(new Vector3f(
-                (uiResolutionSettings.getWidth()-settingsPanelSize.getX())/2,
-                (uiResolutionSettings.getHeight()+settingsPanelSize.getY())/2,
+                (baseResolution.getWidth()-settingsPanelSize.getX())/2,
+                (baseResolution.getHeight()+settingsPanelSize.getY())/2,
                 2
         ));
     }

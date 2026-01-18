@@ -23,6 +23,7 @@ import com.mccurry.game.gameStates.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
 import com.mccurry.game.shared.util.event.EventSubscribers;
 import lombok.NonNull;
@@ -36,19 +37,17 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
 
     @Override
     protected void initialize(Application application) {
+        var baseResolution = ResolutionSettings.R_640x360;
+
         var simpleApplication = (SimpleApplication) application;
-        var settings = simpleApplication.getContext().getSettings();
 
         var orchestrationBus = getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         orchestrationBus.subscribe(InitialBootCompleteEvent.class, this);
         loadingProgressUpdateSubscriber(orchestrationBus, simpleApplication).subscribe(orchestrationBus);
 
-        float width = settings.getWidth();
-        float height = settings.getHeight();
-
         var guiNode = simpleApplication.getGuiNode();
 
-        var quad = new Quad(width, height);
+        var quad = new Quad(baseResolution.getWidth(), baseResolution.getHeight());
         Geometry blackOverlayGeom = new Geometry("BlackQuad", quad);
 
         var mat = new Material(simpleApplication.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -59,8 +58,8 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
         progressBarGeom = createLoadingBarNode(simpleApplication);
 
         var loadingBarPos = new Vector3f(
-                (width-getProgressBarWidth(settings))*0.5f,
-                (height-getProgressBarHeight(settings))*0.5f,
+                (baseResolution.getWidth()-getProgressBarWidth())*0.5f,
+                (baseResolution.getHeight()-getProgressBarHeight())*0.5f,
                 1
         );
 
@@ -70,10 +69,10 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
 
         loadingText = createLoadingText(simpleApplication);
 
-        loadingText.setLocalTranslation(getLoadingTextPos(settings));
+        loadingText.setLocalTranslation(getLoadingTextPos(baseResolution));
         stateGuiNode.attachChild(loadingText);
 
-        stateGuiNode.setLocalTranslation(blackOverlayGeom.getLocalTranslation().clone().setZ(Float.MAX_VALUE));
+        stateGuiNode.setLocalTranslation(blackOverlayGeom.getLocalTranslation().clone().setZ(999999f));
         guiNode.attachChild(stateGuiNode);
 
         System.out.println("[LoadingScreenState] Loading screen initialized");
@@ -108,7 +107,7 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
     private BitmapText createLoadingText(SimpleApplication application) {
         var loadingTextFont = application.getAssetManager().loadFont("Interface/Fonts/pixelFlat11.fnt");
         var loadingText = new BitmapText(loadingTextFont);
-        loadingText.setSize(loadingTextFont.getCharSet().getRenderedSize() * 1);
+        loadingText.setSize(loadingTextFont.getCharSet().getRenderedSize() /2);
         loadingText.setText("Loading...");
         return loadingText;
     }
@@ -116,9 +115,8 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
 
     private Geometry createLoadingBarNode(SimpleApplication app) {
         var assetManager = app.getAssetManager();
-        var settings = app.getContext().getSettings();
 
-        Quad quad = new Quad(getProgressBarWidth(settings), getProgressBarHeight(settings));
+        Quad quad = new Quad(getProgressBarWidth(), getProgressBarHeight());
         Geometry geo = new Geometry("OurQuad", quad);
         Material mat = new Material(assetManager, "Shaders/PlayerHealthbar/SimpleColor.j3md");
         var emptyHpBar = assetManager.loadTexture("Textures/GUI/HUD/playerHealthbar/healthbar_background.png");
@@ -136,17 +134,17 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
         return geo;
     }
 
-    private float getProgressBarWidth(AppSettings settings) {
-        return settings.getWidth() * 0.20f;
+    private float getProgressBarWidth() {
+        return 128;
     }
 
-    private float getProgressBarHeight(AppSettings settings) {
-        return settings.getWidth() * 0.03f;
+    private float getProgressBarHeight() {
+        return 19;
     }
 
-    private Vector3f getLoadingTextPos(AppSettings settings){
+    private Vector3f getLoadingTextPos(ResolutionSettings baseResolution){
         return new Vector3f(
-                (settings.getWidth()-loadingText.getLineWidth())*0.5f,
+                (baseResolution.getWidth()-loadingText.getLineWidth())*0.5f,
                 progressBarGeom.getLocalTranslation().clone().subtractLocal(0,loadingText.getHeight(),0).getY(),
                 1
         );
@@ -165,7 +163,7 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
                         } else {
                             loadingText.setText("Loading done :D");
                         }
-                        loadingText.setLocalTranslation(getLoadingTextPos(application.getContext().getSettings()));
+                        loadingText.setLocalTranslation(getLoadingTextPos(ResolutionSettings.R_640x360));
                     });
                 },
                 assetLoadingPercentAdvanceEvent -> {

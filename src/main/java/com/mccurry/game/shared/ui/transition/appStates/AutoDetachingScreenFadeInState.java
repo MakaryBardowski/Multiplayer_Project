@@ -10,6 +10,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.shape.Quad;
+import com.mccurry.game.shared.settings.model.ResolutionSettings;
 
 public class AutoDetachingScreenFadeInState extends BaseAppState {
     private final float maxFadeInTimeSeconds;
@@ -32,12 +33,9 @@ public class AutoDetachingScreenFadeInState extends BaseAppState {
         stateManager = getStateManager();
 
         var simpleApplication = (SimpleApplication) application;
-        var settings = simpleApplication.getContext().getSettings();
+        var baseResolution = ResolutionSettings.R_640x360;
 
-        float width = settings.getWidth();
-        float height = settings.getHeight();
-
-        var quad = new Quad(width, height);
+        var quad = new Quad(baseResolution.getWidth(), baseResolution.getHeight());
         overlayGeom = new Geometry("BlackQuad", quad);
 
         var mat = new Material(simpleApplication.getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -45,7 +43,7 @@ public class AutoDetachingScreenFadeInState extends BaseAppState {
         mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
         overlayGeom.setMaterial(mat);
         overlayGeom.setQueueBucket(RenderQueue.Bucket.Gui);
-        overlayGeom.getLocalTranslation().setZ(Float.MAX_VALUE);
+        overlayGeom.getLocalTranslation().setZ(1000000f);
         simpleApplication.getGuiNode().attachChild(overlayGeom);
 
         System.out.println("[AutoDetachingScreenFadeInState] Starting fade in...");

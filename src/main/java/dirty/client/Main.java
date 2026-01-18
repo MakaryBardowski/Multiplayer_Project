@@ -43,7 +43,6 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         inputManager.deleteMapping(SimpleApplication.INPUT_MAPPING_EXIT);
-        GuiGlobals.initialize(this);
 
         setDisplayFps(false);
         setDisplayStatView(false);

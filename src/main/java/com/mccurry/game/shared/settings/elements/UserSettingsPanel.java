@@ -3,16 +3,16 @@ package com.mccurry.game.shared.settings.elements;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.Vector3f;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.SettingsTab;
 import com.mccurry.game.shared.settings.model.UserSettings;
-import com.mccurry.game.shared.ui.RedrawableElement;
-import com.mccurry.game.shared.ui.model.UiResolutionSettings;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.BoxLayout;
@@ -21,11 +21,10 @@ import com.simsilica.lemur.component.QuadBackgroundComponent;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mccurry.game.shared.ui.UiState.DATA_KEY_BASE_FONT_SIZE;
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
-public class UserSettingsPanel extends Container implements RedrawableElement, UserSettingsPopulated {
+public class UserSettingsPanel extends Container implements UserSettingsPopulated {
 
     private SettingsTab currentSelectedOptionsTab;
 
@@ -69,7 +68,7 @@ public class UserSettingsPanel extends Container implements RedrawableElement, U
 
         settingsLabel.setFont(headerFont);
         settingsLabel.setFontSize(settingsLabel.getFontSize()*0.7f); // todo: remove float scaling
-        settingsLabel.setUserData(DATA_KEY_BASE_FONT_SIZE, settingsLabel.getFontSize());
+
         settingsLabel.setColor(textColor);
 
 
@@ -80,7 +79,7 @@ public class UserSettingsPanel extends Container implements RedrawableElement, U
                 assetManager
         );
         controlsSettingsTab = new ControlsSettingsTab(
-                orchestrationBus,
+                appStateManager.getState(GameStateOrchestrator.class).getKeyBindingService(),
                 assetManager
         );
 
@@ -98,7 +97,8 @@ public class UserSettingsPanel extends Container implements RedrawableElement, U
                                              }
                                              currentSelectedOptionsTab = graphicsSettingsTab;
                                              settingTabContainer.addChild(currentSelectedOptionsTab);
-                                             source.setColor(ColorRGBA.Red.clone());
+                                             source.setColor(ColorRGBA.Red);
+                                             optionTabButtons.stream().filter(btn -> btn != source).forEach(btn -> btn.setColor(ColorRGBA.White));
                                          }
                                      }
         );
@@ -115,7 +115,8 @@ public class UserSettingsPanel extends Container implements RedrawableElement, U
                                              }
                                              currentSelectedOptionsTab = controlsSettingsTab;
                                              settingTabContainer.addChild(currentSelectedOptionsTab);
-                                             source.setColor(ColorRGBA.Red.clone());
+                                             source.setColor(ColorRGBA.Red);
+                                             optionTabButtons.stream().filter(btn -> btn != source).forEach(btn -> btn.setColor(ColorRGBA.White));
                                          }
                                      }
         );
@@ -147,48 +148,41 @@ public class UserSettingsPanel extends Container implements RedrawableElement, U
         actionButtonsContainer.addChild(applyBtn);
 
         this.addChild(actionButtonsContainer);
+
+        layout();
     }
 
 
-    @Override
-    public void resizeForResolution(UiResolutionSettings resolutionSettings) {
-        var size = resolutionSettings.getSizeFor(360, 180, 1);
+    private void layout() {
+        var size = new Vector3f(360, 180, 1);
         this.setPreferredSize(size);
 
-        settingsLabel.setFontSize(FontUtil.getFontSize(settingsLabel, resolutionSettings));
         headerContainer.setPreferredSize(
-                resolutionSettings.getSizeFor(360, 27, 1)
+                new Vector3f(360, 27, 1)
         );
 
 
         settingsButtonsContainer.setPreferredSize(
-                resolutionSettings.getSizeFor(360, 18, 1)
+                new Vector3f(360, 18, 1)
         );
 
         optionTabButtons.forEach(b -> {
-            b.setFontSize(FontUtil.getFontSize(b, resolutionSettings));
             b.setPreferredSize(
-                    resolutionSettings.getSizeFor(90,18,1)
+                    new Vector3f(90,18,1)
             );
         });
 
         spaceBetweenActionButtons.setPreferredSize(
-                resolutionSettings.getSizeFor(360-2*90,18,1)
+                new Vector3f(360-2*90,18,1)
         );
 
         cancelBtn.setPreferredSize(
-                resolutionSettings.getSizeFor(90,18,1)
+                new Vector3f(90,18,1)
         );
-        cancelBtn.setFontSize(FontUtil.getFontSize(cancelBtn, resolutionSettings));
 
         applyBtn.setPreferredSize(
-                resolutionSettings.getSizeFor(90,18,1)
+                new Vector3f(90,18,1)
         );
-        applyBtn.setFontSize(FontUtil.getFontSize(applyBtn, resolutionSettings));
-
-
-
-        currentSelectedOptionsTab.resizeForResolution(resolutionSettings);
     }
 
 
@@ -219,7 +213,6 @@ public class UserSettingsPanel extends Container implements RedrawableElement, U
         button.setTextVAlignment(VAlignment.Center);
 
         button.setFont(buttonFont);
-        button.setUserData(DATA_KEY_BASE_FONT_SIZE, button.getFontSize());
 
         button.setFocusColor(ColorRGBA.Red.clone());
         button.setHighlightColor(ColorRGBA.Red.clone());

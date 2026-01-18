@@ -9,6 +9,9 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.gameStates.boot.InitialBootState;
 import com.mccurry.game.gameStates.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
+import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
+import com.mccurry.game.gameStates.keyBinding.model.KeyBind;
+import com.mccurry.game.gameStates.keyBinding.model.PlayerAction;
 import com.mccurry.game.gameStates.menu.main.MainMenuState;
 import com.mccurry.game.gameStates.menu.main.event.MainMenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
@@ -29,6 +32,9 @@ public class GameStateOrchestrator extends BaseAppState {
 
     @Getter(AccessLevel.NONE)
     private final UserSettingsService userSettingsService;
+
+    @Getter
+    private final KeyBindingService keyBindingService;
 
     @Override
     protected void initialize(Application application) {

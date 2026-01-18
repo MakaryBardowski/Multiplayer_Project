@@ -6,23 +6,18 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
-import com.jme3.texture.Texture2D;
-import com.jme3.util.BufferUtils;
 import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
 import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.UiState;
-import com.mccurry.game.shared.ui.model.UiResolutionSettings;
-import com.mccurry.game.shared.ui.util.FontUtil;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import com.simsilica.lemur.event.PopupState;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +33,10 @@ public class MainMenuState extends UiState {
     }
 
     @Override
-    public void createUi(SimpleApplication application, Node stateGuiNode, UiResolutionSettings uiResolutionSettings) {
+    public void createUi(SimpleApplication application, Node stateGuiNode) {
         assetManager = application.getAssetManager();
         application.getViewPort().setBackgroundColor(ColorRGBA.Black);
-
+        
 
         var newGameButton = button("New Game", new Command<Button>() {
             @Override
@@ -82,14 +77,17 @@ public class MainMenuState extends UiState {
                 new GameOrchestrationContext(),
                 null
         );
+
+
+        layout();
     }
 
-    @Override
-    public void layoutUi(UiResolutionSettings uiResolutionSettings) {
+    private void layout(){
+        var baseResolution = ResolutionSettings.R_640x360;
 
         var buttonIndexPlusOne = 1;
         for(var button : buttons){
-            var buttonSize = uiResolutionSettings.getSizeFor(120, 36, 1);
+            var buttonSize = new Vector3f(120, 36, 1);
             button.setPreferredSize(buttonSize);
 
             Spatial node = button;
@@ -98,12 +96,11 @@ public class MainMenuState extends UiState {
                 node = node.getParent();
             }
 
-            var screenHeight = uiResolutionSettings.getHeight();
+            var screenHeight = baseResolution.getHeight();
             var topButtonMargin = (int)screenHeight * 0.19f;
             var distanceBetweenButtons = (int)buttonSize.getY() * 0.3f;
-            button.setFontSize(FontUtil.getFontSize(button,uiResolutionSettings));
 
-            var buttonX = ((int)(uiResolutionSettings.getWidth() * 0.98f)) - buttonSize.getX();
+            var buttonX = ((int)(baseResolution.getWidth() * 0.98f)) - buttonSize.getX();
 
             button.setLocalTranslation(new Vector3f(
                     buttonX,
@@ -133,7 +130,6 @@ public class MainMenuState extends UiState {
         fontTex.setMagFilter(Texture.MagFilter.Nearest);
         fontTex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
         button.setFont(font);
-        button.setUserData(DATA_KEY_BASE_FONT_SIZE,button.getFontSize());
         button.setColor(ColorRGBA.White.clone());
 
         if (onClick != null) {

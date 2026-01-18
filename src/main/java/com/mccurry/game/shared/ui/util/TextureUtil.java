@@ -1,5 +1,6 @@
 package com.mccurry.game.shared.ui.util;
 
+import com.jme3.asset.AssetManager;
 import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture2D;
@@ -9,6 +10,14 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
 public class TextureUtil {
+
+    public static Texture loadPixelPerfectTexture(AssetManager assetManager, String texturePath){
+        var tex = assetManager.loadTexture(texturePath);
+        tex.setMagFilter(Texture.MagFilter.Nearest);
+        tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        return tex;
+    }
+
     public static Texture2D toGrayscale(Texture texture) {
         if (!(texture instanceof Texture2D)) {
             throw new IllegalArgumentException("Only Texture2D supported");

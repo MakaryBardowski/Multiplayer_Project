@@ -12,8 +12,7 @@ import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.settings.event.MainThreadResolutionChangedEvent;
 import com.mccurry.game.shared.settings.exception.UserSettingsException;
 import com.mccurry.game.shared.settings.model.UserSettings;
-import com.mccurry.game.shared.ui.event.MainThreadRefreshUiEvent;
-import lombok.Getter;
+import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
 import lombok.NonNull;
 
 import java.io.File;
@@ -40,8 +39,8 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
             applyLogicalResolution(application,currentSettings.getResolutionSetting().getWidth(),currentSettings.getResolutionSetting().getHeight());
             application.restart();
 
-            orchestrationBus.publish(new MainThreadRefreshUiEvent(
-                    currentSettings.toBuilder().build()
+            orchestrationBus.publish(new MainThreadResizeUiEvent(
+                    currentSettings.getResolutionSetting().getUiScale()
             ), new GameOrchestrationContext(), null);
         };
     }
