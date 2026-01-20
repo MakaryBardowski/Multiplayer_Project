@@ -30,4 +30,10 @@ public class KeyBindingService {
     public KeyBind getKeyBindForAction(PlayerAction action){
         return currentKeyBinds.get(action);
     }
+
+    public KeyBind bindKeyToAction(PlayerAction playerAction,String rawBind){
+       var newBind = new KeyBind("test",rawBind);
+       currentKeyBinds.put(playerAction,newBind);
+       return newBind;
+    }
 }

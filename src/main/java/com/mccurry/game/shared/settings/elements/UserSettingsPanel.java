@@ -6,6 +6,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
+import com.mccurry.game.Main;
 import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
@@ -80,6 +81,8 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         );
         controlsSettingsTab = new ControlsSettingsTab(
                 appStateManager.getState(GameStateOrchestrator.class).getKeyBindingService(),
+                ((Main)appStateManager.getApplication()).getGuiNode(),
+                appStateManager.getApplication().getInputManager(),
                 assetManager
         );
 

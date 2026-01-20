@@ -9,6 +9,7 @@ import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
 import lombok.Getter;
@@ -45,6 +46,7 @@ public class Main extends SimpleApplication {
         var orchestrationBus = new EventBus<GameOrchestrationContext>();
 
         Main app = new Main(orchestrationBus);
+        KeybindInputListener.initialize(app);
 
         orchestrationBus.subscribe(MainThreadResizeUiEvent.class, app.resizeUiEventHandler);
 

@@ -1,28 +1,35 @@
 package com.mccurry.game.shared.settings.elements.option;
 
 import com.jme3.asset.AssetManager;
+import com.jme3.input.InputManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.scene.Node;
 import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
+import com.mccurry.game.gameStates.keyBinding.model.KeyBind;
 import com.mccurry.game.gameStates.keyBinding.model.PlayerAction;
+import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.mccurry.game.shared.ui.util.TextureUtil;
-import com.simsilica.lemur.Button;
-import com.simsilica.lemur.HAlignment;
-import com.simsilica.lemur.Insets3f;
-import com.simsilica.lemur.VAlignment;
+import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import lombok.Getter;
 
 public class OptionKeybindSelector extends OptionSelector {
     private final Button bindButton;
+
+    @Getter
+    private final PlayerAction managedPlayerAction;
 
     public OptionKeybindSelector(
             String optionName,
             PlayerAction playerAction,
             KeyBindingService keyBindingService,
+            Node guiNode,
+            InputManager inputManager,
             AssetManager assetManager) {
         super(optionName, assetManager);
-        var font = FontUtil.loadPixelPerfectFont(assetManager,"Interface/Fonts/settings/settings7px.fnt");
+        var font = FontUtil.loadPixelPerfectFont(assetManager, "Interface/Fonts/settings/settings7px.fnt");
         var background = TextureUtil.loadPixelPerfectTexture(assetManager, "Interface/GUI/Settings/SettingSelectorBackground.png");
         bindButton = new Button(keyBindingService.getKeyBindForAction(playerAction).getUiKeyName());
         bindButton.setColor(ColorRGBA.White);
@@ -30,9 +37,18 @@ public class OptionKeybindSelector extends OptionSelector {
         bindButton.setFocusColor(ColorRGBA.Red);
         bindButton.setFont(font);
         bindButton.setBackground(new QuadBackgroundComponent(background));
-        bindButton.setInsets(new Insets3f(0,0,0,0));
+        bindButton.setInsets(new Insets3f(0, 0, 0, 0));
         bindButton.setTextVAlignment(VAlignment.Center);
         bindButton.setTextHAlignment(HAlignment.Center);
+
+
+        bindButton.addClickCommands(
+                source -> {
+                    KeybindInputListener.getInstance().registerToManager(this, keyBindingService, inputManager, guiNode);
+                    source.setText("Press_a_key...");
+                }
+        );
+        managedPlayerAction = playerAction;
 
         selectorContainer.addChild(bindButton);
         layout();
@@ -47,4 +63,14 @@ public class OptionKeybindSelector extends OptionSelector {
                 )
         );
     }
+
+    public void setDisplayedBind(KeyBind bind) {
+        var keyName = bind.getUiKeyName();
+
+        if (keyName == null || keyName.isBlank()) {
+            keyName = "?";
+        }
+        bindButton.setText(keyName);
+    }
+
 }
