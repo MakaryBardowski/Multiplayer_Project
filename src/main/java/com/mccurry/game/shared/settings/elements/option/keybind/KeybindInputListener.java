@@ -4,11 +4,7 @@ import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
-import com.jme3.input.KeyInput;
-import com.jme3.input.MouseInput;
 import com.jme3.input.controls.ActionListener;
-import com.jme3.input.controls.KeyTrigger;
-import com.jme3.input.controls.MouseButtonTrigger;
 import com.jme3.scene.Node;
 import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
 import com.mccurry.game.shared.settings.elements.option.OptionKeybindSelector;
@@ -16,37 +12,10 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import java.util.List;
+import static com.mccurry.game.gameStates.keyBinding.KeyBindingService.VALID_KEY_BINDINGS;
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class KeybindInputListener extends BaseAppState {
-
-    private static final String BINDING_MOUSE_LEFT = "L_Mouse_Button";
-    private static final String BINDING_MOUSE_RIGHT = "R_Mouse_Button";
-    private static final String BINDING_CTRL_LEFT = "L_Ctrl";
-    private static final List<String> NON_ALPHANUMERIC_BINDINGS = List.of(BINDING_MOUSE_LEFT,BINDING_MOUSE_RIGHT,BINDING_CTRL_LEFT);
-
-
-    private static final String ASCII_ALPHANUMERIC =
-            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-
-    private static final String[] VALID_KEY_BINDINGS = new String[ASCII_ALPHANUMERIC.length()+NON_ALPHANUMERIC_BINDINGS.size()];
-
-    static {
-        var alphanumericBindings = ASCII_ALPHANUMERIC
-                .chars()
-                .mapToObj(c -> String.valueOf((char) c))
-                .toList();
-
-        int idx;
-        for (idx = 0; idx < alphanumericBindings.size(); idx++){
-            VALID_KEY_BINDINGS[idx] = alphanumericBindings.get(idx);
-        }
-
-        for (int i =0; i < NON_ALPHANUMERIC_BINDINGS.size();i++){
-            VALID_KEY_BINDINGS[idx++] = NON_ALPHANUMERIC_BINDINGS.get(i);
-        }
-    }
 
     @Getter
     private static KeybindInputListener instance;
@@ -132,9 +101,6 @@ public class KeybindInputListener extends BaseAppState {
         this.parentInputManager = inputManager;
         this.optionKeybindSelector = optionKeybindSelector;
         this.keyBindingService = keyBindingService;
-
-        inputManager.addMapping(BINDING_MOUSE_LEFT, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
-        inputManager.addMapping("X", new KeyTrigger(KeyInput.KEY_X));
 
         inputManager.addListener(rebindListener,VALID_KEY_BINDINGS);
         application.getStateManager().attach(this);

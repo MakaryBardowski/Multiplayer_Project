@@ -39,6 +39,7 @@ public class Main extends SimpleApplication {
         viewPort.setBackgroundColor(ColorRGBA.Black);
         stateManager.attach(new ScreenshotAppState());
         System.out.println("\n\n\n\n[Main] Starting");
+        keyBindingService.initializeMappings(inputManager);
         stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService, keyBindingService));
     }
 
