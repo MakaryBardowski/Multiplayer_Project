@@ -5,18 +5,21 @@ import com.jme3.input.InputManager;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
-import com.mccurry.game.gameStates.keyBinding.model.KeyBind;
-import com.mccurry.game.gameStates.keyBinding.model.PlayerAction;
+import com.mccurry.game.gameplayConfig.keyBinding.model.KeyBind;
+import com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction;
+import com.mccurry.game.shared.settings.elements.UserSettingsPopulated;
 import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
+import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.mccurry.game.shared.ui.util.TextureUtil;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import lombok.Getter;
 
-public class OptionKeybindSelector extends OptionSelector {
+public class OptionKeybindSelector extends OptionSelector implements UserSettingsPopulated {
     private final Button bindButton;
+
+    private UserSettings temporaryUserSettings;
 
     @Getter
     private final PlayerAction managedPlayerAction;
@@ -24,14 +27,14 @@ public class OptionKeybindSelector extends OptionSelector {
     public OptionKeybindSelector(
             String optionName,
             PlayerAction playerAction,
-            KeyBindingService keyBindingService,
             Node guiNode,
             InputManager inputManager,
             AssetManager assetManager) {
         super(optionName, assetManager);
         var font = FontUtil.loadPixelPerfectFont(assetManager, "Interface/Fonts/settings/settings7px.fnt");
         var background = TextureUtil.loadPixelPerfectTexture(assetManager, "Interface/GUI/Settings/SettingSelectorBackground.png");
-        bindButton = new Button(keyBindingService.getKeyBindForAction(playerAction).getUiKeyName());
+//        bindButton = new Button(keyBindingService.getKeyBindForAction(playerAction).getKeyName());
+        bindButton = new Button("");
         bindButton.setColor(ColorRGBA.White);
         bindButton.setHighlightColor(ColorRGBA.Red);
         bindButton.setFocusColor(ColorRGBA.Red);
@@ -44,7 +47,7 @@ public class OptionKeybindSelector extends OptionSelector {
 
         bindButton.addClickCommands(
                 source -> {
-                    KeybindInputListener.getInstance().registerToManager(this, keyBindingService, inputManager, guiNode);
+                    KeybindInputListener.getInstance().registerToManager(this,temporaryUserSettings, inputManager, guiNode);
                     source.setText("Press_a_key...");
                 }
         );
@@ -65,7 +68,7 @@ public class OptionKeybindSelector extends OptionSelector {
     }
 
     public void setDisplayedBind(KeyBind bind) {
-        var keyName = bind.getUiKeyName();
+        var keyName = bind.getKeyName();
 
         if (keyName == null || keyName.isBlank()) {
             keyName = "?";
@@ -73,4 +76,13 @@ public class OptionKeybindSelector extends OptionSelector {
         bindButton.setText(keyName);
     }
 
+    public String getCurrentBindMapping(){
+        return bindButton.getText();
+    }
+
+    @Override
+    public void populateWithSettings(UserSettings temporaryUserSettings) {
+        this.temporaryUserSettings = temporaryUserSettings;
+        setDisplayedBind(temporaryUserSettings.getKeyBinds().get(managedPlayerAction));
+    }
 }

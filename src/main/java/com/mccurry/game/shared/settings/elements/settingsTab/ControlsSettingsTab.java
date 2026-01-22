@@ -4,9 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.input.InputManager;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
 import com.mccurry.game.shared.settings.elements.option.OptionKeybindSelector;
-import com.mccurry.game.shared.settings.elements.option.OptionSelector;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.ContainerUtil;
 import com.simsilica.lemur.Container;
@@ -14,29 +12,28 @@ import com.simsilica.lemur.Container;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mccurry.game.gameStates.keyBinding.model.PlayerAction.*;
+import static com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction.*;
 
 public class ControlsSettingsTab extends SettingsTab{
-    private List<OptionSelector> keybindOptionSelectors = new ArrayList<>();
-    private Container paddingContainer;
+    private final List<OptionKeybindSelector> keybindOptionSelectors = new ArrayList<>();
+    private final Container paddingContainer;
 
     public ControlsSettingsTab(
-            KeyBindingService keyBindingService,
             Node guiNode,
             InputManager inputManager,
             AssetManager assetManager
     ) {
         super(assetManager);
 
-        var forwardKeybindOption = new OptionKeybindSelector("Move_Forward", MOVE_FORWARD,keyBindingService,guiNode,inputManager,assetManager);
-        var backwardKeybindOption = new OptionKeybindSelector("Move_Backward",MOVE_BACKWARD,keyBindingService,guiNode,inputManager,assetManager);
-        var leftKeybindOption = new OptionKeybindSelector("Move_Left",MOVE_LEFT,keyBindingService,guiNode,inputManager,assetManager);
-        var rightKeybindOption = new OptionKeybindSelector("Move_Right",MOVE_RIGHT,keyBindingService,guiNode,inputManager,assetManager);
+        var forwardKeybindOption = new OptionKeybindSelector("Move_Forward", MOVE_FORWARD,guiNode,inputManager,assetManager);
+        var backwardKeybindOption = new OptionKeybindSelector("Move_Backward",MOVE_BACKWARD,guiNode,inputManager,assetManager);
+        var leftKeybindOption = new OptionKeybindSelector("Move_Left",MOVE_LEFT,guiNode,inputManager,assetManager);
+        var rightKeybindOption = new OptionKeybindSelector("Move_Right",MOVE_RIGHT,guiNode,inputManager,assetManager);
 
-        var shootKeybindOption = new OptionKeybindSelector("Attack",ATTACK,keyBindingService,guiNode,inputManager,assetManager);
-        var interactKeybindOption = new OptionKeybindSelector("Interact",INTERACT,keyBindingService,guiNode,inputManager,assetManager);
-        var skill1KeybindOption = new OptionKeybindSelector("Skill_1",SKILL_1,keyBindingService,guiNode,inputManager,assetManager);
-        var skill2KeybindOption = new OptionKeybindSelector("Skill_2",SKILL_2,keyBindingService,guiNode,inputManager,assetManager);
+        var shootKeybindOption = new OptionKeybindSelector("Attack",ATTACK,guiNode,inputManager,assetManager);
+        var interactKeybindOption = new OptionKeybindSelector("Interact",INTERACT,guiNode,inputManager,assetManager);
+        var skill1KeybindOption = new OptionKeybindSelector("Skill_1",SKILL_1,guiNode,inputManager,assetManager);
+        var skill2KeybindOption = new OptionKeybindSelector("Skill_2",SKILL_2,guiNode,inputManager,assetManager);
 
         keybindOptionSelectors.add(forwardKeybindOption);
         keybindOptionSelectors.add(backwardKeybindOption);
@@ -78,5 +75,9 @@ public class ControlsSettingsTab extends SettingsTab{
 
 
     @Override
-    public void populateWithSettings(UserSettings userSettings) {}
+    public void populateWithSettings(UserSettings temporaryUserSettings) {
+        keybindOptionSelectors.forEach(
+                s -> s.populateWithSettings(temporaryUserSettings)
+        );
+    }
 }

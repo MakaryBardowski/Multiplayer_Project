@@ -69,8 +69,13 @@ dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.28'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
     runtimeOnly project(':assets')
+
+    testImplementation("org.assertj:assertj-core:3.6.1")
 }
 
+test {
+    useJUnitPlatform()
+}
 
 tasks.named('distZip') {
     dependsOn shadowJar

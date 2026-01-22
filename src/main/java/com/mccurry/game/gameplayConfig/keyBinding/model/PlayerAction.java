@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.keyBinding.model;
+package com.mccurry.game.gameplayConfig.keyBinding.model;
 
 public enum PlayerAction {
     MOVE_FORWARD,

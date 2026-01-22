@@ -13,6 +13,7 @@ import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.SettingsTab;
+import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.simsilica.lemur.*;
@@ -35,6 +36,8 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
     private final Container settingsButtonsContainer;
 
     private final List<Button> optionTabButtons;
+
+    private UserSettings temporaryUserSettings; // options that will be commited when "apply" is clicked
     private final GraphicsSettingsTab graphicsSettingsTab;
     private final ControlsSettingsTab controlsSettingsTab;
 
@@ -76,11 +79,9 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         var settingTabContainer = noBackgroundContainer();
 
         graphicsSettingsTab = new GraphicsSettingsTab(
-                orchestrationBus,
                 assetManager
         );
         controlsSettingsTab = new ControlsSettingsTab(
-                appStateManager.getState(GameStateOrchestrator.class).getKeyBindingService(),
                 ((Main)appStateManager.getApplication()).getGuiNode(),
                 appStateManager.getApplication().getInputManager(),
                 assetManager
@@ -144,7 +145,12 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         cancelBtn.addClickCommands(source -> {
             appStateManager.detach(appStateManager.getState(UserSettingsMenuState.class));
         });
-        applyBtn = settingsTabButton("Apply",assetManager,false,textColor);
+
+        applyBtn = settingsTabButton("Apply",assetManager,true,textColor);
+        applyBtn.addClickCommands(source -> {
+            commitNewSettings(orchestrationBus);
+            populateWithSettings(temporaryUserSettings.deepClone());
+        });
 
         actionButtonsContainer.addChild(cancelBtn);
         actionButtonsContainer.addChild(spaceBetweenActionButtons);
@@ -227,8 +233,17 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
 
 
     @Override
-    public void populateWithSettings(UserSettings userSettings) {
-        graphicsSettingsTab.populateWithSettings(userSettings);
-        controlsSettingsTab.populateWithSettings(userSettings);
+    public void populateWithSettings(UserSettings temporaryUserSettings) {
+        this.temporaryUserSettings = temporaryUserSettings;
+        graphicsSettingsTab.populateWithSettings(this.temporaryUserSettings);
+        controlsSettingsTab.populateWithSettings(this.temporaryUserSettings);
+    }
+
+    private void commitNewSettings(EventBus<GameOrchestrationContext> orchestrationBus){
+        orchestrationBus.publish(
+                MainThreadSettingsAppliedEvent.builder().newSettings(temporaryUserSettings).build(),
+                new GameOrchestrationContext(),
+                null
+        );
     }
 }

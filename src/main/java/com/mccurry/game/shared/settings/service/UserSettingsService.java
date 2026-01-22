@@ -9,7 +9,7 @@ import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.EventHandler;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.shared.settings.event.MainThreadResolutionChangedEvent;
+import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.exception.UserSettingsException;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
@@ -17,27 +17,34 @@ import lombok.NonNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.LinkedHashMap;
 
 public class UserSettingsService implements EventSubscriber<GameOrchestrationContext> {
     private static final ObjectMapper USER_SETTINGS_FILE_OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-    private final EventHandler<MainThreadResolutionChangedEvent, GameOrchestrationContext> onResolutionChanged;
+    private final EventHandler<MainThreadSettingsAppliedEvent, GameOrchestrationContext> onSettingsApplied;
 
     private UserSettings currentSettings;
 
     public UserSettingsService(EventBus<GameOrchestrationContext> orchestrationBus, SimpleApplication application) {
-        onResolutionChanged = (SyncEventHandler<MainThreadResolutionChangedEvent, GameOrchestrationContext>) (event, eventContext, lifecycleManager) -> {
+        onSettingsApplied = (SyncEventHandler<MainThreadSettingsAppliedEvent, GameOrchestrationContext>) (event, eventContext, lifecycleManager) -> {
             // the event can only come from UI
 
-            UserSettings patch = new UserSettings().setResolutionSetting(event.getResolutionSetting());
+            UserSettings patch = event.getNewSettings();
             var file = getSettingsFile();
             var settings = getCurrentOrDefaultSettings();
+
+            var previousResolution = settings.getResolutionSetting();
+
             currentSettings = updateSettings(file, settings, patch);
 
 
             application.setSettings(getApplicationSettings());
-            applyLogicalResolution(application,currentSettings.getResolutionSetting().getWidth(),currentSettings.getResolutionSetting().getHeight());
-            application.restart();
+//            applyLogicalResolution(application,currentSettings.getResolutionSetting().getWidth(),currentSettings.getResolutionSetting().getHeight());
+
+            if(!currentSettings.getResolutionSetting().equals(previousResolution)) {
+                application.restart();
+            }
 
             orchestrationBus.publish(new MainThreadResizeUiEvent(
                     currentSettings.getResolutionSetting().getUiScale()
@@ -47,12 +54,12 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
 
     @Override
     public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
-        eventBus.subscribe(MainThreadResolutionChangedEvent.class, onResolutionChanged);
+        eventBus.subscribe(MainThreadSettingsAppliedEvent.class, onSettingsApplied);
     }
 
     @Override
     public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
-        eventBus.unsubscribe(MainThreadResolutionChangedEvent.class, onResolutionChanged);
+        eventBus.unsubscribe(MainThreadSettingsAppliedEvent.class, onSettingsApplied);
     }
 
     private synchronized UserSettings getCurrentOrDefaultSettings() {
@@ -72,7 +79,17 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
             }
 
             // Merge missing fields from defaults
-            var mergedSettings = USER_SETTINGS_FILE_OBJECT_MAPPER.updateValue(UserSettings.getDefault(), currentSettings);
+            var defaultSettings = UserSettings.getDefault();
+
+            // Manually merge keybinds (jackson doesnt do that automatically). This happens before "root" options merge because root merge is in place )
+            var mergedKeybinds = new LinkedHashMap<>(defaultSettings.getKeyBinds());
+            mergedKeybinds.putAll(currentSettings.getKeyBinds());
+
+
+            var mergedSettings = USER_SETTINGS_FILE_OBJECT_MAPPER.updateValue(defaultSettings, currentSettings);
+            mergedSettings.setKeyBinds(mergedKeybinds);
+
+
             if (!mergedSettings.equals(currentSettings)) {
                 currentSettings = mergedSettings;
                 saveSettings(file, currentSettings);
@@ -88,7 +105,12 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
     private synchronized UserSettings updateSettings(File file, UserSettings settings, UserSettings patch) {
         // Merge non-null fields
         try {
+            // Manually merge keybinds (jackson doesnt do that automatically). This happens before "root" options merge because root merge is in place )
+            var mergedKeybinds = new LinkedHashMap<>(settings.getKeyBinds());
+            mergedKeybinds.putAll(patch.getKeyBinds());
+
             settings = USER_SETTINGS_FILE_OBJECT_MAPPER.updateValue(settings, patch);
+            settings.setKeyBinds(mergedKeybinds);
         } catch (IOException e) {
             throw new UserSettingsException(e.getMessage());
         }
@@ -130,7 +152,7 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
         app.getViewPort().setBackgroundColor(app.getViewPort().getBackgroundColor());
     }
 
-    public UserSettings getCurrentSettings(){
-        return currentSettings.toBuilder().build();
+    public UserSettings getCurrentSettingsDeepClone(){
+        return currentSettings.deepClone();
     }
 }

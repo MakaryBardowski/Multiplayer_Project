@@ -20,8 +20,7 @@ public class UserSettingsMenuState extends UiState {
         var stateManager = application.getStateManager();
         var bus = stateManager.getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         userSettingsPanel = new UserSettingsPanel(bus,stateManager,application.getAssetManager());
-        userSettingsPanel.populateWithSettings(stateManager.getState(GameStateOrchestrator.class).getUserSettings());
-
+        userSettingsPanel.populateWithSettings(stateManager.getState(GameStateOrchestrator.class).getUserSettingsDeepClone());
         stateGuiNode.attachChild(userSettingsPanel);
         layout();
     }

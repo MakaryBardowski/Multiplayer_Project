@@ -6,7 +6,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
+import com.mccurry.game.gameplayConfig.keyBinding.KeyBindingService;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
@@ -39,8 +39,10 @@ public class Main extends SimpleApplication {
         viewPort.setBackgroundColor(ColorRGBA.Black);
         stateManager.attach(new ScreenshotAppState());
         System.out.println("\n\n\n\n[Main] Starting");
+
         keyBindingService.initializeMappings(inputManager);
-        stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService, keyBindingService));
+
+        stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService));
     }
 
     public static void main(String[] args) {
@@ -59,14 +61,14 @@ public class Main extends SimpleApplication {
         app.setSettings(settings);
 
 
-        var userSettings = userSettingsService.getCurrentSettings(); // same settings, just different class
+        var userSettings = userSettingsService.getCurrentSettingsDeepClone(); // same settings, just different class
         app.resizeUiEventHandler.handle(
                 new MainThreadResizeUiEvent(userSettings.getResolutionSetting().getUiScale()),
                 new GameOrchestrationContext(),
                 null
         );
 
-        app.setKeyBindingService(KeyBindingService.withKeybindsFromSettings(userSettings));
+        app.setKeyBindingService(KeyBindingService.withKeybindsFromSettings(orchestrationBus,userSettings));
 
         app.start();
     }

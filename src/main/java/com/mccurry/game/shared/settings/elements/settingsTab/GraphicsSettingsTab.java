@@ -5,7 +5,6 @@ import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.settings.elements.option.OptionDropdownSelector;
-import com.mccurry.game.shared.settings.event.MainThreadResolutionChangedEvent;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.ContainerUtil;
@@ -17,12 +16,12 @@ import java.util.Arrays;
 
 public class GraphicsSettingsTab extends SettingsTab {
 
-    private final OptionDropdownSelector<ResolutionSettings> resolutionOption;
+    private UserSettings temporaryUserSettings;
 
+    private final OptionDropdownSelector<ResolutionSettings> resolutionOption;
     private Container paddingContainer;
 
     public GraphicsSettingsTab(
-            EventBus<GameOrchestrationContext> orchestrationBus,
             AssetManager assetManager
     ) {
         super(assetManager);
@@ -36,8 +35,8 @@ public class GraphicsSettingsTab extends SettingsTab {
                 6,
                 source -> {
                     var selectedItem = (ResolutionSettings) source.getSelectedItem();
-                    System.err.println("selected "+selectedItem);
-                    orchestrationBus.publish(new MainThreadResolutionChangedEvent(selectedItem), new GameOrchestrationContext(), null);
+                    System.err.println("selected "+selectedItem + "temporary settings %s@%s".formatted("tempSettings",System.identityHashCode(temporaryUserSettings)));
+                    temporaryUserSettings.setResolutionSetting(selectedItem);
                 },
                 assetManager
         );
@@ -68,7 +67,8 @@ public class GraphicsSettingsTab extends SettingsTab {
     }
 
     @Override
-    public void populateWithSettings(UserSettings userSettings) {
-        resolutionOption.setSelectedItem(userSettings.getResolutionSetting());
+    public void populateWithSettings(UserSettings temporaryUserSettings) {
+        this.temporaryUserSettings = temporaryUserSettings;
+        resolutionOption.setSelectedItem(this.temporaryUserSettings.getResolutionSetting());
     }
 }

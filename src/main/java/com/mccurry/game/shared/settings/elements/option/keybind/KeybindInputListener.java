@@ -6,13 +6,15 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.scene.Node;
-import com.mccurry.game.gameStates.keyBinding.KeyBindingService;
+import com.mccurry.game.gameplayConfig.keyBinding.model.KeyBind;
 import com.mccurry.game.shared.settings.elements.option.OptionKeybindSelector;
+import com.mccurry.game.shared.settings.model.UserSettings;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import static com.mccurry.game.gameStates.keyBinding.KeyBindingService.VALID_KEY_BINDINGS;
+import static com.mccurry.game.gameplayConfig.keyBinding.KeyBindingRegistry.VALID_KEY_BINDINGS;
+
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
 public class KeybindInputListener extends BaseAppState {
@@ -27,7 +29,7 @@ public class KeybindInputListener extends BaseAppState {
     private final SimpleApplication application;
 
     private OptionKeybindSelector optionKeybindSelector; // the selector that spawned this rebind listener
-    private KeyBindingService keyBindingService;
+    private UserSettings temporaryUserSettings;
     private InputManager parentInputManager;
     private Node guiNode;
 
@@ -47,7 +49,11 @@ public class KeybindInputListener extends BaseAppState {
     public void update(float tpf) {
         if (optionKeybindSelector != null && !optionKeybindSelector.hasAncestor(guiNode)) {
             removeRebindListener();
-            restoreCurrentKeybindText();
+
+            /* its ok to do it, because if settings.cancel is clicked -> then on next open of settings fresh values are displayed not from temporary settings.
+            if settings.apply is clicked -> then this is the fresh value
+             */
+            restoreKeybindTextFromUncommitedSettings();
             this.getApplication().getStateManager().detach(this);
             return;
         }
@@ -60,21 +66,22 @@ public class KeybindInputListener extends BaseAppState {
 
                 if (!optionKeybindSelector.hasAncestor(guiNode)) { // this is duplicated to prevent one frame delay between polling and this
                     removeRebindListener();
-                    restoreCurrentKeybindText();
+                    restoreKeybindTextFromUncommitedSettings();
                     return;
                 }
 
                 var boundPlayerAction = optionKeybindSelector.getManagedPlayerAction();
-                var newBind = keyBindingService.bindKeyToAction(boundPlayerAction, mappingName);
-                optionKeybindSelector.setDisplayedBind(newBind);
+                var newUncommitedBind = new KeyBind(mappingName);
+                temporaryUserSettings.getKeyBinds().put(boundPlayerAction,newUncommitedBind);
+                optionKeybindSelector.setDisplayedBind(newUncommitedBind);
                 removeRebindListener();
             }
         }
     };
 
-    private void restoreCurrentKeybindText(){
+    private void restoreKeybindTextFromUncommitedSettings(){
         var boundPlayerAction = optionKeybindSelector.getManagedPlayerAction();
-        var currentBind = keyBindingService.getKeyBindForAction(boundPlayerAction);
+        var currentBind = temporaryUserSettings.getKeyBinds().get(boundPlayerAction);
         optionKeybindSelector.setDisplayedBind(currentBind);
     }
 
@@ -87,20 +94,20 @@ public class KeybindInputListener extends BaseAppState {
      */
     public void registerToManager(
             OptionKeybindSelector optionKeybindSelector,
-            KeyBindingService keyBindingService,
+            UserSettings temporaryUserSettings,
             InputManager inputManager,
             Node guiNode
     ){
         if(parentInputManager != null && this.optionKeybindSelector != optionKeybindSelector){
             // we can call it without worrying about null pointers because all props are set together
             removeRebindListener();
-            restoreCurrentKeybindText();
+            restoreKeybindTextFromUncommitedSettings();
         }
 
         this.guiNode = guiNode;
         this.parentInputManager = inputManager;
         this.optionKeybindSelector = optionKeybindSelector;
-        this.keyBindingService = keyBindingService;
+        this.temporaryUserSettings = temporaryUserSettings;
 
         inputManager.addListener(rebindListener,VALID_KEY_BINDINGS);
         application.getStateManager().attach(this);
