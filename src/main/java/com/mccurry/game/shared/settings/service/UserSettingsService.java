@@ -9,6 +9,7 @@ import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.EventHandler;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.locale.event.MainThreadLocaleChangedEvent;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.exception.UserSettingsException;
 import com.mccurry.game.shared.settings.model.UserSettings;
@@ -35,6 +36,7 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
             var settings = getCurrentOrDefaultSettings();
 
             var previousResolution = settings.getResolutionSetting();
+            var previousLocale = settings.getLocale();
 
             currentSettings = updateSettings(file, settings, patch);
 
@@ -44,11 +46,20 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
 
             if(!currentSettings.getResolutionSetting().equals(previousResolution)) {
                 application.restart();
+                orchestrationBus.publish(new MainThreadResizeUiEvent(
+                        currentSettings.getResolutionSetting().getUiScale()
+                ), new GameOrchestrationContext(), null);
             }
 
-            orchestrationBus.publish(new MainThreadResizeUiEvent(
-                    currentSettings.getResolutionSetting().getUiScale()
-            ), new GameOrchestrationContext(), null);
+            if(!currentSettings.getLocale().equals(previousLocale)){
+                orchestrationBus.publish(
+                        MainThreadLocaleChangedEvent.builder()
+                                .newLocale(currentSettings.getLocale())
+                                .build(),
+                        new GameOrchestrationContext(),
+                        null
+                );
+            }
         };
     }
 

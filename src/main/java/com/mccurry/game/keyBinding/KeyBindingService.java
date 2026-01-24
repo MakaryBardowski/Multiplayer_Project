@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplayConfig.keyBinding;
+package com.mccurry.game.keyBinding;
 
 import com.jme3.input.InputManager;
 import com.jme3.input.KeyInput;
@@ -9,10 +9,10 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.gameplayConfig.keyBinding.model.KeyBind;
-import com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction;
+import com.mccurry.game.keyBinding.model.KeyBind;
+import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.gameplayConfig.keyBinding.event.KeyRebindEvent;
+import com.mccurry.game.keyBinding.event.KeyRebindEvent;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import lombok.NonNull;
@@ -21,7 +21,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.mccurry.game.gameplayConfig.keyBinding.KeyBindingRegistry.*;
+import static com.mccurry.game.keyBinding.KeyBindingRegistry.*;
 
 public class KeyBindingService implements EventSubscriber<GameOrchestrationContext>, SyncEventHandler<MainThreadSettingsAppliedEvent,GameOrchestrationContext> {
     private final EventBus<GameOrchestrationContext> orchestrationBus;

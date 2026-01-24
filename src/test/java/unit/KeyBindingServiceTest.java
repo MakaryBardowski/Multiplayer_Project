@@ -3,19 +3,19 @@ package unit;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.gameplayConfig.keyBinding.KeyBindingService;
-import com.mccurry.game.gameplayConfig.keyBinding.model.KeyBind;
-import com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction;
+import com.mccurry.game.keyBinding.KeyBindingService;
+import com.mccurry.game.keyBinding.model.KeyBind;
+import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.gameplayConfig.keyBinding.event.KeyRebindEvent;
+import com.mccurry.game.keyBinding.event.KeyRebindEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
 
 import java.util.LinkedHashMap;
 
-import static com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction.MOVE_FORWARD;
-import static com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction.MOVE_LEFT;
+import static com.mccurry.game.keyBinding.model.PlayerAction.MOVE_FORWARD;
+import static com.mccurry.game.keyBinding.model.PlayerAction.MOVE_LEFT;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class KeyBindingServiceTest {

@@ -94,6 +94,12 @@ tasks.named('shadowDistZip') {
             throw new GradleException("❌ Maps dir does not exist: $mapsDir")
         }
         println "✅ Including maps from: $mapsDir"
+
+        def localeDir = file("$buildDir/locale")
+        if (!localeDir.exists()) {
+            throw new GradleException("❌ locale dir does not exist: $localeDir")
+        }
+        println "✅ Including locale from: $localeDir"
     }
 
     def archiveName = archiveFileName.get()
@@ -102,6 +108,11 @@ tasks.named('shadowDistZip') {
 
     from("$buildDir/assets/resources/main/Maps") {
         into "$baseName/bin/Maps"
+        include "**/*"
+    }
+
+    from("$buildDir/locale") {
+        into "$baseName/bin/locale"
         include "**/*"
     }
 }

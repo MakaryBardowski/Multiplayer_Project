@@ -11,16 +11,17 @@ import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
 import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.UiState;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
-import com.simsilica.lemur.event.PopupState;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mccurry.game.gameStates.menu.main.LocaleConstants.*;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
 public class MainMenuState extends UiState {
@@ -29,8 +30,7 @@ public class MainMenuState extends UiState {
 
     private List<Button> buttons = new ArrayList<>();
 
-    private MainMenuState() {
-    }
+    private MainMenuState() {}
 
     @Override
     public void createUi(SimpleApplication application, Node stateGuiNode) {
@@ -38,16 +38,16 @@ public class MainMenuState extends UiState {
         application.getViewPort().setBackgroundColor(ColorRGBA.Black);
         
 
-        var newGameButton = button("New Game", new Command<Button>() {
+        var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, new Command<Button>() {
             @Override
             public void execute(Button source) {
                 System.err.println("button y=%s".formatted(source.getLocalTranslation().getY()));
             }
         }, true);
 
-        var loadGameButton = button("Load Game", null, false);
+        var loadGameButton = newMainMenuButton(LOCALE_KEY_LOAD_GAME, null, false);
 
-        var settingsButton = button("Settings", new Command<Button>() {
+        var settingsButton = newMainMenuButton(LOCALE_KEY_SETTINGS, new Command<Button>() {
             private UserSettingsMenuState userSettingsMenuState;
 
             @Override
@@ -59,9 +59,9 @@ public class MainMenuState extends UiState {
             }
         }, true);
 
-        var bestiaryButton = button("Bestiary", null, false);
+        var bestiaryButton = newMainMenuButton(LOCALE_KEY_BESTIARY, null, false);
 
-        var quitButton = button("Quit", button -> application.stop(), true);
+        var quitButton = newMainMenuButton(LOCALE_KEY_QUIT, button -> application.stop(), true);
 
 
         buttons.add(newGameButton);
@@ -114,12 +114,13 @@ public class MainMenuState extends UiState {
         }
     }
 
-    private Button button(
-            String label,
+    private Button newMainMenuButton(
+            String localeKey,
             @Nullable Command<Button> onClick,
             boolean enabled
     ) {
-        var button = new Button(label);
+        var button = new Button("");
+        button.setUserData(METADATA_LOCALE_KEY,localeKey);
         button.setTextVAlignment(VAlignment.Center);
         button.setTextHAlignment(HAlignment.Center);
         button.setHighlightColor(ColorRGBA.Red.clone());
@@ -154,7 +155,17 @@ public class MainMenuState extends UiState {
         return button;
     }
 
-    public static MainMenuState getNew() {
+    public static MainMenuState instance() {
         return instance;
+    }
+
+    @Override
+    public void refresh() {
+        buttons.forEach( button -> {
+                    var localeKey = (String) button.getUserData(METADATA_LOCALE_KEY);
+                    var localizedText = LocalizedString.get(localeKey);
+                    button.setText(localizedText);
+                }
+        );
     }
 }

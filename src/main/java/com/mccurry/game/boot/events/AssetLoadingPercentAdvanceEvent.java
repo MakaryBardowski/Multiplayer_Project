@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.boot.events;
+package com.mccurry.game.boot.events;
 
 import com.mccurry.events.core.Event;
 import lombok.Getter;

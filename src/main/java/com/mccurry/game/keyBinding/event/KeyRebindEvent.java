@@ -1,7 +1,7 @@
-package com.mccurry.game.gameplayConfig.keyBinding.event;
+package com.mccurry.game.keyBinding.event;
 
 import com.mccurry.events.core.Event;
-import com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction;
+import com.mccurry.game.keyBinding.model.PlayerAction;
 import lombok.Builder;
 import lombok.Getter;
 

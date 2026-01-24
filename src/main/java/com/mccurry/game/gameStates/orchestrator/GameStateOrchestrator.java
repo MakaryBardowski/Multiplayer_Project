@@ -6,9 +6,9 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.gameStates.boot.InitialBootState;
-import com.mccurry.game.gameStates.boot.events.AssetLoadingCompleteEvent;
-import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
+import com.mccurry.game.boot.InitialBootState;
+import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
+import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.gameStates.menu.main.MainMenuState;
 import com.mccurry.game.gameStates.menu.main.event.MainMenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
@@ -86,7 +86,7 @@ public class GameStateOrchestrator extends BaseAppState {
             @Override
             public void handle(@NonNull MainMenuOpenRequest event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainMenuOpenRequest> lifecycleManager) {
                 if (mainMenuState == null) {
-                    mainMenuState = MainMenuState.getNew();
+                    mainMenuState = MainMenuState.instance();
                 }
                 var stateManager = getStateManager();
                 if(stateManager.hasState(mainMenuState)){ // we check just to not enqueue additional stuff

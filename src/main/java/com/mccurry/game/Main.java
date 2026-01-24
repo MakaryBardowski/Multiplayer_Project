@@ -6,9 +6,10 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.gameplayConfig.keyBinding.KeyBindingService;
+import com.mccurry.game.keyBinding.KeyBindingService;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.locale.LocaleService;
 import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
@@ -25,6 +26,8 @@ public class Main extends SimpleApplication {
 
     @Setter
     private KeyBindingService keyBindingService;
+
+    @Setter LocaleService localeService;
 
     private final SyncEventHandler<MainThreadResizeUiEvent, GameOrchestrationContext> resizeUiEventHandler = resizeUiOnResolutionChanged();
 
@@ -69,6 +72,7 @@ public class Main extends SimpleApplication {
         );
 
         app.setKeyBindingService(KeyBindingService.withKeybindsFromSettings(orchestrationBus,userSettings));
+        app.setLocaleService(LocaleService.withLocaleFromSettings(orchestrationBus,userSettings));
 
         app.start();
     }

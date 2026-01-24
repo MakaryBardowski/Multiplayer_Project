@@ -12,7 +12,7 @@ import com.simsilica.lemur.Container;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction.*;
+import static com.mccurry.game.keyBinding.model.PlayerAction.*;
 
 public class ControlsSettingsTab extends SettingsTab{
     private final List<OptionKeybindSelector> keybindOptionSelectors = new ArrayList<>();

@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplayConfig.keyBinding.model;
+package com.mccurry.game.keyBinding.model;
 
 import lombok.Builder;
 import lombok.EqualsAndHashCode;

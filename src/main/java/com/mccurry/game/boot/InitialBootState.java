@@ -1,14 +1,14 @@
-package com.mccurry.game.gameStates.boot;
+package com.mccurry.game.boot;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
-import com.mccurry.game.gameStates.boot.assetLoader.AssetLoader;
-import com.mccurry.game.gameStates.boot.events.BootUiStateSetupCompleteEvent;
-import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
-import com.mccurry.game.gameStates.boot.ui.LoadingScreenState;
+import com.mccurry.game.boot.assetLoader.AssetLoader;
+import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
+import com.mccurry.game.boot.events.InitialBootCompleteEvent;
+import com.mccurry.game.boot.ui.LoadingScreenState;
 import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;

@@ -1,12 +1,12 @@
-package com.mccurry.game.gameStates.boot.assetLoader;
+package com.mccurry.game.boot.assetLoader;
 
 import com.jme3.app.SimpleApplication;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.AsyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.gameStates.boot.events.AssetLoadingPercentAdvanceEvent;
-import com.mccurry.game.gameStates.boot.events.BootUiStateSetupCompleteEvent;
-import com.mccurry.game.gameStates.boot.events.AssetLoadingCompleteEvent;
+import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
+import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
+import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;

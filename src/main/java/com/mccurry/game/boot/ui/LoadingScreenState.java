@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.boot.ui;
+package com.mccurry.game.boot.ui;
 
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -11,16 +11,15 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.shape.Quad;
-import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.gameStates.boot.events.AssetLoadingPercentAdvanceEvent;
-import com.mccurry.game.gameStates.boot.events.BootUiStateSetupCompleteEvent;
-import com.mccurry.game.gameStates.boot.events.InitialBootCompleteEvent;
+import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
+import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
+import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;

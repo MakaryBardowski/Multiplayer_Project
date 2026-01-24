@@ -1,7 +1,7 @@
-package com.mccurry.game.gameplayConfig.keyBinding;
+package com.mccurry.game.keyBinding;
 
-import com.mccurry.game.gameplayConfig.keyBinding.model.KeyBind;
-import com.mccurry.game.gameplayConfig.keyBinding.model.PlayerAction;
+import com.mccurry.game.keyBinding.model.KeyBind;
+import com.mccurry.game.keyBinding.model.PlayerAction;
 
 import java.util.LinkedHashMap;
 import java.util.List;

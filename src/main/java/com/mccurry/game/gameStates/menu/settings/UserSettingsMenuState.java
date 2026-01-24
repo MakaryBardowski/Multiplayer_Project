@@ -40,4 +40,9 @@ public class UserSettingsMenuState extends UiState {
     public static UserSettingsMenuState getNew(){
         return instance;
     }
+
+    @Override
+    public void refresh() {
+
+    }
 }

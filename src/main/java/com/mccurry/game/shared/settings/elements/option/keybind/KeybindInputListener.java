@@ -6,14 +6,14 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.scene.Node;
-import com.mccurry.game.gameplayConfig.keyBinding.model.KeyBind;
+import com.mccurry.game.keyBinding.model.KeyBind;
 import com.mccurry.game.shared.settings.elements.option.OptionKeybindSelector;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-import static com.mccurry.game.gameplayConfig.keyBinding.KeyBindingRegistry.VALID_KEY_BINDINGS;
+import static com.mccurry.game.keyBinding.KeyBindingRegistry.VALID_KEY_BINDINGS;
 
 
 @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
