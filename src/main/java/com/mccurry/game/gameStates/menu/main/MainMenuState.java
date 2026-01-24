@@ -7,15 +7,18 @@ import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
+import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
-import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
+import com.mccurry.game.gameStates.menu.main.event.MenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
-import com.mccurry.game.shared.ui.UiState;
+import com.mccurry.game.shared.ui.MenuState;
+import com.mccurry.game.shared.ui.MenuType;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
+import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -24,13 +27,12 @@ import java.util.List;
 import static com.mccurry.game.gameStates.menu.main.LocaleConstants.*;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
-public class MainMenuState extends UiState {
-    private static final MainMenuState instance = new MainMenuState();
+@RequiredArgsConstructor
+public class MainMenuState extends MenuState {
     private AssetManager assetManager;
+    private final List<Button> buttons = new ArrayList<>();
 
-    private List<Button> buttons = new ArrayList<>();
-
-    private MainMenuState() {}
+    private final EventBus<GameOrchestrationContext> orchestrationBus;
 
     @Override
     public void createUi(SimpleApplication application, Node stateGuiNode) {
@@ -41,23 +43,19 @@ public class MainMenuState extends UiState {
         var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, new Command<Button>() {
             @Override
             public void execute(Button source) {
-                System.err.println("button y=%s".formatted(source.getLocalTranslation().getY()));
+
             }
         }, true);
 
         var loadGameButton = newMainMenuButton(LOCALE_KEY_LOAD_GAME, null, false);
 
-        var settingsButton = newMainMenuButton(LOCALE_KEY_SETTINGS, new Command<Button>() {
-            private UserSettingsMenuState userSettingsMenuState;
-
-            @Override
-            public void execute(Button button) {
-                if (userSettingsMenuState == null) {
-                    userSettingsMenuState = UserSettingsMenuState.getNew();
-                }
-                getStateManager().attach(userSettingsMenuState);
-            }
-        }, true);
+        var settingsButton = newMainMenuButton(LOCALE_KEY_SETTINGS, button -> orchestrationBus.publish(
+                MenuOpenRequest.builder()
+                        .menuType(MenuType.SETTINGS)
+                        .build(),
+                new GameOrchestrationContext(),
+                null
+        ), true);
 
         var bestiaryButton = newMainMenuButton(LOCALE_KEY_BESTIARY, null, false);
 
@@ -119,7 +117,7 @@ public class MainMenuState extends UiState {
             @Nullable Command<Button> onClick,
             boolean enabled
     ) {
-        var button = new Button("");
+        var button = new Button(LocalizedString.get(localeKey));
         button.setUserData(METADATA_LOCALE_KEY,localeKey);
         button.setTextVAlignment(VAlignment.Center);
         button.setTextHAlignment(HAlignment.Center);
@@ -155,12 +153,7 @@ public class MainMenuState extends UiState {
         return button;
     }
 
-    public static MainMenuState instance() {
-        return instance;
-    }
-
-    @Override
-    public void refresh() {
+    public void refreshLocale(){
         buttons.forEach( button -> {
                     var localeKey = (String) button.getUserData(METADATA_LOCALE_KEY);
                     var localizedText = LocalizedString.get(localeKey);

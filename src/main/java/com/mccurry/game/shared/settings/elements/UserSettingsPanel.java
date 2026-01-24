@@ -10,6 +10,7 @@ import com.mccurry.game.Main;
 import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.SettingsTab;
@@ -23,6 +24,7 @@ import com.simsilica.lemur.component.QuadBackgroundComponent;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.mccurry.game.shared.settings.elements.SettingsPanelLocaleKeys.*;
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
@@ -64,7 +66,7 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
 
         headerContainer = noBackgroundContainer();
 
-        settingsLabel = new Label("Settings");
+        settingsLabel = new Label(LocalizedString.get(SETTINGS_LABEL));
         settingsLabel.setTextHAlignment(HAlignment.Center);
         settingsLabel.setTextVAlignment(VAlignment.Center);
 
@@ -92,7 +94,7 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         settingsButtonsContainer.setLayout(new BoxLayout(Axis.X, FillMode.None));
 
 
-        var graphicsBtn = settingsTabButton("Graphics",assetManager,true,textColor);
+        var graphicsBtn = settingsTabButton(SETTINGS_GRAPHICS,assetManager,true,textColor);
         graphicsBtn.addClickCommands(new Command<Button>() {
                                          @Override
                                          public void execute(Button source) {
@@ -107,10 +109,10 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
                                      }
         );
 
-        var soundBtn = settingsTabButton("Sound",assetManager,false,textColor);
-        var gameplayBtn = settingsTabButton("Gameplay",assetManager,false,textColor);
+        var soundBtn = settingsTabButton(SETTINGS_SOUND,assetManager,false,textColor);
+        var gameplayBtn = settingsTabButton(SETTINGS_GAMEPLAY,assetManager,false,textColor);
 
-        var controlsBtn = settingsTabButton("Controls",assetManager,true,textColor);
+        var controlsBtn = settingsTabButton(SETTINGS_CONTROLS,assetManager,true,textColor);
         controlsBtn.addClickCommands(new Command<Button>() {
                                          @Override
                                          public void execute(Button source) {
@@ -141,12 +143,12 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         var actionButtonsContainer = noBackgroundContainer();
         actionButtonsContainer.setLayout(new BoxLayout(Axis.X, FillMode.Even));
 
-        cancelBtn = settingsTabButton("Cancel",assetManager,true,textColor);
+        cancelBtn = settingsTabButton(SETTINGS_CANCEL,assetManager,true,textColor);
         cancelBtn.addClickCommands(source -> {
             appStateManager.detach(appStateManager.getState(UserSettingsMenuState.class));
         });
 
-        applyBtn = settingsTabButton("Apply",assetManager,true,textColor);
+        applyBtn = settingsTabButton(SETTINGS_APPLY,assetManager,true,textColor);
         applyBtn.addClickCommands(source -> {
             commitNewSettings(orchestrationBus);
             populateWithSettings(temporaryUserSettings.deepClone());
@@ -195,9 +197,9 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
     }
 
 
-    private Button settingsTabButton(String label, AssetManager assetManager, boolean enabled, ColorRGBA textColor) {
+    private Button settingsTabButton(String localeKey, AssetManager assetManager, boolean enabled, ColorRGBA textColor) {
 
-        var button = new Button(label);
+        var button = new Button(LocalizedString.get(localeKey));
         button.setInsets(new Insets3f(0,0,0,0));
         var buttonTexture = assetManager.loadTexture("Interface/GUI/Settings/SettingsTabButton.png");
 

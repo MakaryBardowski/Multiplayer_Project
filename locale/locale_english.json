@@ -3,5 +3,28 @@
   "MAIN_MENU_LOAD_GAME": "Load Game",
   "MAIN_MENU_SETTINGS": "Settings",
   "MAIN_MENU_BESTIARY": "Bestiary",
-  "MAIN_MENU_QUIT": "Quit"
+  "MAIN_MENU_QUIT": "Quit",
+
+
+  "SETTINGS_LABEL": "Settings",
+
+  "SETTINGS_GRAPHICS": "Graphics",
+    "GRAPHICS_RESOLUTION": "Resolution",
+
+  "SETTINGS_GAMEPLAY": "Gameplay",
+  "SETTINGS_SOUND": "Sound",
+
+  "SETTINGS_CONTROLS": "Controls",
+    "CONTROLS_FORWARD": "Move_Forward",
+    "CONTROLS_BACKWARD": "Move_Backward",
+    "CONTROLS_LEFT": "Move_Left",
+    "CONTROLS_RIGHT": "Move_Right",
+
+    "CONTROLS_ATTACK": "Attack",
+    "CONTROLS_INTERACT": "Interact",
+    "CONTROLS_SKILL_1": "Skill_1",
+    "CONTROLS_SKILL_2": "Skill_2",
+
+  "SETTINGS_APPLY": "Apply",
+  "SETTINGS_CANCEL": "Cancel"
 }

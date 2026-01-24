@@ -4,6 +4,7 @@ import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.option.OptionDropdownSelector;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.settings.model.UserSettings;
@@ -12,6 +13,8 @@ import com.simsilica.lemur.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import static com.mccurry.game.shared.settings.elements.settingsTab.SettingsTabLocaleKeys.GRAPHICS_RESOLUTION;
 
 
 public class GraphicsSettingsTab extends SettingsTab {
@@ -28,7 +31,7 @@ public class GraphicsSettingsTab extends SettingsTab {
 
         var resolutionOptions = new ArrayList<>(Arrays.stream(ResolutionSettings.values()).toList());
         resolutionOption = new OptionDropdownSelector<>(
-                "Resolution",
+                LocalizedString.get(GRAPHICS_RESOLUTION),
                         resolutionOptions
                 ,
                 ro -> ro.name().replace("R_", ""),

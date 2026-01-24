@@ -8,7 +8,7 @@ import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.event.MainThreadLocaleChangedEvent;
 import com.mccurry.game.locale.model.GameLocale;
 import com.mccurry.game.shared.settings.model.UserSettings;
-import com.mccurry.game.shared.ui.event.MainThreadRefreshUiEvent;
+import com.mccurry.game.shared.ui.event.MainThreadLocaleReloadedEvent;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -44,6 +44,6 @@ public class LocaleService implements EventSubscriber<GameOrchestrationContext>,
     @Override
     public void handle(@NonNull MainThreadLocaleChangedEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainThreadLocaleChangedEvent> lifecycleManager) {
         changeLocale(event.getNewLocale());
-        orchestrationBus.publish(new MainThreadRefreshUiEvent(),new GameOrchestrationContext(), null);
+        orchestrationBus.publish(new MainThreadLocaleReloadedEvent(),new GameOrchestrationContext(), null);
     }
 }

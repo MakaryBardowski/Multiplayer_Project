@@ -6,14 +6,10 @@ import com.jme3.scene.Node;
 import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.elements.UserSettingsPanel;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
-import com.mccurry.game.shared.ui.UiState;
+import com.mccurry.game.shared.ui.MenuState;
 
-public class UserSettingsMenuState extends UiState {
-    private static final UserSettingsMenuState instance = new UserSettingsMenuState();
-
+public class UserSettingsMenuState extends MenuState {
     private UserSettingsPanel userSettingsPanel;
-
-    private UserSettingsMenuState(){}
 
     @Override
     public void createUi(SimpleApplication application, Node stateGuiNode) {
@@ -35,14 +31,5 @@ public class UserSettingsMenuState extends UiState {
                 (baseResolution.getHeight()+settingsPanelSize.getY())/2,
                 2
         ));
-    }
-
-    public static UserSettingsMenuState getNew(){
-        return instance;
-    }
-
-    @Override
-    public void refresh() {
-
     }
 }

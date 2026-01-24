@@ -9,8 +9,9 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.boot.InitialBootState;
 import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
+import com.mccurry.game.gameStates.menu.MenuManager;
 import com.mccurry.game.gameStates.menu.main.MainMenuState;
-import com.mccurry.game.gameStates.menu.main.event.MainMenuOpenRequest;
+import com.mccurry.game.gameStates.menu.main.event.MenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
@@ -33,7 +34,7 @@ public class GameStateOrchestrator extends BaseAppState {
     @Override
     protected void initialize(Application application) {
         new ScreenTransitionService(application.getStateManager()).subscribe(gameOrchestrationBus);
-        registerMainMenuLauncher();
+        new MenuManager(application).subscribe(gameOrchestrationBus);
 
         var bootDoneHandler = new OnAssetLoadingDoneMainMenuLauncher(gameOrchestrationBus);
         gameOrchestrationBus.subscribe(AssetLoadingCompleteEvent.class, bootDoneHandler);
@@ -78,40 +79,6 @@ public class GameStateOrchestrator extends BaseAppState {
 
     @Override
     public void update(float tpf) {}
-
-    private void registerMainMenuLauncher() {
-        var launcherHandler = new SyncEventHandler<MainMenuOpenRequest, GameOrchestrationContext>() {
-            private MainMenuState mainMenuState;
-
-            @Override
-            public void handle(@NonNull MainMenuOpenRequest event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainMenuOpenRequest> lifecycleManager) {
-                if (mainMenuState == null) {
-                    mainMenuState = MainMenuState.instance();
-                }
-                var stateManager = getStateManager();
-                if(stateManager.hasState(mainMenuState)){ // we check just to not enqueue additional stuff
-                    return;
-                }
-                getApplication().enqueue(()->{
-                    stateManager.attach(mainMenuState);
-                });
-            }
-        };
-
-        var launcher = new EventSubscriber<GameOrchestrationContext>() {
-            @Override
-            public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
-                eventBus.subscribe(MainMenuOpenRequest.class, launcherHandler);
-            }
-
-            @Override
-            public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
-                eventBus.unsubscribe(MainMenuOpenRequest.class, launcherHandler);
-            }
-        };
-
-        launcher.subscribe(gameOrchestrationBus);
-    }
 
     public UserSettings getUserSettingsDeepClone(){
         return userSettingsService.getCurrentSettingsDeepClone();
