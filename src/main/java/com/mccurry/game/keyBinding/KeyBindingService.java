@@ -12,7 +12,7 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.keyBinding.model.KeyBind;
 import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.keyBinding.event.KeyRebindEvent;
+import com.mccurry.game.keyBinding.event.KeyReboundEvent;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import lombok.NonNull;
@@ -41,6 +41,8 @@ public class KeyBindingService implements EventSubscriber<GameOrchestrationConte
         inputManager.addMapping(BINDING_MOUSE_LEFT, new MouseButtonTrigger(MouseInput.BUTTON_LEFT));
         inputManager.addMapping(BINDING_MOUSE_RIGHT, new MouseButtonTrigger(MouseInput.BUTTON_RIGHT));
         inputManager.addMapping(BINDING_CTRL_LEFT, new KeyTrigger(KeyInput.KEY_LCONTROL));
+
+        inputManager.addMapping("TILDE", new KeyTrigger(KeyInput.KEY_GRAVE));
 
         inputManager.addMapping("A", new KeyTrigger(KeyInput.KEY_A));
         inputManager.addMapping("B", new KeyTrigger(KeyInput.KEY_B));
@@ -95,7 +97,7 @@ public class KeyBindingService implements EventSubscriber<GameOrchestrationConte
 
             if(!newKeybind.equals(previousBind)){
                 orchestrationBus.publish(
-                        KeyRebindEvent.builder()
+                        KeyReboundEvent.builder()
                                 .playerAction(reboundPlayerAction)
                                 .newMapping(newKeybind.getKeyName())
                                 .build(),

@@ -5,22 +5,23 @@ import com.jme3.app.state.BaseAppState;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.boot.InitialBootState;
 import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
+import com.mccurry.game.console.CheatConsoleLauncher;
+import com.mccurry.game.console.event.AttachConsoleListenerEvent;
 import com.mccurry.game.gameStates.menu.MenuManager;
-import com.mccurry.game.gameStates.menu.main.MainMenuState;
-import com.mccurry.game.gameStates.menu.main.event.MenuOpenRequest;
 import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
+import com.mccurry.game.keyBinding.KeyBindingService;
+import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.transition.ScreenTransitionService;
+import com.mccurry.game.shared.util.event.EventSubscribers;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
@@ -31,6 +32,8 @@ public class GameStateOrchestrator extends BaseAppState {
     @Getter(AccessLevel.NONE)
     private final UserSettingsService userSettingsService;
 
+    private final KeyBindingService keyBindingService;
+
     @Override
     protected void initialize(Application application) {
         new ScreenTransitionService(application.getStateManager()).subscribe(gameOrchestrationBus);
@@ -39,10 +42,12 @@ public class GameStateOrchestrator extends BaseAppState {
         var bootDoneHandler = new OnAssetLoadingDoneMainMenuLauncher(gameOrchestrationBus);
         gameOrchestrationBus.subscribe(AssetLoadingCompleteEvent.class, bootDoneHandler);
 
+        attachConsoleListenerSubscriberOnce().subscribe(gameOrchestrationBus);
         var initialBootState = new InitialBootState();
         getStateManager().attach(initialBootState);
 
-        closeInitialBootStateSubscriber(initialBootState).subscribe(gameOrchestrationBus);
+        closeInitialBootStateSubscriber(initialBootState).subscribe(gameOrchestrationBus); // todo: bug? co jesli asset loading skonczy sie przed zarejestrowaniem tego subscribera?
+
     }
 
     @Override
@@ -55,6 +60,12 @@ public class GameStateOrchestrator extends BaseAppState {
 
     @Override
     protected void onDisable() {
+    }
+
+    private void registerConsoleLauncher(KeyBindingService keyBindingService){
+       var launcher =  new CheatConsoleLauncher(getApplication(),keyBindingService.getKeybindForPlayerAction(PlayerAction.OPEN_CONSOLE).getKeyName());
+       launcher.startListening();
+       launcher.subscribe(gameOrchestrationBus);
     }
 
     private EventSubscriber<GameOrchestrationContext> closeInitialBootStateSubscriber(InitialBootState initialBootState) {
@@ -75,6 +86,12 @@ public class GameStateOrchestrator extends BaseAppState {
                 eventBus.unsubscribe(InitialBootCompleteEvent.class, handler);
             }
         };
+    }
+
+    private EventSubscriber<GameOrchestrationContext> attachConsoleListenerSubscriberOnce(){
+        return EventSubscribers.syncUnsubscribingOnFirstMessage(AttachConsoleListenerEvent.class,gameOrchestrationBus,(event)->{
+            registerConsoleLauncher(keyBindingService);
+        });
     }
 
     @Override

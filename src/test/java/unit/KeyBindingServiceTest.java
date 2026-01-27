@@ -7,7 +7,7 @@ import com.mccurry.game.keyBinding.KeyBindingService;
 import com.mccurry.game.keyBinding.model.KeyBind;
 import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.keyBinding.event.KeyRebindEvent;
+import com.mccurry.game.keyBinding.event.KeyReboundEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import org.jetbrains.annotations.Nullable;
 import org.junit.jupiter.api.Test;
@@ -41,15 +41,15 @@ public class KeyBindingServiceTest {
         newBindings.put(MOVE_FORWARD, newBinding);
         newBindings.put(MOVE_LEFT, new KeyBind("A"));
 
-        var keyRebindEventHandler = new SyncEventHandler<KeyRebindEvent, GameOrchestrationContext>(){
+        var keyRebindEventHandler = new SyncEventHandler<KeyReboundEvent, GameOrchestrationContext>(){
             int eventsConsumed;
 
             @Override
-            public void handle(KeyRebindEvent event, GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<KeyRebindEvent> lifecycleManager) {
+            public void handle(KeyReboundEvent event, GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<KeyReboundEvent> lifecycleManager) {
                 eventsConsumed++;
             }
         };
-        orchestrationBus.subscribe(KeyRebindEvent.class,keyRebindEventHandler);
+        orchestrationBus.subscribe(KeyReboundEvent.class,keyRebindEventHandler);
 
         // when
         keybindService.updateBindings(newBindings);

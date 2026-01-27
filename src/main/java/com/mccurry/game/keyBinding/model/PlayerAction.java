@@ -1,6 +1,8 @@
 package com.mccurry.game.keyBinding.model;
 
 public enum PlayerAction {
+    OPEN_CONSOLE,
+
     MOVE_FORWARD,
     MOVE_BACKWARD,
     MOVE_LEFT,

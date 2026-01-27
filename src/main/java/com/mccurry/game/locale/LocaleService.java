@@ -23,6 +23,7 @@ public class LocaleService implements EventSubscriber<GameOrchestrationContext>,
     public static LocaleService withLocaleFromSettings(EventBus<GameOrchestrationContext> orchestrationBus, UserSettings settings){
         var service = new LocaleService(orchestrationBus);
         service.changeLocale(settings.getLocale());
+        service.subscribe(orchestrationBus);
         return service;
     }
 

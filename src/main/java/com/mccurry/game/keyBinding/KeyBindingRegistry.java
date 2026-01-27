@@ -37,6 +37,8 @@ public class KeyBindingRegistry {
 
     public static LinkedHashMap<PlayerAction, KeyBind> getNewDefaultBindings(){
         var defaultBinds = new LinkedHashMap<PlayerAction, KeyBind>();
+        defaultBinds.put(PlayerAction.OPEN_CONSOLE,new KeyBind("TILDE"));
+
         defaultBinds.put(PlayerAction.MOVE_FORWARD,new KeyBind("W"));
         defaultBinds.put(PlayerAction.MOVE_BACKWARD,new KeyBind("S"));
         defaultBinds.put(PlayerAction.MOVE_LEFT,new KeyBind("A"));

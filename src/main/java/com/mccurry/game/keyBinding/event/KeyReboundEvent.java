@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class KeyRebindEvent implements Event {
+public class KeyReboundEvent implements Event {
     private PlayerAction playerAction;
     private String newMapping;
 }

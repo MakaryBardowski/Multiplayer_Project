@@ -45,7 +45,7 @@ public class Main extends SimpleApplication {
 
         keyBindingService.initializeMappings(inputManager);
 
-        stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService));
+        stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService,keyBindingService));
     }
 
     public static void main(String[] args) {

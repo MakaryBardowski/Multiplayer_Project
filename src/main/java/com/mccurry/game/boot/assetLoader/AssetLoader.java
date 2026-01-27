@@ -7,6 +7,7 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
 import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
+import com.mccurry.game.console.event.AttachConsoleListenerEvent;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
@@ -61,6 +62,7 @@ public class AssetLoader implements AsyncEventHandler<BootUiStateSetupCompleteEv
             }
 
             lemurLibLoader.join();
+            orchestrationBus.publish(new AttachConsoleListenerEvent(), new GameOrchestrationContext(),null);
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);

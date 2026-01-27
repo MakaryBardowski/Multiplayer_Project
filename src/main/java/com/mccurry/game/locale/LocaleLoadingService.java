@@ -11,11 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static com.mccurry.game.locale.model.GameLocale.ENGLISH;
+import static com.mccurry.game.locale.model.GameLocale.POLISH;
 
 public class LocaleLoadingService {
     private static final String LOCALE_FILENAME_TEMPLATE = "locale/locale_%s.json";
     private static final Map<GameLocale,String> FILE_SUFFIX_BY_GAME_LOCALE = new HashMap<>(){{
         put(ENGLISH, "english");
+        put(POLISH, "polish");
     }};
 
     private static final ObjectMapper LOCALE_FILE_MAPPER = new ObjectMapper();
@@ -24,7 +26,7 @@ public class LocaleLoadingService {
 
     Map<String,String> loadLocale(GameLocale gameLocale){
         var localeFile = new File(getLocaleFileName(gameLocale));
-
+        System.err.println("locale change triggered "+localeFile.getPath());
         if(!localeFile.exists() || !localeFile.isFile()){
             LocaleRegistry.updateLocale(new HashMap<>());
         }
