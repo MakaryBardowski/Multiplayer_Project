@@ -1,4 +1,4 @@
-package com.mccurry.game.shared.settings.elements.option;
+package com.mccurry.game.shared.settings.elements.option.keybind;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.input.InputManager;
@@ -8,7 +8,7 @@ import com.jme3.scene.Node;
 import com.mccurry.game.keyBinding.model.KeyBind;
 import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.shared.settings.elements.UserSettingsPopulated;
-import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
+import com.mccurry.game.shared.settings.elements.option.OptionSelector;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.mccurry.game.shared.ui.util.TextureUtil;

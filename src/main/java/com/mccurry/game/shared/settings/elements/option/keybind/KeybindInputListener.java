@@ -7,7 +7,6 @@ import com.jme3.input.InputManager;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.scene.Node;
 import com.mccurry.game.keyBinding.model.KeyBind;
-import com.mccurry.game.shared.settings.elements.option.OptionKeybindSelector;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import lombok.AccessLevel;
 import lombok.Getter;

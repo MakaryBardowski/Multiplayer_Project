@@ -9,8 +9,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.mccurry.game.util.strings.JmeRgbaTagsUtil.green;
-import static com.mccurry.game.util.strings.JmeRgbaTagsUtil.red;
+import static com.mccurry.game.util.strings.JmeRgbaTagsUtil.greenToWhite;
+import static com.mccurry.game.util.strings.JmeRgbaTagsUtil.redToWhite;
 
 public class ConsoleRegistry {
     private static final Map<String,ConsoleCommand> AVAILABLE_COMMANDS = new LinkedHashMap<>(){{
@@ -45,14 +45,14 @@ public class ConsoleRegistry {
 
     public static String execute(EventBus<GameOrchestrationContext> orchestrationBus, String consoleInput){
         if(!consoleInput.startsWith("/")){
-            return red("Invalid command. Commands must start with \"/\"");
+            return redToWhite("Invalid command. Commands must start with \"/\"");
         }
 
         var commandName = parseCommandName(consoleInput);
         var executableCommand = AVAILABLE_COMMANDS.get(commandName);
 
         if(executableCommand == null){
-            return red("Invalid command \"%s\". To get a list of available commands, use \"/help\"".formatted(commandName));
+            return redToWhite("Invalid command \"%s\". To get a list of available commands, use \"/help\"".formatted(commandName));
         }
 
         var argumentsInput = consoleInput.replace("/"+commandName,"").trim();
@@ -61,14 +61,14 @@ public class ConsoleRegistry {
         try {
             commandArgs = executableCommand.parseExecutionArgs(argumentsInput);
         } catch (CommandParsingException commandParsingException){
-            return red(commandParsingException.getMessage());
+            return redToWhite(commandParsingException.getMessage());
         }
 
         try{
             var execOutput = executableCommand.run(orchestrationBus,commandArgs);
-            return green(execOutput == null ? "Command executed successfully" : execOutput);
+            return greenToWhite(execOutput == null ? "Command executed successfully" : execOutput);
         } catch (Exception e){
-            return red("Exception during command execution: "+e.getMessage());
+            return redToWhite("Exception during command execution: "+e.getMessage());
         }
     }
 

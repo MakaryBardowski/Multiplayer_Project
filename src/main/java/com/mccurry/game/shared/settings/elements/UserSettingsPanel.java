@@ -14,6 +14,7 @@ import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.SettingsTab;
+import com.mccurry.game.shared.settings.elements.settingsTab.SoundSettingsTab;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.FontUtil;
@@ -42,6 +43,7 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
     private UserSettings temporaryUserSettings; // options that will be commited when "apply" is clicked
     private final GraphicsSettingsTab graphicsSettingsTab;
     private final ControlsSettingsTab controlsSettingsTab;
+    private final SoundSettingsTab soundSettingsTab;
 
     private final Button cancelBtn;
     private final Button applyBtn;
@@ -83,6 +85,10 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         graphicsSettingsTab = new GraphicsSettingsTab(
                 assetManager
         );
+        soundSettingsTab = new SoundSettingsTab(
+                assetManager
+        );
+
         controlsSettingsTab = new ControlsSettingsTab(
                 ((Main)appStateManager.getApplication()).getGuiNode(),
                 appStateManager.getApplication().getInputManager(),
@@ -109,7 +115,21 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
                                      }
         );
 
-        var soundBtn = settingsTabButton(SETTINGS_SOUND,assetManager,false,textColor);
+        var soundBtn = settingsTabButton(SETTINGS_SOUND,assetManager,true,textColor);
+        soundBtn.addClickCommands(new Command<Button>() {
+                                      @Override
+                                      public void execute(Button source) {
+                                          if (currentSelectedOptionsTab != null && currentSelectedOptionsTab != soundSettingsTab) {
+                                              currentSelectedOptionsTab.removeFromParent();
+                                          }
+                                          currentSelectedOptionsTab = soundSettingsTab;
+                                          settingTabContainer.addChild(currentSelectedOptionsTab);
+                                          source.setColor(ColorRGBA.Red);
+                                          optionTabButtons.stream().filter(btn -> btn != source).forEach(btn -> btn.setColor(ColorRGBA.White));
+                                      }
+                                  }
+        );
+
         var gameplayBtn = settingsTabButton(SETTINGS_GAMEPLAY,assetManager,false,textColor);
 
         var controlsBtn = settingsTabButton(SETTINGS_CONTROLS,assetManager,true,textColor);
@@ -239,6 +259,7 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         this.temporaryUserSettings = temporaryUserSettings;
         graphicsSettingsTab.populateWithSettings(this.temporaryUserSettings);
         controlsSettingsTab.populateWithSettings(this.temporaryUserSettings);
+        soundSettingsTab.populateWithSettings(this.temporaryUserSettings);
     }
 
     private void commitNewSettings(EventBus<GameOrchestrationContext> orchestrationBus){

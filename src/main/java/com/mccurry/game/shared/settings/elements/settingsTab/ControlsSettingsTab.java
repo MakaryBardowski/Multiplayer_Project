@@ -5,7 +5,7 @@ import com.jme3.input.InputManager;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
 import com.mccurry.game.locale.LocalizedString;
-import com.mccurry.game.shared.settings.elements.option.OptionKeybindSelector;
+import com.mccurry.game.shared.settings.elements.option.keybind.OptionKeybindSelector;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.ContainerUtil;
 import com.simsilica.lemur.Container;

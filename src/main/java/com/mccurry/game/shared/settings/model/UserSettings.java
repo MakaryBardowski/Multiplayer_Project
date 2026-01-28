@@ -1,5 +1,6 @@
 package com.mccurry.game.shared.settings.model;
 
+import com.fasterxml.jackson.annotation.JsonMerge;
 import com.mccurry.game.keyBinding.model.KeyBind;
 import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.locale.model.GameLocale;
@@ -26,6 +27,9 @@ public class UserSettings {
     private Boolean vSync;
     private Integer maxFps;
     private GameLocale locale;
+
+    @JsonMerge
+    private SoundSettings soundSettings;
     private LinkedHashMap<PlayerAction, KeyBind> keyBinds;
 
     public UserSettings deepClone() {
@@ -45,6 +49,7 @@ public class UserSettings {
                 .maxFps(maxFps)
                 .locale(locale)
                 .keyBinds(clonedBinds)
+                .soundSettings(soundSettings.toBuilder().build())
                 .build();
     }
 
@@ -57,6 +62,14 @@ public class UserSettings {
                 .setVSync(true)
                 .setMaxFps(120)
                 .setLocale(ENGLISH)
-                .setKeyBinds(getNewDefaultBindings());
+                .setKeyBinds(getNewDefaultBindings())
+                .setSoundSettings(
+                        SoundSettings.builder()
+                                .masterVolume(70)
+                                .musicVolume(70)
+                                .sfxVolume(70)
+                                .gunshotVolume(70)
+                                .build()
+                );
     }
 }

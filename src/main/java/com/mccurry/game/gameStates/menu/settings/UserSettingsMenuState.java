@@ -16,7 +16,6 @@ public class UserSettingsMenuState extends MenuState {
         var stateManager = application.getStateManager();
         var bus = stateManager.getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         userSettingsPanel = new UserSettingsPanel(bus,stateManager,application.getAssetManager());
-        userSettingsPanel.populateWithSettings(stateManager.getState(GameStateOrchestrator.class).getUserSettingsDeepClone());
         stateGuiNode.attachChild(userSettingsPanel);
         layout();
     }
@@ -32,4 +31,12 @@ public class UserSettingsMenuState extends MenuState {
                 2
         ));
     }
+
+    @Override
+    protected void onEnable() {
+        super.onEnable();
+        var stateManager = getApplication().getStateManager();
+        userSettingsPanel.populateWithSettings(stateManager.getState(GameStateOrchestrator.class).getUserSettingsDeepClone());
+    }
+
 }
