@@ -3,6 +3,10 @@ package com.mccurry.game.shared.settings.elements.settingsTab;
 public class SettingsTabLocaleKeys {
     public static String GRAPHICS_RESOLUTION = "GRAPHICS_RESOLUTION";
 
+    public static String SOUND_MASTER = "SOUND_MASTER";
+    public static String SOUND_MUSIC = "SOUND_MUSIC";
+    public static String SOUND_SFX = "SOUND_SFX";
+    public static String SOUND_GUNSHOT = "SOUND_GUNSHOT";
 
     public static String CONTROLS_FORWARD = "CONTROLS_FORWARD";
     public static String CONTROLS_BACKWARD = "CONTROLS_BACKWARD";

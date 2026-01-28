@@ -3,10 +3,13 @@ package com.mccurry.game.shared.settings.elements.settingsTab;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
+import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.option.slider.SliderOptionSelector;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.util.ContainerUtil;
 import com.simsilica.lemur.Container;
+
+import static com.mccurry.game.shared.settings.elements.settingsTab.SettingsTabLocaleKeys.*;
 
 public class SoundSettingsTab extends SettingsTab {
 
@@ -17,29 +20,29 @@ public class SoundSettingsTab extends SettingsTab {
     private final SliderOptionSelector sfxVolumeOption;
     private final SliderOptionSelector gunshotVolumeOption;
 
-    private Container paddingContainer;
+    private final Container paddingContainer;
 
     public SoundSettingsTab(
             AssetManager assetManager
     ) {
         super(assetManager);
 
-        masterVolumeOption = new SliderOptionSelector("Master_Volume",
+        masterVolumeOption = new SliderOptionSelector(LocalizedString.get(SOUND_MASTER),
                 (s) -> {
                     temporaryUserSettings.getSoundSettings().setMasterVolume((int) Math.round(s.getModel().getValue()));
                 }, assetManager);
 
-        musicVolumeOption = new SliderOptionSelector("Music_Volume",
+        musicVolumeOption = new SliderOptionSelector(LocalizedString.get(SOUND_MUSIC),
                 (s) -> {
                     temporaryUserSettings.getSoundSettings().setMusicVolume((int) Math.round(s.getModel().getValue()));
                 }, assetManager);
 
-        sfxVolumeOption = new SliderOptionSelector("Sfx_Volume",
+        sfxVolumeOption = new SliderOptionSelector(LocalizedString.get(SOUND_SFX),
                 (s) -> {
                     temporaryUserSettings.getSoundSettings().setSfxVolume((int) Math.round(s.getModel().getValue()));
                 }, assetManager);
 
-        gunshotVolumeOption = new SliderOptionSelector("Gunshot_Volume", (s) -> {
+        gunshotVolumeOption = new SliderOptionSelector(LocalizedString.get(SOUND_GUNSHOT), (s) -> {
             temporaryUserSettings.getSoundSettings().setGunshotVolume((int) Math.round(s.getModel().getValue()));
         }, assetManager);
 

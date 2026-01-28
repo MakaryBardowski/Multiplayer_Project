@@ -9,10 +9,9 @@ import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.command.ConsoleRegistry;
 import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.simsilica.lemur.Container;
-import com.simsilica.lemur.Insets3f;
-import com.simsilica.lemur.Label;
-import com.simsilica.lemur.TextField;
+import com.mccurry.game.keyBinding.KeyBindingRegistry;
+import com.mccurry.game.keyBinding.KeyBindingService;
+import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.event.KeyAction;
@@ -26,6 +25,7 @@ public class CheatConsoleState extends BaseAppState {
     private static final float CONSOLE_MAX_Y = CONSOLE_SIZE_Y+CONSOLE_INPUT_LINE_SIZE_Y;
     private static final float CONSOLE_OPENING_SPEED = 2000;
 
+    private final TextField consoleInputLine;
     private final Container consoleContainer;
     private ConsoleState currentState = ConsoleState.STATIC;
 
@@ -39,7 +39,7 @@ public class CheatConsoleState extends BaseAppState {
         consoleLog.setColor(ColorRGBA.White);
         consoleLog.setFontSize(8);
 
-        var consoleInputLine = new TextField("");
+        consoleInputLine = new TextField("");
         consoleInputLine.setPreferredSize(new Vector3f(640,CONSOLE_INPUT_LINE_SIZE_Y,1));
         consoleInputLine.setBackground(new QuadBackgroundComponent(ColorRGBA.DarkGray.clone().setAlpha(0.2f)));
         consoleInputLine.setColor(ColorRGBA.White);
@@ -87,6 +87,8 @@ public class CheatConsoleState extends BaseAppState {
         ((SimpleApplication)getApplication()).getGuiNode().attachChild(consoleContainer);
         currentState = ConsoleState.OPENING;
         consoleContainer.setLocalTranslation(0,0,1000555f);
+        consoleInputLine.setText("");
+        GuiGlobals.getInstance().requestFocus(consoleInputLine);
     }
 
     @Override

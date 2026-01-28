@@ -38,7 +38,6 @@ public class GraphicsSettingsTab extends SettingsTab {
                 6,
                 source -> {
                     var selectedItem = (ResolutionSettings) source.getSelectedItem();
-                    System.err.println("selected "+selectedItem + "temporary settings %s@%s".formatted("tempSettings",System.identityHashCode(temporaryUserSettings)));
                     temporaryUserSettings.setResolutionSetting(selectedItem);
                 },
                 assetManager

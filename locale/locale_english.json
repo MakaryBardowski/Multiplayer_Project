@@ -12,7 +12,12 @@
     "GRAPHICS_RESOLUTION": "Resolution",
 
   "SETTINGS_GAMEPLAY": "Gameplay",
+
   "SETTINGS_SOUND": "Sound",
+    "SOUND_MASTER": "Master_Volume",
+    "SOUND_MUSIC": "Music_Volume",
+    "SOUND_SFX": "Sfx_Volume",
+    "SOUND_GUNSHOT": "Gunshot_Volume",
 
   "SETTINGS_CONTROLS": "Controls",
     "CONTROLS_FORWARD": "Move_Forward",
