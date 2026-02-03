@@ -16,6 +16,8 @@ import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
 import com.mccurry.game.shared.ui.MenuType;
+import com.mccurry.game.sound.event.PlayGlobalSoundRequestEvent;
+import com.mccurry.game.sound.model.global.GlobalSoundEntry;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import lombok.RequiredArgsConstructor;
@@ -40,12 +42,7 @@ public class MainMenuState extends MenuState {
         application.getViewPort().setBackgroundColor(ColorRGBA.Black);
         
 
-        var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, new Command<Button>() {
-            @Override
-            public void execute(Button source) {
-
-            }
-        }, true);
+        var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, null, true);
 
         var loadGameButton = newMainMenuButton(LOCALE_KEY_LOAD_GAME, null, false);
 
@@ -131,9 +128,21 @@ public class MainMenuState extends MenuState {
         button.setFont(font);
         button.setColor(ColorRGBA.White.clone());
 
+        Command<Button> defaultClickCommand;
+
         if (onClick != null) {
-            button.addClickCommands(onClick);
+            defaultClickCommand = source -> {
+                playClickSound();
+                onClick.execute(source);
+            };
+        } else {
+            defaultClickCommand = source -> {
+                playClickSound();
+            };
         }
+
+        button.addClickCommands(defaultClickCommand);
+
 
         var buttonTexture = assetManager.loadTexture("Interface/GUI/MainMenu/MainMenuButton.png");
 
@@ -160,5 +169,9 @@ public class MainMenuState extends MenuState {
                     button.setText(localizedText);
                 }
         );
+    }
+
+    private void playClickSound(){
+        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK),new GameOrchestrationContext(),null);
     }
 }

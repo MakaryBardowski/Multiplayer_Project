@@ -13,6 +13,8 @@ import com.mccurry.game.locale.LocaleService;
 import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
+import com.mccurry.game.sound.SoundRegistry;
+import com.mccurry.game.sound.SoundService;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -27,7 +29,11 @@ public class Main extends SimpleApplication {
     @Setter
     private KeyBindingService keyBindingService;
 
-    @Setter LocaleService localeService;
+    @Setter
+    private LocaleService localeService;
+
+    @Setter
+    private SoundService soundService;
 
     private final SyncEventHandler<MainThreadResizeUiEvent, GameOrchestrationContext> resizeUiEventHandler = resizeUiOnResolutionChanged();
 
@@ -35,6 +41,7 @@ public class Main extends SimpleApplication {
     private static int guiScale;
 
     private final Node gameGuiNode = new Node("Main gui node");
+    private final Node rootNonPositionalSoundNode = new Node("root non-positional sound node");
 
     @Override
     public void simpleInitApp() {
@@ -44,6 +51,20 @@ public class Main extends SimpleApplication {
         System.out.println("\n\n\n\n[Main] Starting");
 
         keyBindingService.initializeMappings(inputManager);
+
+        var currentSettings = userSettingsService.getCurrentSettingsDeepClone();
+        var soundRegistry = SoundRegistry.withSoundVolumesFromSettings(assetManager,currentSettings);
+        soundRegistry.subscribe(orchestrationBus);
+
+        var soundService = new SoundService(
+                Thread.currentThread(),
+                this,rootNonPositionalSoundNode,
+                soundRegistry
+        );
+        this.setSoundService(soundService);
+        this.soundService.subscribe(orchestrationBus);
+
+
 
         stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService,keyBindingService));
     }

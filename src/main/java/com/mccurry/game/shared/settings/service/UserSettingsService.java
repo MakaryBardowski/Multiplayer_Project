@@ -14,6 +14,7 @@ import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.exception.UserSettingsException;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
+import com.mccurry.game.sound.event.MainThreadSoundVolumeChangedEvent;
 import lombok.NonNull;
 
 import java.io.File;
@@ -38,11 +39,38 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
             var previousResolution = settings.getResolutionSetting();
             var previousLocale = settings.getLocale();
 
+            // SOUND SETTINGS
+            var soundSettings = settings.getSoundSettings(); // @JsonMerge updates instance in place, so we cannot compare directly
+            var previousMasterVolume = soundSettings.getMasterVolume();
+            var previousMusicVolume = soundSettings.getMusicVolume();
+            var previousSfxVolume = soundSettings.getSfxVolume();
+            var previousGunshotVolume = soundSettings.getGunshotVolume();
+            // SOUND SETTINGS
+
             currentSettings = updateSettings(file, settings, patch);
 
 
             application.setSettings(getApplicationSettings());
 //            applyLogicalResolution(application,currentSettings.getResolutionSetting().getWidth(),currentSettings.getResolutionSetting().getHeight());
+
+            if(
+                    !soundSettings.getMasterVolume().equals(previousMasterVolume) ||
+                            !soundSettings.getMusicVolume().equals(previousMusicVolume) ||
+                            !soundSettings.getSfxVolume().equals(previousSfxVolume) ||
+                            !soundSettings.getGunshotVolume().equals(previousGunshotVolume)
+            ){
+                var currentSoundSettings = currentSettings.getSoundSettings();
+                orchestrationBus.publish(
+                        MainThreadSoundVolumeChangedEvent.builder()
+                                .masterVolumePercentage(currentSoundSettings.getMasterVolume())
+                                .musicVolumePercentage(currentSoundSettings.getMusicVolume())
+                                .sfxVolumePercentage(currentSoundSettings.getSfxVolume())
+                                .gunshotVolumePercentage(currentSoundSettings.getGunshotVolume())
+                                .build(),
+                        new GameOrchestrationContext(),
+                        null
+                );
+            }
 
             if(!currentSettings.getResolutionSetting().equals(previousResolution)) {
                 application.restart();

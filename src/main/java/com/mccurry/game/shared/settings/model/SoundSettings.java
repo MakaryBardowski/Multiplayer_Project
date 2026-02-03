@@ -7,6 +7,7 @@ import lombok.*;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
+@EqualsAndHashCode
 public class SoundSettings {
     private Integer masterVolume;
     private Integer musicVolume;
