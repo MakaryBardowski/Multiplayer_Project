@@ -4,7 +4,7 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.event.MainThreadLocaleChangedEvent;
 import com.mccurry.game.locale.model.GameLocale;
 import com.mccurry.game.shared.settings.model.UserSettings;

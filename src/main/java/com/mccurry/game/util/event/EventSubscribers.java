@@ -1,4 +1,4 @@
-package com.mccurry.game.shared.util.event;
+package com.mccurry.game.util.event;
 
 import com.mccurry.events.core.Event;
 import com.mccurry.events.core.EventBus;

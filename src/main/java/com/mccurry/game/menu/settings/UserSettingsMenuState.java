@@ -1,9 +1,9 @@
-package com.mccurry.game.gameStates.menu.settings;
+package com.mccurry.game.menu.settings;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
-import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.elements.UserSettingsPanel;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;

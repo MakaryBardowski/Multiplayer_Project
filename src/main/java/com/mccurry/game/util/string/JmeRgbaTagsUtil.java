@@ -1,4 +1,4 @@
-package com.mccurry.game.util.strings;
+package com.mccurry.game.util.string;
 
 public class JmeRgbaTagsUtil {
 

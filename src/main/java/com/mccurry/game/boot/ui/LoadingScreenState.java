@@ -20,11 +20,11 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
 import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
-import com.mccurry.game.shared.util.event.EventSubscribers;
+import com.mccurry.game.util.event.EventSubscribers;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 

@@ -2,15 +2,15 @@ package com.mccurry.game.console.command;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.exception.CommandParsingException;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static com.mccurry.game.util.strings.JmeRgbaTagsUtil.greenToWhite;
-import static com.mccurry.game.util.strings.JmeRgbaTagsUtil.redToWhite;
+import static com.mccurry.game.util.string.JmeRgbaTagsUtil.greenToWhite;
+import static com.mccurry.game.util.string.JmeRgbaTagsUtil.redToWhite;
 
 public class ConsoleRegistry {
     private static final Map<String,ConsoleCommand> AVAILABLE_COMMANDS = new LinkedHashMap<>(){{

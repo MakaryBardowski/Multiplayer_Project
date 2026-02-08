@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.orchestrator;
+package com.mccurry.game.orchestrator;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
@@ -10,14 +10,14 @@ import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.console.CheatConsoleLauncher;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
-import com.mccurry.game.gameStates.menu.MenuManager;
-import com.mccurry.game.gameStates.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
+import com.mccurry.game.menu.MenuManager;
+import com.mccurry.game.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
 import com.mccurry.game.keyBinding.KeyBindingService;
 import com.mccurry.game.keyBinding.model.PlayerAction;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.transition.ScreenTransitionService;
-import com.mccurry.game.shared.util.event.EventSubscribers;
+import com.mccurry.game.util.event.EventSubscribers;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;

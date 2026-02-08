@@ -8,7 +8,7 @@ import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
 import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
 import lombok.NonNull;

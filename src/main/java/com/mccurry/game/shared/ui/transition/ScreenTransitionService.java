@@ -4,7 +4,7 @@ import com.jme3.app.state.AppStateManager;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.ui.transition.appStates.AutoDetachingScreenFadeInState;
 import com.mccurry.game.shared.ui.transition.appStates.AutoDetachingScreenFadeOutState;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;

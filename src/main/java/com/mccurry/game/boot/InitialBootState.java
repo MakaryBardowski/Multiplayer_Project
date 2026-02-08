@@ -9,11 +9,11 @@ import com.mccurry.game.boot.assetLoader.AssetLoader;
 import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.boot.ui.LoadingScreenState;
-import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.menu.main.event.MainMenuOpened;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;
-import com.mccurry.game.shared.util.event.EventSubscribers;
+import com.mccurry.game.util.event.EventSubscribers;
 
 public class InitialBootState extends BaseAppState {
 

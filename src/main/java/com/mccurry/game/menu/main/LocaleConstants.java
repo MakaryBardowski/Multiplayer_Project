@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.menu.main;
+package com.mccurry.game.menu.main;
 
 public class LocaleConstants {
     public static String LOCALE_KEY_NEW_GAME = "MAIN_MENU_NEW_GAME";

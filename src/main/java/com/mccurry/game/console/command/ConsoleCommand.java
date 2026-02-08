@@ -2,7 +2,7 @@ package com.mccurry.game.console.command;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.exception.CommandParsingException;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 

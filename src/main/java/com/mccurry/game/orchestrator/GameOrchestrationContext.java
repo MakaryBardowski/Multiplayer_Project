@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.orchestrator;
+package com.mccurry.game.orchestrator;
 
 import com.mccurry.events.core.EventContext;
 

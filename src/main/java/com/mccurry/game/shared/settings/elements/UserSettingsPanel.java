@@ -7,9 +7,8 @@ import com.jme3.math.Vector3f;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.Main;
-import com.mccurry.game.gameStates.menu.settings.UserSettingsMenuState;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.menu.settings.UserSettingsMenuState;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
@@ -165,6 +164,7 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
 
         cancelBtn = settingsTabButton(SETTINGS_CANCEL,assetManager,true,textColor);
         cancelBtn.addClickCommands(source -> {
+//            close menu event
             appStateManager.detach(appStateManager.getState(UserSettingsMenuState.class));
         });
 

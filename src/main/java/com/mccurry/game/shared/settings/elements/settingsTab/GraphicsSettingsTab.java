@@ -2,8 +2,6 @@ package com.mccurry.game.shared.settings.elements.settingsTab;
 
 import com.jme3.asset.AssetManager;
 import com.jme3.math.Vector3f;
-import com.mccurry.events.core.EventBus;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.option.OptionDropdownSelector;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;

@@ -1,4 +1,4 @@
-package com.mccurry.game.gameStates.menu.main;
+package com.mccurry.game.menu.main;
 
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
@@ -8,10 +8,10 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
-import com.mccurry.game.gameStates.menu.main.event.MainMenuOpened;
-import com.mccurry.game.gameStates.menu.main.event.MenuOpenRequest;
-import com.mccurry.game.gameStates.orchestrator.GameOrchestrationContext;
-import com.mccurry.game.gameStates.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.menu.main.event.MainMenuOpened;
+import com.mccurry.game.menu.main.event.MenuOpenRequest;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.mccurry.game.gameStates.menu.main.LocaleConstants.*;
+import static com.mccurry.game.menu.main.LocaleConstants.*;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
 @RequiredArgsConstructor
@@ -40,9 +40,18 @@ public class MainMenuState extends MenuState {
     public void createUi(SimpleApplication application, Node stateGuiNode) {
         assetManager = application.getAssetManager();
         application.getViewPort().setBackgroundColor(ColorRGBA.Black);
-        
 
-        var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, null, true);
+
+        var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, button -> {
+            orchestrationBus.publish(
+                    MenuOpenRequest.builder()
+                            .menuType(MenuType.GAMEMODE_SELECTOR)
+                            .build(),
+                    new GameOrchestrationContext(),
+                    null
+            );
+            application.getStateManager().detach(this);
+        }, true);
 
         var loadGameButton = newMainMenuButton(LOCALE_KEY_LOAD_GAME, null, false);
 
@@ -77,25 +86,22 @@ public class MainMenuState extends MenuState {
         layout();
     }
 
-    private void layout(){
+    private void layout() {
         var baseResolution = ResolutionSettings.R_640x360;
 
         var buttonIndexPlusOne = 1;
-        for(var button : buttons){
-            var buttonSize = new Vector3f(120, 36, 1);
-            button.setPreferredSize(buttonSize);
-
+        for (var button : buttons) {
+            var buttonSize = button.getPreferredSize();
             Spatial node = button;
             while (node != null) {
-                System.err.println(node + " localTrans=" + node.getLocalTranslation() + " scale=" + node.getLocalScale());
                 node = node.getParent();
             }
 
             var screenHeight = baseResolution.getHeight();
-            var topButtonMargin = (int)screenHeight * 0.19f;
-            var distanceBetweenButtons = (int)buttonSize.getY() * 0.3f;
+            var topButtonMargin = (int) screenHeight * 0.19f;
+            var distanceBetweenButtons = (int) buttonSize.getY() * 0.3f;
 
-            var buttonX = ((int)(baseResolution.getWidth() * 0.98f)) - buttonSize.getX();
+            var buttonX = ((int) (baseResolution.getWidth() * 0.98f)) - buttonSize.getX();
 
             button.setLocalTranslation(new Vector3f(
                     buttonX,
@@ -115,14 +121,15 @@ public class MainMenuState extends MenuState {
             boolean enabled
     ) {
         var button = new Button(LocalizedString.get(localeKey));
-        button.setUserData(METADATA_LOCALE_KEY,localeKey);
+        button.setPreferredSize(new Vector3f(120, 36, 1));
+        button.setUserData(METADATA_LOCALE_KEY, localeKey);
         button.setTextVAlignment(VAlignment.Center);
         button.setTextHAlignment(HAlignment.Center);
         button.setHighlightColor(ColorRGBA.Red.clone());
         button.setFocusColor(ColorRGBA.Red.clone());
 
         var font = assetManager.loadFont("Interface/Fonts/pixelFlat11.fnt");
-        Texture fontTex =  font.getPage(0).getTextureParam("ColorMap").getTextureValue();
+        Texture fontTex = font.getPage(0).getTextureParam("ColorMap").getTextureValue();
         fontTex.setMagFilter(Texture.MagFilter.Nearest);
         fontTex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
         button.setFont(font);
@@ -162,8 +169,8 @@ public class MainMenuState extends MenuState {
         return button;
     }
 
-    public void refreshLocale(){
-        buttons.forEach( button -> {
+    public void refreshLocale() {
+        buttons.forEach(button -> {
                     var localeKey = (String) button.getUserData(METADATA_LOCALE_KEY);
                     var localizedText = LocalizedString.get(localeKey);
                     button.setText(localizedText);
@@ -171,7 +178,7 @@ public class MainMenuState extends MenuState {
         );
     }
 
-    private void playClickSound(){
-        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK),new GameOrchestrationContext(),null);
+    private void playClickSound() {
+        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK), new GameOrchestrationContext(), null);
     }
 }
