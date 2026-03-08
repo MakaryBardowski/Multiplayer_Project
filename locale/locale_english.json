@@ -31,5 +31,12 @@
     "CONTROLS_SKILL_2": "Skill_2",
 
   "SETTINGS_APPLY": "Apply",
-  "SETTINGS_CANCEL": "Cancel"
+  "SETTINGS_CANCEL": "Cancel",
+
+  "GAMEMODE_SELECTOR_SP": "Single",
+  "GAMEMODE_SELECTOR_HOST_MP": "Host Game",
+  "GAMEMODE_SELECTOR_JOIN_MP": "Join Game",
+
+  "LOBBY_SP_CONFIRM": "Confirm"
+
 }

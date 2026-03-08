@@ -10,6 +10,7 @@ import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.console.CheatConsoleLauncher;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
+import com.mccurry.game.menu.OverlayMenuManager;
 import com.mccurry.game.menu.MenuManager;
 import com.mccurry.game.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
 import com.mccurry.game.keyBinding.KeyBindingService;

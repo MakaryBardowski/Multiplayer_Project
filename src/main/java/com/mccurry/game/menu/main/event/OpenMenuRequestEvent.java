@@ -7,6 +7,6 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class MenuOpenRequest implements Event {
+public class OpenMenuRequestEvent implements Event {
     private final MenuType menuType;
 }

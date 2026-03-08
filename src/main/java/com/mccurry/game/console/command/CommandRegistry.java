@@ -12,10 +12,15 @@ import java.util.Map;
 import static com.mccurry.game.util.string.JmeRgbaTagsUtil.greenToWhite;
 import static com.mccurry.game.util.string.JmeRgbaTagsUtil.redToWhite;
 
-public class ConsoleRegistry {
+public class CommandRegistry {
     private static final Map<String,ConsoleCommand> AVAILABLE_COMMANDS = new LinkedHashMap<>(){{
 
         var helpCommand = new ConsoleCommand(){
+            @Override
+            public boolean showOnHelpCommand() {
+                return false;
+            }
+
             @Override
             public @NonNull String commandName() {
                 return "help";
@@ -30,16 +35,20 @@ public class ConsoleRegistry {
             public @Nullable String run(EventBus<GameOrchestrationContext> orchestrationBus, Object[] executionArgs) {
                 var sb = new StringBuilder();
                 sb.append("Available commands:");
-                AVAILABLE_COMMANDS.keySet().forEach(key -> {
-                    sb.append("\n   /");
-                    sb.append(key);
+                AVAILABLE_COMMANDS.entrySet().forEach(commandEntry -> {
+                    if(commandEntry.getValue().showOnHelpCommand()){
+                        sb.append("\n   /");
+                        sb.append(commandEntry.getKey());
+                    }
                 });
                 return sb.toString();
             }
         };
 
         var localeChangeNoSave = new ChangeLocaleCommand();
+        var showUiStateCommand = new ShowUiStateCommand();
         put(helpCommand.commandName(), helpCommand);
+        put(showUiStateCommand.commandName(),showUiStateCommand);
         put(localeChangeNoSave.commandName(), localeChangeNoSave);
     }};
 

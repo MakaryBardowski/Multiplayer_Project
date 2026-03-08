@@ -7,6 +7,7 @@ import com.jme3.math.Vector3f;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.Main;
+import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.LocalizedString;
@@ -16,6 +17,7 @@ import com.mccurry.game.shared.settings.elements.settingsTab.SettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.SoundSettingsTab;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
+import com.mccurry.game.shared.ui.MenuType;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.BoxLayout;
@@ -165,7 +167,11 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         cancelBtn = settingsTabButton(SETTINGS_CANCEL,assetManager,true,textColor);
         cancelBtn.addClickCommands(source -> {
 //            close menu event
-            appStateManager.detach(appStateManager.getState(UserSettingsMenuState.class));
+            orchestrationBus.publish(
+                    CloseMenuRequestEvent.builder().menuType(MenuType.SETTINGS).build(),
+                    new GameOrchestrationContext(),
+                    null
+            );
         });
 
         applyBtn = settingsTabButton(SETTINGS_APPLY,assetManager,true,textColor);

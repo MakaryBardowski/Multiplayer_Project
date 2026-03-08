@@ -8,6 +8,8 @@ import org.jetbrains.annotations.Nullable;
 
 public abstract class ConsoleCommand {
 
+    public abstract boolean showOnHelpCommand();
+
     /**
      * @return the prefix of the console input that will trigger execution.
      * for example: "disableGuns" will make this command run when player inputs "/disableGuns" in the console

@@ -11,7 +11,8 @@ import static com.mccurry.game.shared.ui.MenuType.MenuLayer.ROOT;
 public enum MenuType {
     MAIN_MENU(ROOT),
     SETTINGS(OVERLAY),
-    GAMEMODE_SELECTOR(ROOT);
+    GAMEMODE_SELECTOR(ROOT),
+    LOBBY_SINGLEPLAYER(ROOT);
 
     private final MenuLayer menuLayer;
     public enum MenuLayer{

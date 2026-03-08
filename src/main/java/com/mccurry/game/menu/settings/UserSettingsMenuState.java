@@ -12,7 +12,7 @@ public class UserSettingsMenuState extends MenuState {
     private UserSettingsPanel userSettingsPanel;
 
     @Override
-    public void createUi(SimpleApplication application, Node stateGuiNode) {
+    public void createUiOnce(SimpleApplication application, Node stateGuiNode) {
         var stateManager = application.getStateManager();
         var bus = stateManager.getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         userSettingsPanel = new UserSettingsPanel(bus,stateManager,application.getAssetManager());

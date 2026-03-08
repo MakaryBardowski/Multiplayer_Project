@@ -4,7 +4,7 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
-import com.mccurry.game.menu.main.event.MenuOpenRequest;
+import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.ui.MenuType;
 import lombok.NonNull;
@@ -20,7 +20,7 @@ public class OnAssetLoadingDoneMainMenuLauncher implements SyncEventHandler<Asse
             System.out.println("[MainMenuLauncherHandler] Launching main menu");
             eventBus.unsubscribe(AssetLoadingCompleteEvent.class,this);
             eventBus.publish(
-                    MenuOpenRequest.builder()
+                    OpenMenuRequestEvent.builder()
                             .menuType(MenuType.MAIN_MENU)
                             .build(),
                     new GameOrchestrationContext(),

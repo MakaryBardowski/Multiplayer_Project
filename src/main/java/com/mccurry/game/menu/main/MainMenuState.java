@@ -8,8 +8,9 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
+import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.menu.main.event.MainMenuOpened;
-import com.mccurry.game.menu.main.event.MenuOpenRequest;
+import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.locale.LocalizedString;
@@ -37,26 +38,25 @@ public class MainMenuState extends MenuState {
     private final EventBus<GameOrchestrationContext> orchestrationBus;
 
     @Override
-    public void createUi(SimpleApplication application, Node stateGuiNode) {
+    public void createUiOnce(SimpleApplication application, Node stateGuiNode) {
         assetManager = application.getAssetManager();
         application.getViewPort().setBackgroundColor(ColorRGBA.Black);
 
 
         var newGameButton = newMainMenuButton(LOCALE_KEY_NEW_GAME, button -> {
             orchestrationBus.publish(
-                    MenuOpenRequest.builder()
+                    OpenMenuRequestEvent.builder()
                             .menuType(MenuType.GAMEMODE_SELECTOR)
                             .build(),
                     new GameOrchestrationContext(),
                     null
             );
-            application.getStateManager().detach(this);
         }, true);
 
         var loadGameButton = newMainMenuButton(LOCALE_KEY_LOAD_GAME, null, false);
 
         var settingsButton = newMainMenuButton(LOCALE_KEY_SETTINGS, button -> orchestrationBus.publish(
-                MenuOpenRequest.builder()
+                OpenMenuRequestEvent.builder()
                         .menuType(MenuType.SETTINGS)
                         .build(),
                 new GameOrchestrationContext(),

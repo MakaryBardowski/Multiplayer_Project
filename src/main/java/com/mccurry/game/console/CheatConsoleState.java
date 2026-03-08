@@ -7,17 +7,23 @@ import com.jme3.input.KeyInput;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
-import com.mccurry.game.console.command.ConsoleRegistry;
+import com.mccurry.events.core.EventSubscriber;
+import com.mccurry.events.core.handler.SyncEventHandler;
+import com.mccurry.game.console.command.CommandRegistry;
+import com.mccurry.game.console.event.MainThreadConsoleStateResponseEvent;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
+import com.mccurry.game.util.event.EventHandlers;
+import com.mccurry.game.util.string.JmeRgbaTagsUtil;
 import com.simsilica.lemur.*;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
+import lombok.NonNull;
 
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 
-public class CheatConsoleState extends BaseAppState {
+public class CheatConsoleState extends BaseAppState implements EventSubscriber<GameOrchestrationContext> {
     private static final float CONSOLE_INPUT_LINE_SIZE_Y = 12;
     private static final float CONSOLE_SIZE_Y = 150-CONSOLE_INPUT_LINE_SIZE_Y;
     private static final float CONSOLE_MAX_Y = CONSOLE_SIZE_Y+CONSOLE_INPUT_LINE_SIZE_Y;
@@ -27,7 +33,12 @@ public class CheatConsoleState extends BaseAppState {
     private final Container consoleContainer;
     private ConsoleState currentState = ConsoleState.STATIC;
 
+    private final EventBus<GameOrchestrationContext> orchestrationBus;
+    private final SyncEventHandler<MainThreadConsoleStateResponseEvent,GameOrchestrationContext> onUiStateResponse;
+
     public CheatConsoleState(EventBus<GameOrchestrationContext> orchestrationBus){
+        this.orchestrationBus = orchestrationBus;
+
         consoleContainer = noBackgroundContainer();
 
         var consoleLog = new Label("");
@@ -46,8 +57,8 @@ public class CheatConsoleState extends BaseAppState {
         consoleInputLine.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), new KeyActionListener() {
             @Override
             public void keyAction(TextEntryComponent arg0, KeyAction arg1) {
-                var executionResponse = ConsoleRegistry.execute(orchestrationBus,arg0.getText());
-                consoleLog.setText(executionResponse+"\n"+consoleLog.getText());
+                var executionResponse = CommandRegistry.execute(orchestrationBus,arg0.getText());
+                appendToLog(executionResponse,consoleLog);
                 consoleInputLine.setText("");
             }
         });
@@ -55,6 +66,13 @@ public class CheatConsoleState extends BaseAppState {
         consoleContainer.addChild(consoleInputLine);
         consoleContainer.addChild(consoleLog);
         consoleContainer.setPreferredSize(new Vector3f(640,CONSOLE_MAX_Y,1));
+
+
+        onUiStateResponse = EventHandlers.syncEventHandler(
+                (event, ctx, elm)->{
+                    appendToLog(JmeRgbaTagsUtil.greenToWhite(event.getStringState()),consoleLog);
+                }
+        );
     }
 
     @Override
@@ -82,20 +100,39 @@ public class CheatConsoleState extends BaseAppState {
 
     @Override
     protected void onEnable() {
+
         ((SimpleApplication)getApplication()).getGuiNode().attachChild(consoleContainer);
         currentState = ConsoleState.OPENING;
         consoleContainer.setLocalTranslation(0,0,1000555f);
         consoleInputLine.setText("");
         GuiGlobals.getInstance().requestFocus(consoleInputLine);
+
+        subscribe(orchestrationBus);
     }
 
     @Override
     protected void onDisable() {
+        unsubscribe(orchestrationBus);
         consoleContainer.removeFromParent();
+    }
+
+    @Override
+    public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+        eventBus.subscribe(MainThreadConsoleStateResponseEvent.class, onUiStateResponse);
+    }
+
+    @Override
+    public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+        eventBus.unsubscribe(MainThreadConsoleStateResponseEvent.class, onUiStateResponse);
     }
 
     private enum ConsoleState{
         OPENING,
         STATIC
+    }
+
+    private void appendToLog(String executionResponse, Label consoleLog){
+        consoleLog.setText(executionResponse+"\n"+consoleLog.getText());
+        System.err.println(executionResponse);
     }
 }

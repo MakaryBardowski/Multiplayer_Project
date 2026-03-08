@@ -1,20 +1,23 @@
 package com.mccurry.game.menu;
 
 import com.jme3.app.Application;
-import com.jme3.app.state.AppStateManager;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.events.lifecycle.EventLifecycleManager;
+import com.mccurry.game.console.event.ConsoleRequestUiStateEvent;
+import com.mccurry.game.console.event.MainThreadConsoleStateResponseEvent;
 import com.mccurry.game.menu.gamemodeSelector.GamemodeSelectorState;
+import com.mccurry.game.menu.lobby.singlePlayer.SinglePlayerLobbyState;
 import com.mccurry.game.menu.main.MainMenuState;
-import com.mccurry.game.menu.main.event.MenuOpenRequest;
+import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
+import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
 import com.mccurry.game.menu.settings.UserSettingsMenuState;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.MenuState;
 import com.mccurry.game.shared.ui.MenuType;
 import com.mccurry.game.shared.ui.event.MainThreadLocaleReloadedEvent;
+import com.mccurry.game.util.event.EventHandlers;
 import lombok.Builder;
 import lombok.NonNull;
 import lombok.Setter;
@@ -22,22 +25,75 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Stack;
 import java.util.function.Supplier;
 
 import static com.mccurry.game.shared.ui.MenuType.*;
 
-public class MenuManager implements SyncEventHandler<MenuOpenRequest,GameOrchestrationContext>, EventSubscriber<GameOrchestrationContext> {
+public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
     private final Application application;
-    private final SyncEventHandler<MainThreadLocaleReloadedEvent,GameOrchestrationContext> localeChangeHandler;
+    private final SyncEventHandler<MainThreadLocaleReloadedEvent, GameOrchestrationContext> localeChangeHandler;
 
-    private final Map<MenuType, CachedMenu> menuCache = new HashMap<>();
-    private final Stack<MenuState> overlayStack = new Stack<>();
+    private final Map<MenuType, CachedMenu> rootMenuCache = new HashMap<>();
+    private final Map<MenuType, CachedMenu> overlayMenuCache = new HashMap<>();
 
-    public MenuManager(Application application){
+    private final OverlayMenuManager overlayMenuManager;
+    private final RootMenuManager rootMenuManager;
+
+    private final SyncEventHandler<ConsoleRequestUiStateEvent, GameOrchestrationContext> onMenuStateRequest;
+
+
+    private final SyncEventHandler<OpenMenuRequestEvent, GameOrchestrationContext> onMenuOpenHandler = EventHandlers.syncEventHandler(
+            (event, ctx, lcm) -> {
+                openMenu(event.getMenuType());
+            }
+    );
+
+    private final SyncEventHandler<CloseMenuRequestEvent, GameOrchestrationContext> onMenuCloseHandler = EventHandlers.syncEventHandler(
+            (event, ctx, lcm) -> {
+                closeMenu(event.getMenuType());
+            }
+    );
+
+    public MenuManager(Application application) {
         this.application = application;
+        this.overlayMenuManager = new OverlayMenuManager(application);
+        this.rootMenuManager = new RootMenuManager(application);
 
-        var mainMenuState = new MainMenuState(application.getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus());
+
+        var orchestrationBus = application.getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
+
+        onMenuStateRequest = EventHandlers.syncEventHandler(
+                (event, ctx, lcm) -> {
+
+                    var root = rootMenuManager.getCurrentRootMenu();
+
+                    var uiStateBuilder = new StringBuilder();
+                    uiStateBuilder.append("+");
+                    uiStateBuilder.append(root == null ? "null" : root.getClass().getSimpleName());
+
+                    var iterator = overlayMenuManager.getOverlayStackClone().iterator();
+                    while (iterator.hasNext()) {
+                        var overlay = iterator.next();
+                        uiStateBuilder.append("\n   +");
+                        uiStateBuilder.append(overlay.getClass().getSimpleName());
+                        if(!iterator.hasNext()){
+                            uiStateBuilder.append(" [TOP]");
+                        }
+                    }
+
+
+                    orchestrationBus.publish(
+                            MainThreadConsoleStateResponseEvent.builder()
+                                    .uiState(uiStateBuilder.toString())
+                                    .build(),
+                            new GameOrchestrationContext(),
+                            null
+                    );
+                }
+        );
+
+
+        var mainMenuState = new MainMenuState(orchestrationBus);
         localeChangeHandler = (
                 event,
                 eventContext,
@@ -47,92 +103,107 @@ public class MenuManager implements SyncEventHandler<MenuOpenRequest,GameOrchest
             rebuildMenus();
         };
 
-        menuCache.put(
+        rootMenuCache.put(
                 MAIN_MENU,
                 CachedMenu.builder()
                         .cachedInstance(mainMenuState)
-                        .supplier(()-> null) // never used as MainMenu is never removed from cache
-                .build()
+                        .supplier(() -> null) // never used as MainMenu is never removed from cache
+                        .build()
         );
-        menuCache.put(
+        rootMenuCache.put(
                 SETTINGS,
                 CachedMenu.builder()
                         .cachedInstance(null)
-                        .supplier(()-> new UserSettingsMenuState())
+                        .supplier(() -> new UserSettingsMenuState())
                         .build()
         );
 
-        menuCache.put(GAMEMODE_SELECTOR,
+        rootMenuCache.put(GAMEMODE_SELECTOR,
                 CachedMenu.builder()
                         .cachedInstance(null)
-                        .supplier(()-> new GamemodeSelectorState())
+                        .supplier(() -> new GamemodeSelectorState())
+                        .build()
+        );
+
+        rootMenuCache.put(LOBBY_SINGLEPLAYER,
+                CachedMenu.builder()
+                        .cachedInstance(null)
+                        .supplier(() -> new SinglePlayerLobbyState())
                         .build()
         );
 
         rebuildMenus();
     }
 
-    private void openMenu(MenuType menuType){
-        var menu = menuCache.get(menuType).cachedInstance;
+    private synchronized void closeMenu(MenuType menuType) {
+        application.enqueue(() -> {
+            var menu = rootMenuCache.get(menuType).cachedInstance;
 
-        var stateManager = application.getStateManager();
-        if(stateManager.hasState(menu)){ // we check just to not enqueue additional stuff
-            return;
-        }
-
-        if(menuType.getMenuLayer() == MenuLayer.OVERLAY){
-            openOverlay(menu,stateManager);
-        } else if (menuType.getMenuLayer() == MenuLayer.ROOT){
-            application.enqueue(()->{
-                stateManager.attach(menu);
-            });
-        }
-    }
-
-    private void openOverlay(MenuState menu, AppStateManager stateManager){
-        application.enqueue(()->{
-            if(!overlayStack.isEmpty()){
-                hideCurrentOverlay(stateManager);
+            if (menuType.getMenuLayer() == MenuLayer.OVERLAY) {
+                overlayMenuManager.closeOverlay(menu);
+            } else if (menuType.getMenuLayer() == MenuLayer.ROOT) {
+                closeRootMenu(menu);
             }
-
-            overlayStack.push(menu);
-            stateManager.attach(menu);
         });
     }
 
-    private void hideCurrentOverlay(AppStateManager stateManager){
-        var previousOverlay = overlayStack.peek();
-        stateManager.detach(previousOverlay);
+    private synchronized void openMenu(MenuType menuType) {
+        application.enqueue(() -> { // whole thing is enqueued so possibly creating a menu is on main thread
+            var menu = rootMenuCache.get(menuType).cachedInstance;
+
+            var stateManager = application.getStateManager();
+            if (stateManager.hasState(menu)) {
+                return;
+            }
+
+
+            if (menuType.getMenuLayer() == MenuLayer.OVERLAY) {
+                overlayMenuManager.openOverlay(menu);
+            } else if (menuType.getMenuLayer() == MenuLayer.ROOT) {
+                openRootMenu(menu);
+            }
+        });
     }
 
-    private void closeCurrentOverlay(AppStateManager stateManager){
-        var overlay = overlayStack.pop();
-        stateManager.detach(overlay);
+    private void openRootMenu(MenuState menuState) {
+        var currentRoot = rootMenuManager.getCurrentRootMenu();
+        if (currentRoot == null || !currentRoot.equals(menuState)) { // if root is changed, clear stack for it
+            overlayMenuManager.closeAllOverlays();
+            rootMenuManager.closeCurrentRoot();
+            rootMenuManager.openMenu(menuState);
+        }
     }
 
-    @Override
-    public void handle(@NonNull MenuOpenRequest event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MenuOpenRequest> lifecycleManager) {
-        openMenu(event.getMenuType());
+    private void closeRootMenu(MenuState menuState) {
+        var currentRoot = rootMenuManager.getCurrentRootMenu();
+        if (currentRoot != null && currentRoot.equals(menuState)) {
+            overlayMenuManager.closeAllOverlays();
+            rootMenuManager.closeCurrentRoot();
+        }
     }
 
     @Override
     public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
-        eventBus.subscribe(MenuOpenRequest.class,this);
+        eventBus.subscribe(OpenMenuRequestEvent.class, onMenuOpenHandler);
+        eventBus.subscribe(CloseMenuRequestEvent.class, onMenuCloseHandler);
         eventBus.subscribe(MainThreadLocaleReloadedEvent.class, localeChangeHandler);
+        eventBus.subscribe(ConsoleRequestUiStateEvent.class,onMenuStateRequest);
     }
 
     @Override
     public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
-        eventBus.unsubscribe(MenuOpenRequest.class,this);
+        eventBus.unsubscribe(OpenMenuRequestEvent.class, onMenuOpenHandler);
+        eventBus.unsubscribe(CloseMenuRequestEvent.class, onMenuCloseHandler);
         eventBus.unsubscribe(MainThreadLocaleReloadedEvent.class, localeChangeHandler);
+        eventBus.unsubscribe(ConsoleRequestUiStateEvent.class,onMenuStateRequest);
     }
 
-    private void rebuildMenus(){
-        for(var menuType : MenuType.values()){
-            if(!menuType.equals(MAIN_MENU)){
-                var cachedMenu = menuCache.get(menuType);
+    private void rebuildMenus() {
+        for (var menuType : MenuType.values()) {
+            if (!menuType.equals(MAIN_MENU)) {
+                var cachedMenu = rootMenuCache.get(menuType);
 
-                if(cachedMenu.cachedInstance != null){ // just in case - this shouldnt ever trigger because locale can be changed from main menu only (and its never destroyed)
+                if (cachedMenu.cachedInstance != null) { // just in case - this shouldnt ever trigger because locale can be changed from main menu only (and its never destroyed)
                     application.getStateManager().detach(cachedMenu.cachedInstance);
                 }
 
@@ -141,10 +212,13 @@ public class MenuManager implements SyncEventHandler<MenuOpenRequest,GameOrchest
         }
     }
 
+
     @Setter
     @Builder
-    private static class CachedMenu{
-        @Nullable private MenuState cachedInstance;
-        @NonNull private Supplier<MenuState> supplier;
+    private static class CachedMenu {
+        @Nullable
+        private MenuState cachedInstance;
+        @NonNull
+        private Supplier<MenuState> supplier;
     }
 }

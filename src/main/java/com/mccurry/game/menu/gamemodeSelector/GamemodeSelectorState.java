@@ -8,10 +8,12 @@ import com.jme3.scene.Node;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.locale.LocalizedString;
+import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
+import com.mccurry.game.shared.ui.MenuType;
 import com.mccurry.game.sound.event.PlayGlobalSoundRequestEvent;
 import com.mccurry.game.sound.model.global.GlobalSoundEntry;
 import com.simsilica.lemur.Button;
@@ -21,6 +23,7 @@ import com.simsilica.lemur.VAlignment;
 import com.simsilica.lemur.component.QuadBackgroundComponent;
 import org.jetbrains.annotations.Nullable;
 
+import static com.mccurry.game.menu.gamemodeSelector.LocaleConstants.*;
 import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
 public class GamemodeSelectorState extends MenuState {
@@ -29,13 +32,13 @@ public class GamemodeSelectorState extends MenuState {
     private EventBus<GameOrchestrationContext> orchestrationBus;
 
     @Override
-    public void createUi(SimpleApplication application, Node stateGuiNode) {
+    public void createUiOnce(SimpleApplication application, Node stateGuiNode) {
         orchestrationBus = application.getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         assetManager = application.getAssetManager();
 
-        var singlePlayer = newGamemodeButton("GAMEMODE_SINGLE_PLAYER", null, true);
-        var hostMultiplayer = newGamemodeButton("GAMEMODE_MULTIPLAYER_HOST", null, false);
-        var joinMultiplayer = newGamemodeButton("GAMEMODE_MULTIPLAYER_CLIENT", null, false);
+        var singlePlayer = newGamemodeButton(LOCALE_KEY_SINGLEPLAYER, null, true);
+        var hostMultiplayer = newGamemodeButton(LOCALE_KEY_HOST_MULTIPLAYER, null, false);
+        var joinMultiplayer = newGamemodeButton(LOCALE_KEY_JOIN_MULTIPLAYER, null, false);
 
         var baseResolution = ResolutionSettings.R_640x360;
         var buttonSize = singlePlayer.getPreferredSize();
@@ -43,6 +46,19 @@ public class GamemodeSelectorState extends MenuState {
 
 
         singlePlayer.setLocalTranslation(new Vector3f(buttonX, 240,1));
+
+        singlePlayer.addClickCommands(
+                button -> {
+                    orchestrationBus.publish(
+                            OpenMenuRequestEvent.builder()
+                                    .menuType(MenuType.LOBBY_SINGLEPLAYER)
+                                    .build(),
+                            new GameOrchestrationContext(),
+                            null
+                    );
+                }
+        );
+
         joinMultiplayer.setLocalTranslation(new Vector3f(buttonX, 190,1));
         hostMultiplayer.setLocalTranslation(new Vector3f(buttonX, 140,1));
 
@@ -50,6 +66,8 @@ public class GamemodeSelectorState extends MenuState {
         stateGuiNode.attachChild(singlePlayer);
         stateGuiNode.attachChild(hostMultiplayer);
         stateGuiNode.attachChild(joinMultiplayer);
+
+
     }
 
 

@@ -6,6 +6,7 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
+import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.keyBinding.KeyBindingService;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
@@ -45,6 +46,9 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        flyCam.setEnabled(false);
+        CameraConstants.applyDefaultTransform(getCamera());
+
         this.guiNode.attachChild(gameGuiNode);
         viewPort.setBackgroundColor(ColorRGBA.Black);
         stateManager.attach(new ScreenshotAppState());

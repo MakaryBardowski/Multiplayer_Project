@@ -10,6 +10,11 @@ import org.jetbrains.annotations.Nullable;
 
 public class ChangeLocaleCommand extends ConsoleCommand{
     @Override
+    public boolean showOnHelpCommand() {
+        return true;
+    }
+
+    @Override
     public @NonNull String commandName() {
         return "changelocale";
     }
