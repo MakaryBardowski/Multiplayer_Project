@@ -68,19 +68,19 @@ public class PlayerPositionControlSystem implements ActionListener, AnalogListen
 
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_W)) {
-            temp.addLocal(temp2.mult(10));
+            temp.addLocal(temp2.mult(20));
         }
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_S)) {
-            temp.addLocal(temp2.negate().multLocal(5));
+            temp.addLocal(temp2.negate().multLocal(10));
         }
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_A)) {
-            temp.addLocal(temp3.mult(10));
+            temp.addLocal(temp3.mult(20));
         }
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_D)) {
-            temp.addLocal(temp3.negate().multLocal(10));
+            temp.addLocal(temp3.negate().multLocal(20));
         }
 
         velocity.getDesiredVelocity().set(temp);

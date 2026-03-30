@@ -171,7 +171,7 @@ public class GameState extends BaseAppState {
 
         double s = (double) res / 1000000000;
 
-        System.out.println(s+"s");
+//        System.out.println(s+"s");
 
     }
 
