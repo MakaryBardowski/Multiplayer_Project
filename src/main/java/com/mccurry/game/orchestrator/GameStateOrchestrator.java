@@ -10,11 +10,9 @@ import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.console.CheatConsoleLauncher;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
-import com.mccurry.game.menu.OverlayMenuManager;
 import com.mccurry.game.menu.MenuManager;
 import com.mccurry.game.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
-import com.mccurry.game.keyBinding.KeyBindingService;
-import com.mccurry.game.keyBinding.model.PlayerAction;
+import com.mccurry.game.keyBinding.KeyMappingService;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.transition.ScreenTransitionService;
@@ -33,7 +31,7 @@ public class GameStateOrchestrator extends BaseAppState {
     @Getter(AccessLevel.NONE)
     private final UserSettingsService userSettingsService;
 
-    private final KeyBindingService keyBindingService;
+    private final KeyMappingService keyMappingService;
 
     @Override
     protected void initialize(Application application) {
@@ -63,10 +61,9 @@ public class GameStateOrchestrator extends BaseAppState {
     protected void onDisable() {
     }
 
-    private void registerConsoleLauncher(KeyBindingService keyBindingService){
-       var launcher =  new CheatConsoleLauncher(getApplication(),keyBindingService.getKeybindForPlayerAction(PlayerAction.OPEN_CONSOLE).getKeyName());
+    private void registerConsoleLauncher(){
+       var launcher =  new CheatConsoleLauncher(getApplication());
        launcher.startListening();
-       launcher.subscribe(gameOrchestrationBus);
     }
 
     private EventSubscriber<GameOrchestrationContext> closeInitialBootStateSubscriber(InitialBootState initialBootState) {
@@ -91,7 +88,7 @@ public class GameStateOrchestrator extends BaseAppState {
 
     private EventSubscriber<GameOrchestrationContext> attachConsoleListenerSubscriberOnce(){
         return EventSubscribers.syncUnsubscribingOnFirstMessage(AttachConsoleListenerEvent.class,gameOrchestrationBus,(event)->{
-            registerConsoleLauncher(keyBindingService);
+            registerConsoleLauncher();
         });
     }
 

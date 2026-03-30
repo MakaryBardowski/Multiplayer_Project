@@ -1,20 +1,15 @@
 package com.mccurry.game.menu.lobby.singlePlayer;
 
-import com.jme3.anim.AnimComposer;
-import com.jme3.anim.ArmatureMask;
-import com.jme3.anim.SkinningControl;
+import com.jme3.anim.*;
 import com.jme3.app.SimpleApplication;
 import com.jme3.asset.AssetManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.RenderManager;
-import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
@@ -22,11 +17,15 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.menu.lobby.PlayerClassRegistry;
+import com.mccurry.game.menu.lobby.singlePlayer.launcher.SinglePlayerGameLaunchParams;
+import com.mccurry.game.menu.lobby.singlePlayer.launcher.SinglePlayerGameLauncher;
 import com.mccurry.game.menu.lobby.model.SelectablePlayerClass;
+import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
+import com.mccurry.game.shared.ui.MenuType;
 import com.mccurry.game.shared.ui.util.FontUtil;
 import com.mccurry.game.shared.ui.util.TextureUtil;
 import com.mccurry.game.sound.event.PlayGlobalSoundRequestEvent;
@@ -47,9 +46,12 @@ public class SinglePlayerLobbyState extends MenuState {
     private AssetManager assetManager;
 
     private EventBus<GameOrchestrationContext> orchestrationBus;
-    private Map<SelectablePlayerClass,Button> buttonsByClass = new HashMap<>();
+    private Map<SelectablePlayerClass, Button> buttonsByClass = new HashMap<>();
     private Label classNameLabel;
     private Label classDescriptionLabel;
+    private SelectablePlayerClass currentPickedClass;
+
+    private final SinglePlayerGameLauncher launcher = new SinglePlayerGameLauncher();
 
     @Override
     public void createSceneOnce(SimpleApplication application, Node stateSceneNode) {
@@ -59,7 +61,7 @@ public class SinglePlayerLobbyState extends MenuState {
 
         // Move so center is at (0,0,0)
         floor.setLocalTranslation(-3f, 0f, 3f);
-        floor.rotate(-((float)Math.PI / 2f), 0f, 0f); // make it horizontal
+        floor.rotate(-((float) Math.PI / 2f), 0f, 0f); // make it horizontal
 
         // Unlit material
         var mat = new Material(
@@ -73,7 +75,7 @@ public class SinglePlayerLobbyState extends MenuState {
         stateSceneNode.attachChild(floor);
 
 
-        var armatureRootNode =(Node) application.getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
+        var armatureRootNode = (Node) application.getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
         setupModelLight(armatureRootNode);
         stateSceneNode.attachChild(armatureRootNode);
 
@@ -87,29 +89,102 @@ public class SinglePlayerLobbyState extends MenuState {
         var armature = skinningControl.getArmature();
 
         var legsMask = new ArmatureMask();
-        legsMask.addBones(armature,"Pelvis","ThighR","ThighL", "ShinR","ShinL", "FootR","FootL");
+        legsMask.addBones(armature, "Pelvis", "ThighR", "ThighL", "ShinR", "ShinL", "FootR", "FootL");
 
         var upperBodyMask = new ArmatureMask();
-        upperBodyMask.addBones(armature, "Head","Spine", "ArmL","ArmR", "ForearmR","ForearmL", "HandR","HandL");
+        upperBodyMask.addBones(armature,
+                "Head",
+                "Spine", "ArmL", "ArmR", "ForearmR", "ForearmL", "HandR", "HandL");
 
         composer.makeLayer("LowerBody", legsMask);
         composer.makeLayer("UpperBody", upperBodyMask);
 
-        composer.setCurrentAction("Upper_HoldRifle", "UpperBody");
         composer.setCurrentAction("Lower_Stand", "LowerBody");
 
-        armatureRootNode.addControl(new AbstractControl() {
-                                        @Override
-                                        protected void controlUpdate(float v) {
-                                            armatureRootNode.rotate(0,1*v,0);
-                                        }
 
-                                        @Override
-                                        protected void controlRender(RenderManager renderManager, ViewPort viewPort) {
+//        composer.setCurrentAction("Upper_HoldRifle", "UpperBody");
+        composer.setCurrentAction("Upper_AimRifle", "UpperBody");
 
-                                        }
-                                    }
-        );
+
+//        armatureRootNode.getChild("Armature").addControl(new AbstractControl() {
+//                                                             private float pitch = 0;
+//
+//                                                             boolean up = true;
+//                                                             boolean down = false;
+//
+//                                                             @Override
+//                                                             protected void controlUpdate(float deltaTime) {
+//                                                                 var maxDownPitch = 80 * FastMath.DEG_TO_RAD;
+//                                                                 var maxUpPitch = 70*FastMath.DEG_TO_RAD;
+//                                                                 if (up) {
+//                                                                     pitch += 90 * deltaTime * FastMath.DEG_TO_RAD;
+//                                                                     if (pitch >= maxUpPitch) {
+//                                                                         down = true;
+//                                                                         up = false;
+//                                                                         pitch = maxUpPitch;
+//                                                                     }
+//                                                                 }
+//                                                                 if (down) {
+//                                                                     pitch += -90 * deltaTime * FastMath.DEG_TO_RAD;
+//                                                                     if (pitch <= -maxDownPitch) {
+//                                                                         down = false;
+//                                                                         up = true;
+//                                                                         pitch = -maxDownPitch;
+//                                                                     }
+//                                                                 }
+//
+//                                                                 armatureRootNode.rotate(0, 0.2f * deltaTime, 0);
+//                                                             }
+//
+//                                                             @Override
+//                                                             protected void controlRender(RenderManager renderManager, ViewPort viewPort) {
+//                                                                 // todo: rece musza obracac sie TYLKO gdy celujesz (zadna inna animacja)
+//
+//                                                                 var head = armature.getJoint("Head");
+//                                                                 var torso = armature.getJoint("Spine");
+//                                                                 var upperArmR = armature.getJoint("ArmR");
+//                                                                 var upperArmL = armature.getJoint("ArmL");
+//
+//
+//                                                                 var torsoPitchFraction = 0.3f;
+//                                                                 var headPitchFraction = 1f/3f;
+//                                                                 var handsPitchFraction = 1 - torsoPitchFraction-0.1f; // because hands are attached to torso, the sum is = pitch instead of rotating both by pitch
+//
+//
+//                                                                 if(pitch > 0*FastMath.DEG_TO_RAD){
+//                                                                     torsoPitchFraction = 0.4f;
+//                                                                     headPitchFraction = 0.3f;
+//                                                                     handsPitchFraction = 1 - torsoPitchFraction-0.2f;
+//                                                                 }
+//
+//
+//                                                                 // rotate around heads local X axis
+//                                                                 var headXAxis = head.getLocalRotation().mult(Vector3f.UNIT_X);
+//                                                                 var handsPitchQuat = new Quaternion().fromAngleAxis(pitch*handsPitchFraction, headXAxis);
+//                                                                 upperArmR.setLocalRotation(handsPitchQuat.mult(upperArmR.getLocalRotation()));
+//                                                                 upperArmL.setLocalRotation(handsPitchQuat.mult(upperArmL.getLocalRotation()));
+//
+//                                                                 var headPitchQuat = new Quaternion().fromAngleAxis(pitch*headPitchFraction, headXAxis);
+//                                                                 head.setLocalRotation(headPitchQuat.mult(head.getLocalRotation()));
+//
+//
+//                                                                 var torsoXAxis = torso.getLocalRotation().mult(Vector3f.UNIT_X);
+//                                                                 var torsoPitch = new Quaternion().fromAngleAxis(pitch *torsoPitchFraction, torsoXAxis);
+//                                                                 torso.setLocalRotation(torsoPitch.mult(torso.getLocalRotation()));
+//
+//
+//                                                                 // torso is parent of both upper arms and head so updates them too
+//                                                                 torso.update();
+//                                                             }
+//                                                         }
+//        );
+
+
+        // wazne! skinning control musi byc PO controlu ktory ustawia rotacje kosci
+        var armatureSpatial = armatureRootNode.getChild("Armature");
+        armatureSpatial.removeControl(skinningControl);
+        armatureSpatial.addControl(skinningControl);
+        // wazne! skinning control musi byc PO controlu ktory ustawia rotacje kosci
 
 //        Node shinR = skin.getAttachmentsNode("ShinR");
 //        Node shinL = skin.getAttachmentsNode("ShinL");
@@ -128,7 +203,7 @@ public class SinglePlayerLobbyState extends MenuState {
 //        spine.attachChild(createUnshadedBoxNode());
     }
 
-    public  Node createUnshadedBoxNode() {
+    public Node createUnshadedBoxNode() {
         Box box2 = new Box(0.02f, 0.02f, 0.02f);
         Geometry red = new Geometry("Box", box2);
         Material mat2 = new Material(getApplication().getAssetManager(),
@@ -171,7 +246,16 @@ public class SinglePlayerLobbyState extends MenuState {
 
         var confirmButton = confirmButton(LOCALE_KEY_START_GAME, button -> {
             playClickSound();
-        }, false);
+            button.setEnabled(false);
+            button.setText("Loading...");
+
+            launcher.launch(
+                    getStateManager(),
+                    SinglePlayerGameLaunchParams.builder()
+                            .playerClass(currentPickedClass)
+                            .build()
+            );
+        }, true);
 
         var baseResolution = ResolutionSettings.R_640x360;
         var buttonSize = confirmButton.getPreferredSize();
@@ -214,7 +298,7 @@ public class SinglePlayerLobbyState extends MenuState {
 
             var classButton = classIconOf(clazz, assetManager);
 
-            if(initialClassButton == null){
+            if (initialClassButton == null) {
                 initialClassButton = classButton;
             }
 
@@ -239,7 +323,7 @@ public class SinglePlayerLobbyState extends MenuState {
         }
 
 
-        var classDetailsPanel = new Container(new BoxLayout(Axis.Y,FillMode.None));
+        var classDetailsPanel = new Container(new BoxLayout(Axis.Y, FillMode.None));
         classDetailsPanel.setInsets(new Insets3f(0, 0, 0, 0));
         classDetailsPanel.setBackground(
                 new QuadBackgroundComponent(
@@ -249,10 +333,10 @@ public class SinglePlayerLobbyState extends MenuState {
 
         classNameLabel = new Label(null);
         classNameLabel.setBackground(new QuadBackgroundComponent(
-                TextureUtil.loadPixelPerfectTexture(assetManager,"Interface/GUI/Settings/SettingsTabButton.png")
+                TextureUtil.loadPixelPerfectTexture(assetManager, "Interface/GUI/Settings/SettingsTabButton.png")
         ));
-        classNameLabel.setPreferredSize(new Vector3f(90,18,1));
-        classNameLabel.setInsets(new Insets3f(0,23,0,24));
+        classNameLabel.setPreferredSize(new Vector3f(90, 18, 1));
+        classNameLabel.setInsets(new Insets3f(0, 23, 0, 24));
         classNameLabel.setTextVAlignment(VAlignment.Center);
         classNameLabel.setTextHAlignment(HAlignment.Center);
 
@@ -261,8 +345,8 @@ public class SinglePlayerLobbyState extends MenuState {
         classNameLabel.setColor(ColorRGBA.White.clone());
 
         classDescriptionLabel = new Label(null);
-        classDescriptionLabel.setInsets(new Insets3f(3,3,3,3));
-        classDescriptionLabel.setPreferredSize(new Vector3f(131,180-18-6,1));
+        classDescriptionLabel.setInsets(new Insets3f(3, 3, 3, 3));
+        classDescriptionLabel.setPreferredSize(new Vector3f(131, 180 - 18 - 6, 1));
         classDescriptionLabel.setFont(font);
         classDescriptionLabel.setColor(ColorRGBA.White.clone());
 
@@ -333,9 +417,10 @@ public class SinglePlayerLobbyState extends MenuState {
         return button;
     }
 
+
     public Button classIconOf(SelectablePlayerClass playerClass, AssetManager assetManager) {
         var b = new Button("");
-        buttonsByClass.put(playerClass,b);
+        buttonsByClass.put(playerClass, b);
 
 
         b.setInsets(new Insets3f(0, 0, 0, 0));
@@ -354,6 +439,8 @@ public class SinglePlayerLobbyState extends MenuState {
                             )
                     );
 
+                    currentPickedClass = playerClass;
+
                     classNameLabel.setText(playerClass.getName());
                     classDescriptionLabel.setText(playerClass.getDescription());
 
@@ -361,7 +448,7 @@ public class SinglePlayerLobbyState extends MenuState {
                         var button1 = entry.getValue();
                         var buttonClass = entry.getKey();
 
-                        if(button1 != clickedButton){
+                        if (button1 != clickedButton) {
                             button1.setBackground(
                                     new QuadBackgroundComponent(
                                             TextureUtil.loadPixelPerfectTexture(assetManager, buttonClass.getIconPath()
@@ -382,8 +469,8 @@ public class SinglePlayerLobbyState extends MenuState {
     @Override
     protected void onEnable() {
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.DarkGray);
-        getApplication().getCamera().setLocation(new Vector3f(1,2,-5)); // 0,1,-5
-        getApplication().getCamera().lookAt(new Vector3f(0,1,10),Vector3f.UNIT_Y);
+        getApplication().getCamera().setLocation(new Vector3f(1, 2, -5)); // 0,1,-5
+        getApplication().getCamera().lookAt(new Vector3f(0, 1, 10), Vector3f.UNIT_Y);
     }
 
     @Override

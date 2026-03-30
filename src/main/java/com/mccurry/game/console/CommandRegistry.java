@@ -1,6 +1,11 @@
-package com.mccurry.game.console.command;
+package com.mccurry.game.console;
 
 import com.mccurry.events.core.EventBus;
+import com.mccurry.game.console.command.ChangeLocaleCommand;
+import com.mccurry.game.console.command.ConsoleCommand;
+import com.mccurry.game.console.command.DebugCommand;
+import com.mccurry.game.console.command.ShowUiStateCommand;
+import com.mccurry.game.console.command.spectator.SpectatorModeCommand;
 import com.mccurry.game.console.exception.CommandParsingException;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
@@ -13,7 +18,7 @@ import static com.mccurry.game.util.string.JmeRgbaTagsUtil.greenToWhite;
 import static com.mccurry.game.util.string.JmeRgbaTagsUtil.redToWhite;
 
 public class CommandRegistry {
-    private static final Map<String,ConsoleCommand> AVAILABLE_COMMANDS = new LinkedHashMap<>(){{
+    private static final Map<String, ConsoleCommand> AVAILABLE_COMMANDS = new LinkedHashMap<>(){{
 
         var helpCommand = new ConsoleCommand(){
             @Override
@@ -47,9 +52,13 @@ public class CommandRegistry {
 
         var localeChangeNoSave = new ChangeLocaleCommand();
         var showUiStateCommand = new ShowUiStateCommand();
+        var toggleSpectator = new SpectatorModeCommand();
+        var debugCommand = new DebugCommand();
         put(helpCommand.commandName(), helpCommand);
         put(showUiStateCommand.commandName(),showUiStateCommand);
         put(localeChangeNoSave.commandName(), localeChangeNoSave);
+        put(toggleSpectator.commandName(),  toggleSpectator);
+        put(debugCommand.commandName(), debugCommand);
     }};
 
     public static String execute(EventBus<GameOrchestrationContext> orchestrationBus, String consoleInput){

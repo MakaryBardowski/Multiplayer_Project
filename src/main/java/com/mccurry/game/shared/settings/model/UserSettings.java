@@ -9,7 +9,7 @@ import lombok.experimental.Accessors;
 
 import java.util.LinkedHashMap;
 
-import static com.mccurry.game.keyBinding.KeyBindingRegistry.getNewDefaultBindings;
+import static com.mccurry.game.keyBinding.KeyMappingRegistry.getNewDefaultBindings;
 import static com.mccurry.game.locale.model.GameLocale.ENGLISH;
 
 @Getter

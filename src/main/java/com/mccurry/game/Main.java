@@ -7,11 +7,11 @@ import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.constants.CameraConstants;
-import com.mccurry.game.keyBinding.KeyBindingService;
+import com.mccurry.game.keyBinding.KeyMappingService;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.locale.LocaleService;
-import com.mccurry.game.shared.settings.elements.option.keybind.KeybindInputListener;
+import com.mccurry.game.shared.settings.elements.option.keybind.KeyRebindInputListener;
 import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
 import com.mccurry.game.sound.SoundRegistry;
@@ -28,7 +28,7 @@ public class Main extends SimpleApplication {
     private UserSettingsService userSettingsService;
 
     @Setter
-    private KeyBindingService keyBindingService;
+    private KeyMappingService keyMappingService;
 
     @Setter
     private LocaleService localeService;
@@ -47,6 +47,8 @@ public class Main extends SimpleApplication {
     @Override
     public void simpleInitApp() {
         flyCam.setEnabled(false);
+        flyCam.setMoveSpeed(30);
+
         CameraConstants.applyDefaultTransform(getCamera());
 
         this.guiNode.attachChild(gameGuiNode);
@@ -54,7 +56,7 @@ public class Main extends SimpleApplication {
         stateManager.attach(new ScreenshotAppState());
         System.out.println("\n\n\n\n[Main] Starting");
 
-        keyBindingService.initializeMappings(inputManager);
+        keyMappingService.initializeMappings(inputManager);
 
         var currentSettings = userSettingsService.getCurrentSettingsDeepClone();
         var soundRegistry = SoundRegistry.withSoundVolumesFromSettings(assetManager,currentSettings);
@@ -70,14 +72,15 @@ public class Main extends SimpleApplication {
 
 
 
-        stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService,keyBindingService));
+        stateManager.attach(new GameStateOrchestrator(orchestrationBus, userSettingsService, keyMappingService));
     }
 
     public static void main(String[] args) {
         var orchestrationBus = new EventBus<GameOrchestrationContext>();
 
+
         Main app = new Main(orchestrationBus);
-        KeybindInputListener.initialize(app);
+        KeyRebindInputListener.initialize(app);
 
         orchestrationBus.subscribe(MainThreadResizeUiEvent.class, app.resizeUiEventHandler);
 
@@ -96,7 +99,7 @@ public class Main extends SimpleApplication {
                 null
         );
 
-        app.setKeyBindingService(KeyBindingService.withKeybindsFromSettings(orchestrationBus,userSettings));
+        app.setKeyMappingService(KeyMappingService.withKeybindsFromSettings(orchestrationBus,userSettings));
         app.setLocaleService(LocaleService.withLocaleFromSettings(orchestrationBus,userSettings));
 
         app.start();

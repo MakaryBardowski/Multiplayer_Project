@@ -9,7 +9,6 @@ import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.console.command.CommandRegistry;
 import com.mccurry.game.console.event.MainThreadConsoleStateResponseEvent;
 import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.util.event.EventHandlers;

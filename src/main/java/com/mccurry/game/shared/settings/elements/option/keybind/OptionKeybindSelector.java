@@ -47,7 +47,7 @@ public class OptionKeybindSelector extends OptionSelector implements UserSetting
 
         bindButton.addClickCommands(
                 source -> {
-                    KeybindInputListener.getInstance().registerToManager(this,temporaryUserSettings, inputManager, guiNode);
+                    KeyRebindInputListener.getInstance().registerToManager(this,temporaryUserSettings, inputManager, guiNode);
                     source.setText("Press_a_key...");
                 }
         );
@@ -68,16 +68,8 @@ public class OptionKeybindSelector extends OptionSelector implements UserSetting
     }
 
     public void setDisplayedBind(KeyBind bind) {
-        var keyName = bind.getKeyName();
-
-        if (keyName == null || keyName.isBlank()) {
-            keyName = "?";
-        }
+        var keyName = bind.getKeyDisplayName();
         bindButton.setText(keyName);
-    }
-
-    public String getCurrentBindMapping(){
-        return bindButton.getText();
     }
 
     @Override
