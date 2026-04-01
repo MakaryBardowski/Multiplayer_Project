@@ -9,7 +9,6 @@ import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
@@ -29,7 +28,7 @@ import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 public class GamemodeSelectorState extends MenuState {
     private AssetManager assetManager;
 
-    private EventBus<GameOrchestrationContext> orchestrationBus;
+    private EventBus orchestrationBus;
 
     @Override
     public void createUiOnce(SimpleApplication application, Node stateGuiNode) {
@@ -53,7 +52,6 @@ public class GamemodeSelectorState extends MenuState {
                             OpenMenuRequestEvent.builder()
                                     .menuType(MenuType.LOBBY_SINGLEPLAYER)
                                     .build(),
-                            new GameOrchestrationContext(),
                             null
                     );
                 }
@@ -126,6 +124,6 @@ public class GamemodeSelectorState extends MenuState {
     }
 
     private void playClickSound(){
-        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK),new GameOrchestrationContext(),null);
+        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK),null);
     }
 }

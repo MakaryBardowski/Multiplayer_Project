@@ -10,7 +10,6 @@ import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.boot.ui.LoadingScreenState;
 import com.mccurry.game.menu.main.event.MainMenuOpened;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;
 import com.mccurry.game.util.event.EventSubscribers;
@@ -44,7 +43,7 @@ public class InitialBootState extends BaseAppState {
 
     }
 
-    private EventSubscriber<GameOrchestrationContext> assetLoadingFinishedSubscriber(EventBus<GameOrchestrationContext> orchestrationBus) {
+    private EventSubscriber assetLoadingFinishedSubscriber(EventBus orchestrationBus) {
         return EventSubscribers.syncUnsubscribingOnFirstMessage(
                 MainMenuOpened.class,
                 orchestrationBus,
@@ -52,10 +51,9 @@ public class InitialBootState extends BaseAppState {
                         new StartScreenFadeInEvent(
                                 2.5f,
                                 () -> {
-                                    orchestrationBus.publish(new InitialBootCompleteEvent(), new GameOrchestrationContext(), null);
+                                    orchestrationBus.publish(new InitialBootCompleteEvent(), null);
                                 }
                         ),
-                        new GameOrchestrationContext(),
                         null
                 )
         );

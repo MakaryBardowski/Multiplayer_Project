@@ -13,7 +13,6 @@ import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.keyBinding.model.KeyBind;
 import com.mccurry.game.keyBinding.model.PlayerAction;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import lombok.NonNull;
@@ -24,7 +23,7 @@ import java.util.Map;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
 
-public class KeyMappingService implements EventSubscriber<GameOrchestrationContext>, SyncEventHandler<MainThreadSettingsAppliedEvent, GameOrchestrationContext> {
+public class KeyMappingService implements EventSubscriber, SyncEventHandler<MainThreadSettingsAppliedEvent> {
 
     private static final Map<PlayerAction, String> MAPPINGS_BY_PLAYER_ACTION = new HashMap<>() {{
         put(PlayerAction.MOVE_FORWARD, MAPPING_KEY_W);
@@ -40,11 +39,11 @@ public class KeyMappingService implements EventSubscriber<GameOrchestrationConte
     private final Map<PlayerAction, KeyBind> currentKeyBinds;
     private InputManager inputManager;
 
-    public static KeyMappingService withKeybindsFromSettings(EventBus<GameOrchestrationContext> orchestrationBus, UserSettings userSettings) {
+    public static KeyMappingService withKeybindsFromSettings(EventBus orchestrationBus, UserSettings userSettings) {
         return new KeyMappingService(orchestrationBus, userSettings);
     }
 
-    private KeyMappingService(EventBus<GameOrchestrationContext> orchestrationBus, UserSettings userSettingsDeepClone) {
+    private KeyMappingService(EventBus orchestrationBus, UserSettings userSettingsDeepClone) {
         currentKeyBinds = userSettingsDeepClone.getKeyBinds();
         subscribe(orchestrationBus);
     }
@@ -154,17 +153,17 @@ public class KeyMappingService implements EventSubscriber<GameOrchestrationConte
     }
 
     @Override
-    public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void subscribe(@NonNull EventBus eventBus) {
         eventBus.subscribe(MainThreadSettingsAppliedEvent.class, this);
     }
 
     @Override
-    public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void unsubscribe(@NonNull EventBus eventBus) {
         eventBus.unsubscribe(MainThreadSettingsAppliedEvent.class, this);
     }
 
     @Override
-    public void handle(@NonNull MainThreadSettingsAppliedEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainThreadSettingsAppliedEvent> lifecycleManager) {
+    public void handle(@NonNull MainThreadSettingsAppliedEvent event, @Nullable EventLifecycleManager<MainThreadSettingsAppliedEvent> lifecycleManager) {
         updateBindings(event.getNewSettings().getKeyBinds());
     }
 }

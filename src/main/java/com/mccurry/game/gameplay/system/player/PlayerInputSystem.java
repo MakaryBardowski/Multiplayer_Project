@@ -11,14 +11,13 @@ import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 
 import java.util.HashSet;
 import java.util.Set;
 
 public class PlayerInputSystem implements ActionListener, AnalogListener {
     private final EntityStore entityStore;
-    private final EventBus<GameOrchestrationContext> orchestrationBus;
+    private final EventBus orchestrationBus;
 
     private final Set<String> activeInputs = new HashSet<>();
 
@@ -26,7 +25,7 @@ public class PlayerInputSystem implements ActionListener, AnalogListener {
     private final Vector3f temp2 = new Vector3f();
     private final Vector3f temp3 = new Vector3f();
 
-    public PlayerInputSystem(EntityStore entityStore, EventBus<GameOrchestrationContext> orchestrationBus) {
+    public PlayerInputSystem(EntityStore entityStore, EventBus orchestrationBus) {
         this.entityStore = entityStore;
         this.orchestrationBus = orchestrationBus;
     }
@@ -100,8 +99,7 @@ public class PlayerInputSystem implements ActionListener, AnalogListener {
                 return;
             }
             orchestrationBus.publish(
-                    new IntentEvent(Intent.PRIMARY_ACTION, playerControlledEntity)
-                    , new GameOrchestrationContext(),
+                    new IntentEvent(Intent.PRIMARY_ACTION, playerControlledEntity),
                     null
             );
         }

@@ -20,7 +20,6 @@ import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
 import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
@@ -28,7 +27,7 @@ import com.mccurry.game.util.event.EventSubscribers;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-public class LoadingScreenState extends BaseAppState implements SyncEventHandler<InitialBootCompleteEvent, GameOrchestrationContext> {
+public class LoadingScreenState extends BaseAppState implements SyncEventHandler<InitialBootCompleteEvent> {
     private final Node stateGuiNode = new Node("Loading screen gui node");
     private BitmapText loadingText;
     private Geometry progressBarGeom;
@@ -75,7 +74,7 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
         guiNode.attachChild(stateGuiNode);
 
         System.out.println("[LoadingScreenState] Loading screen initialized");
-        orchestrationBus.publish(new BootUiStateSetupCompleteEvent(), new GameOrchestrationContext(), null);
+        orchestrationBus.publish(new BootUiStateSetupCompleteEvent(), null);
     }
 
     @Override
@@ -95,10 +94,10 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
     }
 
     @Override
-    public void handle(@NonNull InitialBootCompleteEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<InitialBootCompleteEvent> lifecycleManager) {
+    public void handle(@NonNull InitialBootCompleteEvent event, @Nullable EventLifecycleManager<InitialBootCompleteEvent> lifecycleManager) {
         var orchestrationBus = getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         orchestrationBus.unsubscribe(InitialBootCompleteEvent.class, this);
-        orchestrationBus.publish(new StartScreenFadeOutEvent(2f), new GameOrchestrationContext(), null);
+        orchestrationBus.publish(new StartScreenFadeOutEvent(2f), null);
         System.out.println("[LoadingScreenState] Detaching loading screen.");
         getStateManager().detach(this);
     }
@@ -149,7 +148,7 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
         );
     }
 
-    private EventSubscriber<GameOrchestrationContext> loadingProgressUpdateSubscriber(EventBus<GameOrchestrationContext> orchestrationBus, SimpleApplication application){
+    private EventSubscriber loadingProgressUpdateSubscriber(EventBus orchestrationBus, SimpleApplication application){
         return EventSubscribers.syncUnsubscribingOnCondition(
                 AssetLoadingPercentAdvanceEvent.class,
                 orchestrationBus,

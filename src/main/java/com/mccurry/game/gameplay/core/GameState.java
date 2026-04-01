@@ -29,7 +29,6 @@ import com.mccurry.game.gameplay.system.player.component.PlayerControlledCompone
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.util.debug.GeometryUtil;
 import com.mccurry.game.util.event.EventHandlers;
@@ -52,11 +51,11 @@ public class GameState extends BaseAppState {
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
 
-    private EventBus<GameOrchestrationContext> orchestrationBus;
+    private EventBus orchestrationBus;
 
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
-    private SyncEventHandler<ToggleRotationDebugEvent, GameOrchestrationContext> onRotationDebugEnable = EventHandlers.syncEventHandler(
-            (event, ctx, elm) -> {
+    private SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable = EventHandlers.syncEventHandler(
+            (event, elm) -> {
                 entityStore.forEachEntityWithComponents(0, new EntityCallback() {
                     @Override
                     public void execute(Entity entityWithRequiredComponents, float tpf) {

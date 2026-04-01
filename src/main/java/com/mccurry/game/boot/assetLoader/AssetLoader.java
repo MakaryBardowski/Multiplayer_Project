@@ -8,7 +8,6 @@ import com.mccurry.game.boot.events.AssetLoadingPercentAdvanceEvent;
 import com.mccurry.game.boot.events.BootUiStateSetupCompleteEvent;
 import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
 import lombok.NonNull;
@@ -18,12 +17,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @RequiredArgsConstructor
-public class AssetLoader implements AsyncEventHandler<BootUiStateSetupCompleteEvent, GameOrchestrationContext> {
-    private final EventBus<GameOrchestrationContext> orchestrationBus;
+public class AssetLoader implements AsyncEventHandler<BootUiStateSetupCompleteEvent> {
+    private final EventBus orchestrationBus;
     private final SimpleApplication simpleApplication;
 
     @Override
-    public void handle(@NonNull BootUiStateSetupCompleteEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<BootUiStateSetupCompleteEvent> lifecycleManager) {
+    public void handle(@NonNull BootUiStateSetupCompleteEvent event, @Nullable EventLifecycleManager<BootUiStateSetupCompleteEvent> lifecycleManager) {
         System.out.println("[AssetLoader] Beginning to load assets");
         Thread.ofVirtual().start(
                 () -> {
@@ -32,7 +31,6 @@ public class AssetLoader implements AsyncEventHandler<BootUiStateSetupCompleteEv
                     System.out.println("[AssetLoader] Asset loading finished. ");
                     orchestrationBus.publish(
                             new AssetLoadingCompleteEvent(),
-                            new GameOrchestrationContext(),
                             null
                     );
 
@@ -62,7 +60,7 @@ public class AssetLoader implements AsyncEventHandler<BootUiStateSetupCompleteEv
             }
 
             lemurLibLoader.join();
-            orchestrationBus.publish(new AttachConsoleListenerEvent(), new GameOrchestrationContext(),null);
+            orchestrationBus.publish(new AttachConsoleListenerEvent(),null);
 
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
@@ -75,7 +73,6 @@ public class AssetLoader implements AsyncEventHandler<BootUiStateSetupCompleteEv
         System.out.println("Loading... %s%%".formatted(normalizedPercent));
         orchestrationBus.publish(
                 new AssetLoadingPercentAdvanceEvent(normalizedPercent),
-                new GameOrchestrationContext(),
                 null
         );
     }

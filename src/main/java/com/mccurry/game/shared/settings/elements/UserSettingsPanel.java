@@ -8,8 +8,6 @@ import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.Main;
 import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
-import com.mccurry.game.menu.settings.UserSettingsMenuState;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.elements.settingsTab.ControlsSettingsTab;
 import com.mccurry.game.shared.settings.elements.settingsTab.GraphicsSettingsTab;
@@ -51,7 +49,7 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
     private final Container spaceBetweenActionButtons = noBackgroundContainer();
 
     public UserSettingsPanel(
-            EventBus<GameOrchestrationContext> orchestrationBus,
+            EventBus orchestrationBus,
             AppStateManager appStateManager,
             AssetManager assetManager
     ) {
@@ -169,7 +167,6 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
 //            close menu event
             orchestrationBus.publish(
                     CloseMenuRequestEvent.builder().menuType(MenuType.SETTINGS).build(),
-                    new GameOrchestrationContext(),
                     null
             );
         });
@@ -268,10 +265,9 @@ public class UserSettingsPanel extends Container implements UserSettingsPopulate
         soundSettingsTab.populateWithSettings(this.temporaryUserSettings);
     }
 
-    private void commitNewSettings(EventBus<GameOrchestrationContext> orchestrationBus){
+    private void commitNewSettings(EventBus orchestrationBus){
         orchestrationBus.publish(
                 MainThreadSettingsAppliedEvent.builder().newSettings(temporaryUserSettings).build(),
-                new GameOrchestrationContext(),
                 null
         );
     }

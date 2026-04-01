@@ -7,7 +7,6 @@ import com.mccurry.game.console.command.DebugCommand;
 import com.mccurry.game.console.command.ShowUiStateCommand;
 import com.mccurry.game.console.command.spectator.SpectatorModeCommand;
 import com.mccurry.game.console.exception.CommandParsingException;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,7 +36,7 @@ public class CommandRegistry {
             }
 
             @Override
-            public @Nullable String run(EventBus<GameOrchestrationContext> orchestrationBus, Object[] executionArgs) {
+            public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
                 var sb = new StringBuilder();
                 sb.append("Available commands:");
                 AVAILABLE_COMMANDS.entrySet().forEach(commandEntry -> {
@@ -61,7 +60,7 @@ public class CommandRegistry {
         put(debugCommand.commandName(), debugCommand);
     }};
 
-    public static String execute(EventBus<GameOrchestrationContext> orchestrationBus, String consoleInput){
+    public static String execute(EventBus orchestrationBus, String consoleInput){
         if(!consoleInput.startsWith("/")){
             return redToWhite("Invalid command. Commands must start with \"/\"");
         }

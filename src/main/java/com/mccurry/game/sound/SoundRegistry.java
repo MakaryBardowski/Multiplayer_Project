@@ -7,7 +7,6 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.shared.settings.model.UserSettings;
 import com.mccurry.game.sound.asset.GlobalSoundAsset;
 import com.mccurry.game.sound.asset.PositionalSoundAsset;
@@ -27,7 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SoundRegistry implements SyncEventHandler<MainThreadSoundVolumeChangedEvent, GameOrchestrationContext>, EventSubscriber<GameOrchestrationContext> {
+public class SoundRegistry implements SyncEventHandler<MainThreadSoundVolumeChangedEvent>, EventSubscriber {
     private final Map<PositionalSoundEntry, PositionalSound> POSITIONAL_SOUNDS = new HashMap<>();
     private final Map<GlobalSoundEntry, GlobalSound> GLOBAL_SOUNDS = new HashMap<>();
 
@@ -99,7 +98,7 @@ public class SoundRegistry implements SyncEventHandler<MainThreadSoundVolumeChan
     }
 
     @Override
-    public void handle(@NonNull MainThreadSoundVolumeChangedEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<MainThreadSoundVolumeChangedEvent> lifecycleManager) {
+    public void handle(@NonNull MainThreadSoundVolumeChangedEvent event, @Nullable EventLifecycleManager<MainThreadSoundVolumeChangedEvent> lifecycleManager) {
         updateSoundVolumes(event);
     }
 
@@ -130,12 +129,12 @@ public class SoundRegistry implements SyncEventHandler<MainThreadSoundVolumeChan
     }
 
     @Override
-    public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void subscribe(@NonNull EventBus eventBus) {
         eventBus.subscribe(MainThreadSoundVolumeChangedEvent.class, this);
     }
 
     @Override
-    public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void unsubscribe(@NonNull EventBus eventBus) {
         eventBus.unsubscribe(MainThreadSoundVolumeChangedEvent.class, this);
     }
 }
