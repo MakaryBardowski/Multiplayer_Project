@@ -2,21 +2,23 @@ package com.mccurry.game.gameplay.system.player;
 
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
-import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
+import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
+import com.mccurry.game.gameplay.system.intent.model.Intent;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
-import com.mccurry.game.gameplay.system.player.component.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
+import com.mccurry.game.orchestrator.GameOrchestrationContext;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class PlayerPositionControlSystem implements ActionListener, AnalogListener {
+public class PlayerInputSystem implements ActionListener, AnalogListener {
     private final EntityStore entityStore;
+    private final EventBus<GameOrchestrationContext> orchestrationBus;
 
     private final Set<String> activeInputs = new HashSet<>();
 
@@ -24,8 +26,9 @@ public class PlayerPositionControlSystem implements ActionListener, AnalogListen
     private final Vector3f temp2 = new Vector3f();
     private final Vector3f temp3 = new Vector3f();
 
-    public PlayerPositionControlSystem(EntityStore entityStore) {
+    public PlayerInputSystem(EntityStore entityStore, EventBus<GameOrchestrationContext> orchestrationBus) {
         this.entityStore = entityStore;
+        this.orchestrationBus = orchestrationBus;
     }
 
 
@@ -56,7 +59,7 @@ public class PlayerPositionControlSystem implements ActionListener, AnalogListen
         }
 
 
-        temp.set(0,0,0);
+        temp.set(0, 0, 0);
 
         var rotation = transform
                 .getVisualNode()
@@ -64,7 +67,7 @@ public class PlayerPositionControlSystem implements ActionListener, AnalogListen
 
 
         rotation.getRotationColumn(2, temp2).normalizeLocal();
-        rotation.getRotationColumn(0,temp3).normalizeLocal();
+        rotation.getRotationColumn(0, temp3).normalizeLocal();
 
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_W)) {
@@ -89,5 +92,18 @@ public class PlayerPositionControlSystem implements ActionListener, AnalogListen
     @Override
     public void onAnalog(String name, float value, float tpf) {
         updateInput();
+
+
+        if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_LEFT)) {
+            var playerControlledEntity = entityStore.getSingletonComponentHolder(PlayerControlledComponent.class);
+            if (playerControlledEntity == null) {
+                return;
+            }
+            orchestrationBus.publish(
+                    new IntentEvent(Intent.PRIMARY_ACTION, playerControlledEntity)
+                    , new GameOrchestrationContext(),
+                    null
+            );
+        }
     }
 }

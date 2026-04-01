@@ -18,10 +18,11 @@ import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
+import com.mccurry.game.gameplay.system.intent.system.IntentSystem;
 import com.mccurry.game.gameplay.system.movement.MovementSystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.CameraSystem;
-import com.mccurry.game.gameplay.system.player.PlayerPositionControlSystem;
+import com.mccurry.game.gameplay.system.player.PlayerInputSystem;
 import com.mccurry.game.gameplay.system.player.PlayerRotationControlSystem;
 import com.mccurry.game.gameplay.system.player.component.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
@@ -47,8 +48,10 @@ public class GameState extends BaseAppState {
 
     private final List<com.mccurry.game.gameplay.core.ecs.system.System> regularSystems = new ArrayList<>();
 
-    private PlayerPositionControlSystem playerPositionControlSystem = new PlayerPositionControlSystem(entityStore);
-    private PlayerRotationControlSystem playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
+    private PlayerInputSystem playerInputSystem;
+    private PlayerRotationControlSystem playerRotationControlSystem;
+    private IntentSystem intentSystem;
+
     private EventBus<GameOrchestrationContext> orchestrationBus;
 
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
@@ -75,11 +78,21 @@ public class GameState extends BaseAppState {
     protected void initialize(Application app) {
         regularSystems.add(new MovementSystem(entityStore));
         regularSystems.add(new CameraSystem(entityStore,app.getCamera()));
-        getApplication().getInputManager().addListener(playerPositionControlSystem,
+
+
+        orchestrationBus = getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
+
+        playerInputSystem = new PlayerInputSystem(entityStore,orchestrationBus);
+        playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
+        intentSystem = new IntentSystem();
+
+
+        getApplication().getInputManager().addListener(playerInputSystem,
                 KeyMappingRegistry.MAPPING_KEY_W,
                 MAPPING_KEY_S,
                 MAPPING_KEY_A,
-                MAPPING_KEY_D
+                MAPPING_KEY_D,
+                MAPPING_MOUSE_LEFT
         );
 
         getApplication().getInputManager().addListener(playerRotationControlSystem,
@@ -88,9 +101,6 @@ public class GameState extends BaseAppState {
                 MAPPING_MOUSE_MOVE_Y_DOWN,
                 MAPPING_MOUSE_MOVE_Y_UP
         );
-
-        orchestrationBus = getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
-
 
         var universeNode = new Node();
         var blockWorldNode = new Node();
@@ -186,17 +196,19 @@ public class GameState extends BaseAppState {
         GuiGlobals.getInstance().setCursorEventsEnabled(false);
         orchestrationBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         orchestrationBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        intentSystem.subscribe(orchestrationBus);
     }
 
     @Override
     protected void onDisable() {
         CameraConstants.applyDefaultTransform(getApplication().getCamera());
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
-        getApplication().getInputManager().removeListener(playerPositionControlSystem);
+        getApplication().getInputManager().removeListener(playerInputSystem);
         getApplication().getInputManager().removeListener(playerRotationControlSystem);
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
         orchestrationBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         orchestrationBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        intentSystem.unsubscribe(orchestrationBus);
     }
 
 
