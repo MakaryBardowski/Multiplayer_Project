@@ -2,7 +2,6 @@ package com.mccurry.game.console.command;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.exception.CommandParsingException;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,7 +28,7 @@ public abstract class ConsoleCommand {
      * @param executionArgs execution args passed from parseExecutionArgs
      * @return statement printed to console. If null, default will be printed.
      */
-    public abstract @Nullable String run(EventBus<GameOrchestrationContext> orchestrationBus, Object[] executionArgs);
+    public abstract @Nullable String run(EventBus orchestrationBus, Object[] executionArgs);
 
     @Override
     public int hashCode() {

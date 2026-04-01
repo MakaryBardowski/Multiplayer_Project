@@ -11,7 +11,6 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.menu.main.event.MainMenuOpened;
 import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.locale.LocalizedString;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
@@ -35,7 +34,7 @@ public class MainMenuState extends MenuState {
     private AssetManager assetManager;
     private final List<Button> buttons = new ArrayList<>();
 
-    private final EventBus<GameOrchestrationContext> orchestrationBus;
+    private final EventBus orchestrationBus;
 
     @Override
     public void createUiOnce(SimpleApplication application, Node stateGuiNode) {
@@ -48,7 +47,6 @@ public class MainMenuState extends MenuState {
                     OpenMenuRequestEvent.builder()
                             .menuType(MenuType.GAMEMODE_SELECTOR)
                             .build(),
-                    new GameOrchestrationContext(),
                     null
             );
         }, true);
@@ -59,7 +57,6 @@ public class MainMenuState extends MenuState {
                 OpenMenuRequestEvent.builder()
                         .menuType(MenuType.SETTINGS)
                         .build(),
-                new GameOrchestrationContext(),
                 null
         ), true);
 
@@ -78,7 +75,6 @@ public class MainMenuState extends MenuState {
 
         getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus().publish(
                 new MainMenuOpened(),
-                new GameOrchestrationContext(),
                 null
         );
 
@@ -179,6 +175,6 @@ public class MainMenuState extends MenuState {
     }
 
     private void playClickSound() {
-        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK), new GameOrchestrationContext(), null);
+        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK), null);
     }
 }

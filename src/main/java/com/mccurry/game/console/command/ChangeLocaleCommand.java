@@ -2,7 +2,6 @@ package com.mccurry.game.console.command;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.exception.CommandParsingException;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.event.MainThreadLocaleChangedEvent;
 import com.mccurry.game.locale.model.GameLocale;
 import lombok.NonNull;
@@ -29,13 +28,12 @@ public class ChangeLocaleCommand extends ConsoleCommand{
     }
 
     @Override
-    public @Nullable String run(EventBus<GameOrchestrationContext> orchestrationBus, Object[] executionArgs) {
+    public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
         var newLocale = GameLocale.valueOf(executionArgs[0].toString());
         orchestrationBus.publish(
                 MainThreadLocaleChangedEvent.builder()
                         .newLocale(newLocale)
                         .build(),
-                new GameOrchestrationContext(),
                 null
         );
         return "Locale changed to "+newLocale;

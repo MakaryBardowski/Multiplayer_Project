@@ -20,8 +20,6 @@ import com.mccurry.game.menu.lobby.PlayerClassRegistry;
 import com.mccurry.game.menu.lobby.singlePlayer.launcher.SinglePlayerGameLaunchParams;
 import com.mccurry.game.menu.lobby.singlePlayer.launcher.SinglePlayerGameLauncher;
 import com.mccurry.game.menu.lobby.model.SelectablePlayerClass;
-import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
@@ -45,7 +43,7 @@ import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 public class SinglePlayerLobbyState extends MenuState {
     private AssetManager assetManager;
 
-    private EventBus<GameOrchestrationContext> orchestrationBus;
+    private EventBus orchestrationBus;
     private Map<SelectablePlayerClass, Button> buttonsByClass = new HashMap<>();
     private Label classNameLabel;
     private Label classDescriptionLabel;
@@ -480,6 +478,6 @@ public class SinglePlayerLobbyState extends MenuState {
     }
 
     private void playClickSound() {
-        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK), new GameOrchestrationContext(), null);
+        orchestrationBus.publish(new PlayGlobalSoundRequestEvent(GlobalSoundEntry.MENU_BUTTON_CLICK), null);
     }
 }

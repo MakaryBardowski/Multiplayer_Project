@@ -10,7 +10,6 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.console.event.MainThreadConsoleStateResponseEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.game.util.string.JmeRgbaTagsUtil;
 import com.simsilica.lemur.*;
@@ -22,7 +21,7 @@ import lombok.NonNull;
 
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 
-public class CheatConsoleState extends BaseAppState implements EventSubscriber<GameOrchestrationContext> {
+public class CheatConsoleState extends BaseAppState implements EventSubscriber {
     private static final float CONSOLE_INPUT_LINE_SIZE_Y = 12;
     private static final float CONSOLE_SIZE_Y = 150-CONSOLE_INPUT_LINE_SIZE_Y;
     private static final float CONSOLE_MAX_Y = CONSOLE_SIZE_Y+CONSOLE_INPUT_LINE_SIZE_Y;
@@ -32,10 +31,10 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber<G
     private final Container consoleContainer;
     private ConsoleState currentState = ConsoleState.STATIC;
 
-    private final EventBus<GameOrchestrationContext> orchestrationBus;
-    private final SyncEventHandler<MainThreadConsoleStateResponseEvent,GameOrchestrationContext> onUiStateResponse;
+    private final EventBus orchestrationBus;
+    private final SyncEventHandler<MainThreadConsoleStateResponseEvent> onUiStateResponse;
 
-    public CheatConsoleState(EventBus<GameOrchestrationContext> orchestrationBus){
+    public CheatConsoleState(EventBus orchestrationBus){
         this.orchestrationBus = orchestrationBus;
 
         consoleContainer = noBackgroundContainer();
@@ -68,7 +67,7 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber<G
 
 
         onUiStateResponse = EventHandlers.syncEventHandler(
-                (event, ctx, elm)->{
+                (event, elm)->{
                     appendToLog(JmeRgbaTagsUtil.greenToWhite(event.getStringState()),consoleLog);
                 }
         );
@@ -116,12 +115,12 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber<G
     }
 
     @Override
-    public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void subscribe(@NonNull EventBus eventBus) {
         eventBus.subscribe(MainThreadConsoleStateResponseEvent.class, onUiStateResponse);
     }
 
     @Override
-    public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void unsubscribe(@NonNull EventBus eventBus) {
         eventBus.unsubscribe(MainThreadConsoleStateResponseEvent.class, onUiStateResponse);
     }
 

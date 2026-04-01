@@ -8,7 +8,6 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.keyBinding.KeyMappingService;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.locale.LocaleService;
 import com.mccurry.game.shared.settings.elements.option.keybind.KeyRebindInputListener;
@@ -22,7 +21,7 @@ import lombok.Setter;
 
 @RequiredArgsConstructor
 public class Main extends SimpleApplication {
-    private final EventBus<GameOrchestrationContext> orchestrationBus;
+    private final EventBus orchestrationBus;
 
     @Setter
     private UserSettingsService userSettingsService;
@@ -36,7 +35,7 @@ public class Main extends SimpleApplication {
     @Setter
     private SoundService soundService;
 
-    private final SyncEventHandler<MainThreadResizeUiEvent, GameOrchestrationContext> resizeUiEventHandler = resizeUiOnResolutionChanged();
+    private final SyncEventHandler<MainThreadResizeUiEvent> resizeUiEventHandler = resizeUiOnResolutionChanged();
 
     @Getter
     private static int guiScale;
@@ -76,7 +75,7 @@ public class Main extends SimpleApplication {
     }
 
     public static void main(String[] args) {
-        var orchestrationBus = new EventBus<GameOrchestrationContext>();
+        var orchestrationBus = new EventBus();
 
 
         Main app = new Main(orchestrationBus);
@@ -95,7 +94,6 @@ public class Main extends SimpleApplication {
         var userSettings = userSettingsService.getCurrentSettingsDeepClone(); // same settings, just different class
         app.resizeUiEventHandler.handle(
                 new MainThreadResizeUiEvent(userSettings.getResolutionSetting().getUiScale()),
-                new GameOrchestrationContext(),
                 null
         );
 
@@ -105,8 +103,8 @@ public class Main extends SimpleApplication {
         app.start();
     }
 
-    private SyncEventHandler<MainThreadResizeUiEvent, GameOrchestrationContext> resizeUiOnResolutionChanged() {
-        return (event, eventContext, lifecycleManager)
+    private SyncEventHandler<MainThreadResizeUiEvent> resizeUiOnResolutionChanged() {
+        return (event, lifecycleManager)
                 -> {
             guiScale = event.getUiScale();
             gameGuiNode.setLocalScale(guiScale, guiScale, 1);

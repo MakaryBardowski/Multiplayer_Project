@@ -13,11 +13,10 @@ import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.component.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
-public class ToggleSpectatorModeEventHandler implements SyncEventHandler<ToggleSpectatorModeEvent, GameOrchestrationContext> {
+public class ToggleSpectatorModeEventHandler implements SyncEventHandler<ToggleSpectatorModeEvent> {
     private final EntityStore entityStore;
 
     private Entity originalCameraHolder;
@@ -28,7 +27,7 @@ public class ToggleSpectatorModeEventHandler implements SyncEventHandler<ToggleS
     }
 
     @Override
-    public void handle(@NonNull ToggleSpectatorModeEvent event, @NonNull GameOrchestrationContext eventContext, @Nullable EventLifecycleManager<ToggleSpectatorModeEvent> lifecycleManager) {
+    public void handle(@NonNull ToggleSpectatorModeEvent event, @Nullable EventLifecycleManager<ToggleSpectatorModeEvent> lifecycleManager) {
         if (originalCameraHolder != null) {
 
             var newCamHolderComp = new CameraHolderComponent(originalCamComponent.getCurrentCameraOffset());

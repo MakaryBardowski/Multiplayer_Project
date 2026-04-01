@@ -8,7 +8,6 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.EventHandler;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.locale.event.MainThreadLocaleChangedEvent;
 import com.mccurry.game.shared.settings.event.MainThreadSettingsAppliedEvent;
 import com.mccurry.game.shared.settings.exception.UserSettingsException;
@@ -21,15 +20,15 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
-public class UserSettingsService implements EventSubscriber<GameOrchestrationContext> {
+public class UserSettingsService implements EventSubscriber {
     private static final ObjectMapper USER_SETTINGS_FILE_OBJECT_MAPPER = new ObjectMapper().setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-    private final EventHandler<MainThreadSettingsAppliedEvent, GameOrchestrationContext> onSettingsApplied;
+    private final EventHandler<MainThreadSettingsAppliedEvent> onSettingsApplied;
 
     private UserSettings currentSettings;
 
-    public UserSettingsService(EventBus<GameOrchestrationContext> orchestrationBus, SimpleApplication application) {
-        onSettingsApplied = (SyncEventHandler<MainThreadSettingsAppliedEvent, GameOrchestrationContext>) (event, eventContext, lifecycleManager) -> {
+    public UserSettingsService(EventBus orchestrationBus, SimpleApplication application) {
+        onSettingsApplied = (SyncEventHandler<MainThreadSettingsAppliedEvent>) (event, lifecycleManager) -> {
             // the event can only come from UI
 
             UserSettings patch = event.getNewSettings();
@@ -67,7 +66,6 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
                                 .sfxVolumePercentage(currentSoundSettings.getSfxVolume())
                                 .gunshotVolumePercentage(currentSoundSettings.getGunshotVolume())
                                 .build(),
-                        new GameOrchestrationContext(),
                         null
                 );
             }
@@ -76,7 +74,7 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
                 application.restart();
                 orchestrationBus.publish(new MainThreadResizeUiEvent(
                         currentSettings.getResolutionSetting().getUiScale()
-                ), new GameOrchestrationContext(), null);
+                ), null);
             }
 
             if(!currentSettings.getLocale().equals(previousLocale)){
@@ -84,7 +82,6 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
                         MainThreadLocaleChangedEvent.builder()
                                 .newLocale(currentSettings.getLocale())
                                 .build(),
-                        new GameOrchestrationContext(),
                         null
                 );
             }
@@ -92,12 +89,12 @@ public class UserSettingsService implements EventSubscriber<GameOrchestrationCon
     }
 
     @Override
-    public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void subscribe(@NonNull EventBus eventBus) {
         eventBus.subscribe(MainThreadSettingsAppliedEvent.class, onSettingsApplied);
     }
 
     @Override
-    public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void unsubscribe(@NonNull EventBus eventBus) {
         eventBus.unsubscribe(MainThreadSettingsAppliedEvent.class, onSettingsApplied);
     }
 

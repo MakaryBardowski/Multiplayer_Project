@@ -3,7 +3,6 @@ package com.mccurry.game.console.command;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.console.exception.CommandParsingException;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -28,9 +27,9 @@ public class DebugCommand extends ConsoleCommand {
     }
 
     @Override
-    public @Nullable String run(EventBus<GameOrchestrationContext> orchestrationBus, Object[] executionArgs) {
+    public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
         if(DebugType.ROTATION.equals(executionArgs[0])){
-            orchestrationBus.publish(new ToggleRotationDebugEvent(), new GameOrchestrationContext(), null);
+            orchestrationBus.publish(new ToggleRotationDebugEvent(), null);
             return "Toggled rotation debug";
         }
         return "Congratulations, this should not happen!";

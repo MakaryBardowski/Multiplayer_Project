@@ -4,7 +4,6 @@ package com.mccurry.game.menu.lobby.singlePlayer.launcher;
 import com.jme3.app.state.AppStateManager;
 import com.mccurry.game.gameplay.core.GameState;
 import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.MenuType;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;
@@ -23,7 +22,6 @@ public class SinglePlayerGameLauncher {
                             CloseMenuRequestEvent.builder()
                                     .menuType(MenuType.LOBBY_SINGLEPLAYER)
                                     .build(),
-                            new GameOrchestrationContext(),
                             null
                     );
 
@@ -31,10 +29,9 @@ public class SinglePlayerGameLauncher {
                     var gameState = new GameState();
                     appStateManager.attach(gameState);
 
-                    orchestrationBus.publish(new StartScreenFadeOutEvent(1), new GameOrchestrationContext(), null);
+                    orchestrationBus.publish(new StartScreenFadeOutEvent(1), null);
                 }
                 ),
-                new GameOrchestrationContext(),
                 null
         );
 

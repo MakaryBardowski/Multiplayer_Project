@@ -12,7 +12,6 @@ import com.mccurry.game.menu.main.MainMenuState;
 import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
 import com.mccurry.game.menu.settings.UserSettingsMenuState;
-import com.mccurry.game.orchestrator.GameOrchestrationContext;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.MenuState;
 import com.mccurry.game.shared.ui.MenuType;
@@ -29,9 +28,9 @@ import java.util.function.Supplier;
 
 import static com.mccurry.game.shared.ui.MenuType.*;
 
-public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
+public class MenuManager implements EventSubscriber {
     private final Application application;
-    private final SyncEventHandler<MainThreadLocaleReloadedEvent, GameOrchestrationContext> localeChangeHandler;
+    private final SyncEventHandler<MainThreadLocaleReloadedEvent> localeChangeHandler;
 
     private final Map<MenuType, CachedMenu> rootMenuCache = new HashMap<>();
     private final Map<MenuType, CachedMenu> overlayMenuCache = new HashMap<>();
@@ -39,17 +38,17 @@ public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
     private final OverlayMenuManager overlayMenuManager;
     private final RootMenuManager rootMenuManager;
 
-    private final SyncEventHandler<ConsoleRequestUiStateEvent, GameOrchestrationContext> onMenuStateRequest;
+    private final SyncEventHandler<ConsoleRequestUiStateEvent> onMenuStateRequest;
 
 
-    private final SyncEventHandler<OpenMenuRequestEvent, GameOrchestrationContext> onMenuOpenHandler = EventHandlers.syncEventHandler(
-            (event, ctx, lcm) -> {
+    private final SyncEventHandler<OpenMenuRequestEvent> onMenuOpenHandler = EventHandlers.syncEventHandler(
+            (event, lcm) -> {
                 openMenu(event.getMenuType());
             }
     );
 
-    private final SyncEventHandler<CloseMenuRequestEvent, GameOrchestrationContext> onMenuCloseHandler = EventHandlers.syncEventHandler(
-            (event, ctx, lcm) -> {
+    private final SyncEventHandler<CloseMenuRequestEvent> onMenuCloseHandler = EventHandlers.syncEventHandler(
+            (event, lcm) -> {
                 closeMenu(event.getMenuType());
             }
     );
@@ -63,7 +62,7 @@ public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
         var orchestrationBus = application.getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
 
         onMenuStateRequest = EventHandlers.syncEventHandler(
-                (event, ctx, lcm) -> {
+                (event, lcm) -> {
 
                     var root = rootMenuManager.getCurrentRootMenu();
 
@@ -86,7 +85,6 @@ public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
                             MainThreadConsoleStateResponseEvent.builder()
                                     .uiState(uiStateBuilder.toString())
                                     .build(),
-                            new GameOrchestrationContext(),
                             null
                     );
                 }
@@ -96,7 +94,6 @@ public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
         var mainMenuState = new MainMenuState(orchestrationBus);
         localeChangeHandler = (
                 event,
-                eventContext,
                 lifecycleManager
         ) -> {
             mainMenuState.refreshLocale();
@@ -183,7 +180,7 @@ public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
     }
 
     @Override
-    public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void subscribe(@NonNull EventBus eventBus) {
         eventBus.subscribe(OpenMenuRequestEvent.class, onMenuOpenHandler);
         eventBus.subscribe(CloseMenuRequestEvent.class, onMenuCloseHandler);
         eventBus.subscribe(MainThreadLocaleReloadedEvent.class, localeChangeHandler);
@@ -191,7 +188,7 @@ public class MenuManager implements EventSubscriber<GameOrchestrationContext> {
     }
 
     @Override
-    public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+    public void unsubscribe(@NonNull EventBus eventBus) {
         eventBus.unsubscribe(OpenMenuRequestEvent.class, onMenuOpenHandler);
         eventBus.unsubscribe(CloseMenuRequestEvent.class, onMenuCloseHandler);
         eventBus.unsubscribe(MainThreadLocaleReloadedEvent.class, localeChangeHandler);

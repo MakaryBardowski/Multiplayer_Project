@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GameStateOrchestrator extends BaseAppState {
 
-    private final EventBus<GameOrchestrationContext> gameOrchestrationBus;
+    private final EventBus gameOrchestrationBus;
 
     @Getter(AccessLevel.NONE)
     private final UserSettingsService userSettingsService;
@@ -66,27 +66,27 @@ public class GameStateOrchestrator extends BaseAppState {
        launcher.startListening();
     }
 
-    private EventSubscriber<GameOrchestrationContext> closeInitialBootStateSubscriber(InitialBootState initialBootState) {
-        return new EventSubscriber<>() {
-            private final SyncEventHandler<InitialBootCompleteEvent, GameOrchestrationContext> handler = (event, ctx, lifecycleManager) -> {
+    private EventSubscriber closeInitialBootStateSubscriber(InitialBootState initialBootState) {
+        return new EventSubscriber() {
+            private final SyncEventHandler<InitialBootCompleteEvent> handler = (event, lifecycleManager) -> {
                 getStateManager().detach(initialBootState);
                 unsubscribe(gameOrchestrationBus);
                 System.out.println("[GameStateOrchestrator] Initial boot complete. Detaching initial boot state");
             };
 
             @Override
-            public void subscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+            public void subscribe(@NonNull EventBus eventBus) {
                 eventBus.subscribe(InitialBootCompleteEvent.class, handler);
             }
 
             @Override
-            public void unsubscribe(@NonNull EventBus<GameOrchestrationContext> eventBus) {
+            public void unsubscribe(@NonNull EventBus eventBus) {
                 eventBus.unsubscribe(InitialBootCompleteEvent.class, handler);
             }
         };
     }
 
-    private EventSubscriber<GameOrchestrationContext> attachConsoleListenerSubscriberOnce(){
+    private EventSubscriber attachConsoleListenerSubscriberOnce(){
         return EventSubscribers.syncUnsubscribingOnFirstMessage(AttachConsoleListenerEvent.class,gameOrchestrationBus,(event)->{
             registerConsoleLauncher();
         });
