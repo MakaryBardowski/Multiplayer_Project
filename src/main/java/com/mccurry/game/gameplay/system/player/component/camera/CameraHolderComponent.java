@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplay.system.player.component;
+package com.mccurry.game.gameplay.system.player.component.camera;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;

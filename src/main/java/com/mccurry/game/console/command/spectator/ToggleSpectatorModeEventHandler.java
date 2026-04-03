@@ -1,17 +1,15 @@
 package com.mccurry.game.console.command.spectator;
 
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.Camera;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
 import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
-import com.mccurry.game.gameplay.system.player.component.CameraHolderComponent;
-import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
+import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
+import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;

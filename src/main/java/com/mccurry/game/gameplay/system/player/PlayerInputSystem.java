@@ -8,7 +8,7 @@ import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
 import com.mccurry.game.gameplay.system.intent.model.Intent;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
-import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
+import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
 

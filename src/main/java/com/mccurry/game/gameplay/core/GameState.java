@@ -24,8 +24,9 @@ import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.CameraSystem;
 import com.mccurry.game.gameplay.system.player.PlayerInputSystem;
 import com.mccurry.game.gameplay.system.player.PlayerRotationControlSystem;
-import com.mccurry.game.gameplay.system.player.component.CameraHolderComponent;
-import com.mccurry.game.gameplay.system.player.component.PlayerControlledComponent;
+import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
+import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
+import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
@@ -156,10 +157,10 @@ public class GameState extends BaseAppState {
 
 
         var velocityComponent = new VelocityComponent();
-
         var playerControlled = new PlayerControlledComponent();
         var cameraHolder = new CameraHolderComponent(new Vector3f(0,2.067f,0));
-        entityStore.create(transformComponent, velocityComponent, playerControlled, cameraHolder);
+        var cameraEffects = new CameraEffectsComponent();
+        entityStore.create(transformComponent, velocityComponent, playerControlled, cameraHolder, cameraEffects);
 
 
 
