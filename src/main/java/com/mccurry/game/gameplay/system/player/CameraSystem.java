@@ -8,10 +8,7 @@ import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.core.ecs.system.SingletonSystem;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
-import com.mccurry.game.gameplay.system.player.component.camera.model.CameraEffect;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
-
-import java.util.Collection;
 
 public class CameraSystem extends SingletonSystem {
     private final Camera camera;
