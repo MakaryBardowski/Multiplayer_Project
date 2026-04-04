@@ -3,17 +3,22 @@ package com.mccurry.game.gameplay.system.intent.resolver.processor;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
+import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
-import com.mccurry.game.gameplay.system.attack.event.AttackEvent;
-import com.mccurry.game.gameplay.system.equipment.EquipmentComponent;
+import com.mccurry.game.gameplay.system.equipment.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
 import com.mccurry.game.gameplay.system.intent.model.Intent;
 
 public class PrimaryActionProcessor extends IntentProcessor {
+    private final AttackSystem attackSystem;
 
-
-    public PrimaryActionProcessor(EventBus eventBus, EntityStore entityStore) {
+    public PrimaryActionProcessor(
+            EventBus eventBus,
+            EntityStore entityStore,
+            AttackSystem attackSystem
+    ) {
         super(eventBus, entityStore);
+        this.attackSystem = attackSystem;
     }
 
     @Override
@@ -22,23 +27,16 @@ public class PrimaryActionProcessor extends IntentProcessor {
     }
 
     @Override
-    public void processIntent(Entity intentOwner) {
+    public void processIntent(Entity intentOwner, double gameTimeSeconds) {
         var equipmentComponent = entityStore.getComponent(intentOwner, EquipmentComponent.class);
         if (equipmentComponent != null) {
 
-            var rightHandTool = equipmentComponent.getTool(HandSlot.HAND_RIGHT);
+            var heldInRightHand = equipmentComponent.getWorn(HandSlot.HAND_RIGHT);
 
-            if (rightHandTool != null) {
-                var weaponComponent = entityStore.getComponent(rightHandTool, WeaponComponent.class);
-                if (weaponComponent != null && weaponComponent.getCooldown() <= 0) {
-                    eventBus.publish(new AttackEvent(intentOwner, rightHandTool), null);
-                    System.err.println("Entity %s attacks with weapon %s - dealing: %s damage. It will be available for use in %s seconds!".formatted(
-                                    intentOwner.getId(),
-                                    rightHandTool.getId(),
-                                    weaponComponent.getBaseDamage(),
-                                    weaponComponent.getCooldown()
-                            )
-                    );
+            if (heldInRightHand != null) {
+                var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponComponent.class);
+                if (weaponComponent != null) {
+                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent, gameTimeSeconds);
                 }
             }
         }

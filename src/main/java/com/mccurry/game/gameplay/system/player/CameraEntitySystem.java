@@ -5,21 +5,21 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.core.ecs.system.SingletonSystem;
+import com.mccurry.game.gameplay.core.ecs.system.SingletonEntitySystem;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
-public class CameraSystem extends SingletonSystem {
+public class CameraEntitySystem extends SingletonEntitySystem {
     private final Camera camera;
 
-    public CameraSystem(EntityStore entityStore, Camera camera) {
+    public CameraEntitySystem(EntityStore entityStore, Camera camera) {
         super(entityStore, CameraHolderComponent.class);
         this.camera = camera;
     }
 
     @Override
-    protected void processEntity(Entity entityWithRequiredComponents, float tpf) {
+    protected void processEntity(Entity entityWithRequiredComponents, float tpf,double currentGameTimeSeconds) {
         var cameraComponent = entityStore.getComponent(entityWithRequiredComponents, CameraHolderComponent.class);
 
         var transformComponent = entityStore.getComponent(entityWithRequiredComponents, TransformComponent.class);

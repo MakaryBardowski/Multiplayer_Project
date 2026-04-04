@@ -1,6 +1,6 @@
 package com.mccurry.game.gameplay.system.equipment.model;
 
-public enum ArmorSlot {
+public enum BodySlot {
     HEAD,
     CHEST,
     HANDS,

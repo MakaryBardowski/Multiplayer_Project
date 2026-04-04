@@ -18,13 +18,14 @@ import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
+import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
-import com.mccurry.game.gameplay.system.equipment.EquipmentComponent;
+import com.mccurry.game.gameplay.system.equipment.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
 import com.mccurry.game.gameplay.system.intent.system.IntentSystem;
-import com.mccurry.game.gameplay.system.movement.MovementSystem;
+import com.mccurry.game.gameplay.system.movement.MovementEntitySystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
-import com.mccurry.game.gameplay.system.player.CameraSystem;
+import com.mccurry.game.gameplay.system.player.CameraEntitySystem;
 import com.mccurry.game.gameplay.system.player.PlayerInputSystem;
 import com.mccurry.game.gameplay.system.player.PlayerRotationControlSystem;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
@@ -46,9 +47,10 @@ import java.util.List;
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
 
 public class GameState extends BaseAppState {
+    private double gameTimeInSeconds = 0;
     private EntityStore entityStore = new EntityStore();
 
-    private final List<com.mccurry.game.gameplay.core.ecs.system.System> regularSystems = new ArrayList<>();
+    private final List<EntitySystem> entitySystems = new ArrayList<>();
 
     private PlayerInputSystem playerInputSystem;
     private PlayerRotationControlSystem playerRotationControlSystem;
@@ -59,9 +61,9 @@ public class GameState extends BaseAppState {
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
     private SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable = EventHandlers.syncEventHandler(
             (event, elm) -> {
-                entityStore.forEachEntityWithComponents(0, new EntityCallback() {
+                entityStore.forEachEntityWithComponents(0, gameTimeInSeconds,new EntityCallback() {
                     @Override
-                    public void execute(Entity entityWithRequiredComponents, float tpf) {
+                    public void execute(Entity entityWithRequiredComponents, float tpf, double currentGameTimeInSeconds) {
 
                         var transform = entityStore.getComponent(entityWithRequiredComponents, TransformComponent.class);
                         transform.getOriginNode().attachChild(
@@ -76,10 +78,11 @@ public class GameState extends BaseAppState {
             }
     );
 
+
     @Override
     protected void initialize(Application app) {
-        regularSystems.add(new MovementSystem(entityStore));
-        regularSystems.add(new CameraSystem(entityStore,app.getCamera()));
+        entitySystems.add(new MovementEntitySystem(entityStore));
+        entitySystems.add(new CameraEntitySystem(entityStore,app.getCamera()));
 
 
 
@@ -153,7 +156,7 @@ public class GameState extends BaseAppState {
 
 
         var weaponEntity = entityStore.create(
-                new WeaponComponent(10f,0.1f)
+                new WeaponComponent(10f,0.5f, 0)
         );
 
 
@@ -169,7 +172,7 @@ public class GameState extends BaseAppState {
         var equipmentComponent = new EquipmentComponent();
 
 
-        equipmentComponent.putTool(HandSlot.HAND_RIGHT,weaponEntity);
+        equipmentComponent.setWorn(HandSlot.HAND_RIGHT,weaponEntity);
 
         entityStore.create(
                 transformComponent,
@@ -189,18 +192,28 @@ public class GameState extends BaseAppState {
     public void update(float tpf) {
         long t1 = System.nanoTime();
 
-        for (var system : regularSystems) {
-            system.processEligibleEntities(tpf);
+
+
+
+
+
+        gameTimeInSeconds += tpf;
+        intentSystem.processQueued(tpf, gameTimeInSeconds);
+
+
+        for (var system : entitySystems) {
+            system.processEligibleEntities(tpf, gameTimeInSeconds);
         }
 
+
+
+
+
+
         long t2 = System.nanoTime();
-
         long res = t2 - t1;
-
         double s = (double) res / 1000000000;
-
-//        System.out.println(s+"s");
-
+        System.out.printf("%.9f s%n", s);
     }
 
     @Override

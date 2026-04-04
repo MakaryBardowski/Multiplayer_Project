@@ -12,5 +12,5 @@ public abstract class IntentProcessor {
     protected final EntityStore entityStore;
 
     public abstract Intent getHandledIntent();
-    public abstract void processIntent(Entity e);
+    public abstract void processIntent(Entity e, double gameTimeSeconds);
 }

@@ -22,7 +22,7 @@ public class EntityStore {
      * @param callback
      * @param componentClasses
      */
-    public void forEachEntityWithComponents(float tpf,EntityCallback callback, Class<? extends Component>... componentClasses){
+    public void forEachEntityWithComponents(float tpf, double currentGameTimeInSeconds, EntityCallback callback, Class<? extends Component>... componentClasses){
 
         for(final var entity : entities){
             var hasAllQueriedComponents = true;
@@ -35,7 +35,7 @@ public class EntityStore {
             }
 
             if(hasAllQueriedComponents){
-                callback.execute(entity,tpf);
+                callback.execute(entity, tpf, currentGameTimeInSeconds);
             }
 
         }

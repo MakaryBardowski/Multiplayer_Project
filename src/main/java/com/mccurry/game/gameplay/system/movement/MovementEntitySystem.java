@@ -3,20 +3,20 @@ package com.mccurry.game.gameplay.system.movement;
 import com.jme3.math.Vector3f;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.core.ecs.system.System;
+import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.model.movement.headbob.HeadbobCameraEffect;
 import com.mccurry.game.gameplay.system.player.component.camera.model.movement.headbob.HeadbobToIdleCameraEffect;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
-public class MovementSystem extends System {
-    public MovementSystem(EntityStore entityStore) {
+public class MovementEntitySystem extends EntitySystem {
+    public MovementEntitySystem(EntityStore entityStore) {
         super(entityStore, TransformComponent.class, VelocityComponent.class);
     }
 
     @Override
-    protected void processEntity(Entity entityWithRequiredComponents, float tpf) {
+    protected void processEntity(Entity entityWithRequiredComponents, float tpf, double currentGameTimeSeconds) {
         var transform = entityStore.getComponent(entityWithRequiredComponents, TransformComponent.class);
 
         var desiredVelocity = entityStore.getComponent(entityWithRequiredComponents, VelocityComponent.class).getDesiredVelocity();
