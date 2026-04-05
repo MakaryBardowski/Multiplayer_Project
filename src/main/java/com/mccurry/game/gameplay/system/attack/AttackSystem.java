@@ -10,7 +10,7 @@ public class AttackSystem {
     private final EntityStore entityStore;
 
     public void processAttack(Entity attacker, Entity weaponEntity, WeaponComponent weaponComponent, double gameTimeSeconds){
-        if(weaponComponent.getLastUsedGameTimeSeconds() + weaponComponent.getCooldownSeconds() < gameTimeSeconds){
+        if(weaponComponent.getLastUsedGameTimeSeconds() + weaponComponent.getCooldownSeconds() > gameTimeSeconds){
             return;
         }
         weaponComponent.setLastUsedGameTimeSeconds(gameTimeSeconds);

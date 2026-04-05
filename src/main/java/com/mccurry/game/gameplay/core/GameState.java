@@ -195,8 +195,6 @@ public class GameState extends BaseAppState {
 
 
 
-
-
         gameTimeInSeconds += tpf;
         intentSystem.processQueued(tpf, gameTimeInSeconds);
 
@@ -213,7 +211,7 @@ public class GameState extends BaseAppState {
         long t2 = System.nanoTime();
         long res = t2 - t1;
         double s = (double) res / 1000000000;
-        System.out.printf("%.9f s%n", s);
+//        System.out.printf("%.9f s%n", s);
     }
 
     @Override
