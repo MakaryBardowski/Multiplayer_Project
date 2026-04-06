@@ -160,19 +160,18 @@ public class GameState extends BaseAppState {
                 new WeaponComponent(10f,0.5f, 0),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
-                        .displayNode(createUnshadedBox(assetManager))
+                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
                         .build()
         );
 
 
 
-        var humanoidRootNode = (Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
-        setupModelLight(humanoidRootNode);
+        var humanoidRootNode = setupModelLight((Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o"));
 
         var transformComponent = new TransformComponent();
         var humanoidModelComponent = new HumanoidModelComponent(humanoidRootNode);
         transformComponent.getVisualNode().attachChild(humanoidRootNode);
-        ((SimpleApplication) getApplication()).getRootNode().attachChild(transformComponent.getOriginNode());
+        universeNode.attachChild(transformComponent.getOriginNode());
         transformComponent.getOriginNode().move(0,3,0);
         var velocityComponent = new VelocityComponent();
         var playerControlled = new PlayerControlledComponent();
@@ -273,7 +272,7 @@ public class GameState extends BaseAppState {
     }
 
 
-    public void setupModelLight(Node node) {
+    public Node setupModelLight(Node node) {
         for (Spatial c : node.getChildren()) {
 
             if (c != null) {
@@ -290,5 +289,6 @@ public class GameState extends BaseAppState {
                 }
             }
         }
+        return node;
     }
 }
