@@ -20,8 +20,8 @@ public class DebugCommand extends ConsoleCommand {
 
     @Override
     public Object[] parseExecutionArgs(String trimmedArgumentsPart) throws CommandParsingException {
-        if(trimmedArgumentsPart.equals("r")){
-            return new Object[]{DebugType.ROTATION};
+        if(trimmedArgumentsPart.contains("r")){
+            return new Object[]{DebugType.ROTATION,trimmedArgumentsPart.contains("g")};
         }
         throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['r']".formatted(trimmedArgumentsPart));
     }
@@ -30,7 +30,7 @@ public class DebugCommand extends ConsoleCommand {
     public @Nullable String run(EventBus orchestrationBus,@Nullable EventBus gameEventBus,  Object[] executionArgs) {
         if(DebugType.ROTATION.equals(executionArgs[0])){
             if(gameEventBus != null) {
-                gameEventBus.publish(new ToggleRotationDebugEvent(), null);
+                gameEventBus.publish(new ToggleRotationDebugEvent((boolean)executionArgs[1]), null);
                 return "Toggled rotation debug";
             }
             return "Cannot run command. Not currently in game.";

@@ -23,7 +23,7 @@ import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
-import com.mccurry.game.gameplay.system.equipment.visual.VisualEquipSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.ThirdPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquippableComponent;
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
@@ -54,7 +54,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
-import static com.mccurry.game.util.debug.GeometryUtil.createUnshadedBox;
 
 public class GameState extends BaseAppState {
     private double gameTimeInSeconds = 0;
@@ -65,7 +64,7 @@ public class GameState extends BaseAppState {
     private PlayerInputSystem playerInputSystem;
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
-    private VisualEquipSystem visualEquipSystem;
+    private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
 
     private AttackSystem attackSystem;
     private EquipSystem equipSystem;
@@ -81,12 +80,47 @@ public class GameState extends BaseAppState {
 
                         var transform = entityStore.getComponent(entityWithRequiredComponents, TransformComponent.class);
                         transform.getOriginNode().attachChild(
-                                GeometryUtil.createArrow(2, Vector3f.UNIT_Z, ColorRGBA.Red, getApplication().getAssetManager())
+                                GeometryUtil.createArrow(2, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
                         );
 
                         transform.getVisualNode().attachChild(
-                                GeometryUtil.createArrow(4, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
+                                GeometryUtil.createArrow(4, Vector3f.UNIT_Z, ColorRGBA.Magenta, getApplication().getAssetManager())
                         );
+
+                        var humanModelComponent = entityStore.getComponent(entityWithRequiredComponents, HumanoidModelComponent.class);
+                        if(humanModelComponent != null && event.isGranular()){
+                            humanModelComponent.getRightHandAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
+                            );
+                            humanModelComponent.getRightHandAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_X, ColorRGBA.Red, getApplication().getAssetManager())
+                            );
+                            humanModelComponent.getRightHandAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Y, ColorRGBA.Green, getApplication().getAssetManager())
+                            );
+
+
+                            humanModelComponent.getLeftHandAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
+                            );
+                            humanModelComponent.getLeftHandAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_X, ColorRGBA.Red, getApplication().getAssetManager())
+                            );
+                            humanModelComponent.getLeftHandAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Y, ColorRGBA.Green, getApplication().getAssetManager())
+                            );
+
+
+                            humanModelComponent.getHeadAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
+                            );
+                            humanModelComponent.getHeadAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_X, ColorRGBA.Red, getApplication().getAssetManager())
+                            );
+                            humanModelComponent.getHeadAttachmentNode().attachChild(
+                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Y, ColorRGBA.Green, getApplication().getAssetManager())
+                            );
+                        }
                     }
                 }, TransformComponent.class);
             }
@@ -106,7 +140,7 @@ public class GameState extends BaseAppState {
 
         attackSystem = new AttackSystem(entityStore);
         equipSystem = new EquipSystem(gameEventBus,entityStore);
-        visualEquipSystem = new VisualEquipSystem(entityStore);
+        thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -156,13 +190,24 @@ public class GameState extends BaseAppState {
         al.setColor(ColorRGBA.White.mult(0.5f));
         universeNode.addLight(al);
 
-        var weaponEntity = entityStore.create(
+        var weaponEntity1 = entityStore.create(
                 new WeaponComponent(10f,0.5f, 0),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
+                        .handSlot(HandSlot.HAND_LEFT)
                         .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
                         .build()
         );
+
+        var weaponEntity2 = entityStore.create(
+                new WeaponComponent(10f,0.5f, 0),
+                EquippableComponent.builder()
+                        .handSlot(HandSlot.HAND_RIGHT)
+                        .handSlot(HandSlot.HAND_LEFT)
+                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+                        .build()
+        );
+
 
 
 
@@ -195,7 +240,9 @@ public class GameState extends BaseAppState {
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
         subscribeSystems();
-        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity, HandSlot.HAND_RIGHT),null);
+        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT),null);
+        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity2, HandSlot.HAND_LEFT),null);
+
     }
 
     @Override
@@ -258,7 +305,7 @@ public class GameState extends BaseAppState {
     private void subscribeSystems(){
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
-        visualEquipSystem.subscribe(gameEventBus);
+        thirdPersonVisualEquipSystem.subscribe(gameEventBus);
         intentSystem.subscribe(gameEventBus);
     }
 
@@ -267,7 +314,7 @@ public class GameState extends BaseAppState {
         getApplication().getInputManager().removeListener(playerRotationControlSystem);
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
-        visualEquipSystem.unsubscribe(gameEventBus);
+        thirdPersonVisualEquipSystem.unsubscribe(gameEventBus);
         intentSystem.unsubscribe(gameEventBus);
     }
 

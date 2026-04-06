@@ -19,4 +19,8 @@ public class HumanoidModelComponent implements Component {
     public Node getLeftHandAttachmentNode(){
         return skinningControl.getAttachmentsNode("HandL");
     }
+
+    public Node getHeadAttachmentNode(){
+        return skinningControl.getAttachmentsNode("Head");
+    }
 }
