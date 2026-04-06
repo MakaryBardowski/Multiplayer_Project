@@ -4,12 +4,14 @@ package com.mccurry.game.console;
 import com.jme3.app.Application;
 import com.jme3.input.controls.ActionListener;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
+import lombok.Getter;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.MAPPING_KEY_TILDE;
 
 public class CheatConsoleLauncher implements ActionListener {
     private final Application application;
 
+    @Getter
     private final CheatConsoleState cheatConsoleState;
 
     public CheatConsoleLauncher(Application application){

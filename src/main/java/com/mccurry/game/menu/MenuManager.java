@@ -5,7 +5,7 @@ import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.console.event.ConsoleRequestUiStateEvent;
-import com.mccurry.game.console.event.MainThreadConsoleStateResponseEvent;
+import com.mccurry.game.console.event.MainThreadConsoleCallbackEvent;
 import com.mccurry.game.menu.gamemodeSelector.GamemodeSelectorState;
 import com.mccurry.game.menu.lobby.singlePlayer.SinglePlayerLobbyState;
 import com.mccurry.game.menu.main.MainMenuState;
@@ -82,8 +82,8 @@ public class MenuManager implements EventSubscriber {
 
 
                     orchestrationBus.publish(
-                            MainThreadConsoleStateResponseEvent.builder()
-                                    .uiState(uiStateBuilder.toString())
+                            MainThreadConsoleCallbackEvent.builder()
+                                    .message(uiStateBuilder.toString())
                                     .build(),
                             null
                     );

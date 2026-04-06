@@ -27,10 +27,13 @@ public class DebugCommand extends ConsoleCommand {
     }
 
     @Override
-    public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
+    public @Nullable String run(EventBus orchestrationBus,@Nullable EventBus gameEventBus,  Object[] executionArgs) {
         if(DebugType.ROTATION.equals(executionArgs[0])){
-            orchestrationBus.publish(new ToggleRotationDebugEvent(), null);
-            return "Toggled rotation debug";
+            if(gameEventBus != null) {
+                gameEventBus.publish(new ToggleRotationDebugEvent(), null);
+                return "Toggled rotation debug";
+            }
+            return "Cannot run command. Not currently in game.";
         }
         return "Congratulations, this should not happen!";
     }

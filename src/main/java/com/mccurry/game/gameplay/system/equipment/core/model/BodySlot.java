@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplay.system.equipment.model;
+package com.mccurry.game.gameplay.system.equipment.core.model;
 
 public enum BodySlot {
     HEAD,

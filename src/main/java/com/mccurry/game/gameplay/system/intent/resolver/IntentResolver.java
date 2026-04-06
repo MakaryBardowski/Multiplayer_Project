@@ -1,9 +1,6 @@
 package com.mccurry.game.gameplay.system.intent.resolver;
 
-import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.attack.AttackSystem;
-import com.mccurry.game.gameplay.system.equipment.EquipSystem;
 import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
 import com.mccurry.game.gameplay.system.intent.resolver.processor.HandEquipActionProcessor;

@@ -28,7 +28,7 @@ public class ChangeLocaleCommand extends ConsoleCommand{
     }
 
     @Override
-    public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
+    public @Nullable String run(EventBus orchestrationBus, @Nullable EventBus gameEventBus,  Object[] executionArgs) {
         var newLocale = GameLocale.valueOf(executionArgs[0].toString());
         orchestrationBus.publish(
                 MainThreadLocaleChangedEvent.builder()

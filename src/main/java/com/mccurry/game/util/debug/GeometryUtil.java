@@ -6,7 +6,9 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
+import com.jme3.scene.Node;
 import com.jme3.scene.debug.Arrow;
+import com.jme3.scene.shape.Box;
 
 public class GeometryUtil {
     private static Geometry createGeometry(Mesh shape, ColorRGBA color, AssetManager a) {
@@ -22,5 +24,17 @@ public class GeometryUtil {
     public static Geometry createArrow(float arrowLength, Vector3f direction, ColorRGBA colorRGBA, AssetManager assetManager) {
         var arrow = new Arrow(direction.normalize().mult(arrowLength));
         return createGeometry(arrow, colorRGBA, assetManager);
+    }
+
+    public static Node createUnshadedBox(AssetManager assetManager) {
+        Box box2 = new Box(0.2f, 0.2f, 0.2f);
+        Geometry red = new Geometry("Box", box2);
+        Material mat2 = new Material(assetManager,
+                "Common/MatDefs/Misc/Unshaded.j3md");
+        mat2.setColor("Color", ColorRGBA.Red);
+        red.setMaterial(mat2);
+        Node n = new Node();
+        n.attachChild(red);
+        return n;
     }
 }

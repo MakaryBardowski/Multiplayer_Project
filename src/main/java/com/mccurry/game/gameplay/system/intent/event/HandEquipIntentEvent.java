@@ -1,7 +1,7 @@
 package com.mccurry.game.gameplay.system.intent.event;
 
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
-import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
+import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
 

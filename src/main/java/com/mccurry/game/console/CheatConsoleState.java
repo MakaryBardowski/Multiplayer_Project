@@ -9,7 +9,8 @@ import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.console.event.MainThreadConsoleStateResponseEvent;
+import com.mccurry.game.console.event.MainThreadConsoleCallbackEvent;
+import com.mccurry.game.console.model.GameContext;
 import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.game.util.string.JmeRgbaTagsUtil;
 import com.simsilica.lemur.*;
@@ -18,6 +19,7 @@ import com.simsilica.lemur.component.TextEntryComponent;
 import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import lombok.NonNull;
+import lombok.Setter;
 
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 
@@ -32,7 +34,9 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
     private ConsoleState currentState = ConsoleState.STATIC;
 
     private final EventBus orchestrationBus;
-    private final SyncEventHandler<MainThreadConsoleStateResponseEvent> onUiStateResponse;
+    private final SyncEventHandler<MainThreadConsoleCallbackEvent> onUiStateResponse;
+
+    private GameContext gameContext;
 
     public CheatConsoleState(EventBus orchestrationBus){
         this.orchestrationBus = orchestrationBus;
@@ -55,7 +59,8 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
         consoleInputLine.getActionMap().put(new KeyAction(KeyInput.KEY_RETURN), new KeyActionListener() {
             @Override
             public void keyAction(TextEntryComponent arg0, KeyAction arg1) {
-                var executionResponse = CommandRegistry.execute(orchestrationBus,arg0.getText());
+                var gameEventBus = gameContext == null ? null : gameContext.getGameEventBus();
+                var executionResponse = CommandRegistry.execute(orchestrationBus, gameEventBus ,arg0.getText());
                 appendToLog(executionResponse,consoleLog);
                 consoleInputLine.setText("");
             }
@@ -68,7 +73,7 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
 
         onUiStateResponse = EventHandlers.syncEventHandler(
                 (event, elm)->{
-                    appendToLog(JmeRgbaTagsUtil.greenToWhite(event.getStringState()),consoleLog);
+                    appendToLog(JmeRgbaTagsUtil.greenToWhite(event.getCallbackMessage()),consoleLog);
                 }
         );
     }
@@ -106,22 +111,29 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
         GuiGlobals.getInstance().requestFocus(consoleInputLine);
 
         subscribe(orchestrationBus);
+        if(gameContext != null){
+            subscribe(gameContext.getGameEventBus());
+        }
     }
 
     @Override
     protected void onDisable() {
         unsubscribe(orchestrationBus);
+        if(gameContext != null){
+            unsubscribe(gameContext.getGameEventBus());
+        }
+
         consoleContainer.removeFromParent();
     }
 
     @Override
     public void subscribe(@NonNull EventBus eventBus) {
-        eventBus.subscribe(MainThreadConsoleStateResponseEvent.class, onUiStateResponse);
+        eventBus.subscribe(MainThreadConsoleCallbackEvent.class, onUiStateResponse);
     }
 
     @Override
     public void unsubscribe(@NonNull EventBus eventBus) {
-        eventBus.unsubscribe(MainThreadConsoleStateResponseEvent.class, onUiStateResponse);
+        eventBus.unsubscribe(MainThreadConsoleCallbackEvent.class, onUiStateResponse);
     }
 
     private enum ConsoleState{
@@ -132,5 +144,12 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
     private void appendToLog(String executionResponse, Label consoleLog){
         consoleLog.setText(executionResponse+"\n"+consoleLog.getText());
         System.err.println(executionResponse);
+    }
+
+    public void setGameContext(GameContext gameContext) {
+        this.gameContext = gameContext;
+        if(isEnabled()){
+            subscribe(gameContext.getGameEventBus());
+        }
     }
 }

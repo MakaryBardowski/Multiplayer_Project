@@ -1,9 +1,9 @@
-package com.mccurry.game.gameplay.system.equipment.component;
+package com.mccurry.game.gameplay.system.equipment.core.component;
 
 import com.mccurry.game.gameplay.core.ecs.component.Component;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
-import com.mccurry.game.gameplay.system.equipment.model.BodySlot;
-import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
+import com.mccurry.game.gameplay.system.equipment.core.model.BodySlot;
+import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 
 import java.util.HashMap;
 import java.util.Map;

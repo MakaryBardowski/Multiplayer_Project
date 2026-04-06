@@ -22,7 +22,7 @@ public class ShowUiStateCommand extends ConsoleCommand{
     }
 
     @Override
-    public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
+    public @Nullable String run(EventBus orchestrationBus,@Nullable EventBus gameEventBus, Object[] executionArgs) {
         orchestrationBus.publish(new ConsoleRequestUiStateEvent(), null);
         return null;
     }

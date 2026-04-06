@@ -28,7 +28,7 @@ public abstract class ConsoleCommand {
      * @param executionArgs execution args passed from parseExecutionArgs
      * @return statement printed to console. If null, default will be printed.
      */
-    public abstract @Nullable String run(EventBus orchestrationBus, Object[] executionArgs);
+    public abstract @Nullable String run(EventBus orchestrationBus, @Nullable EventBus gameEventBus, Object[] executionArgs);
 
     @Override
     public int hashCode() {

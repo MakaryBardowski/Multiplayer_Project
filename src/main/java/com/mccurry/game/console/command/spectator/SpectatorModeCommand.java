@@ -24,8 +24,11 @@ public class SpectatorModeCommand extends ConsoleCommand {
     }
 
     @Override
-    public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
-        orchestrationBus.publish(new ToggleSpectatorModeEvent(), null);
-        return "Spectator mode toggled.";
+    public @Nullable String run(EventBus orchestrationBus, @Nullable EventBus gameEventBus, Object[] executionArgs) {
+        if(gameEventBus != null){
+            gameEventBus.publish(new ToggleSpectatorModeEvent(), null);
+            return "Spectator mode toggled.";
+        }
+        return "Cannot run command. Not currently in game.";
     }
 }

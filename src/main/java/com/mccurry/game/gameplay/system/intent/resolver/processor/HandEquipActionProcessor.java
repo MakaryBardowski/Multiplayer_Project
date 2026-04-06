@@ -1,7 +1,7 @@
 package com.mccurry.game.gameplay.system.intent.resolver.processor;
 
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.equipment.EquipSystem;
+import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
 import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
 
 public class HandEquipActionProcessor extends IntentProcessor<HandEquipIntentEvent> {

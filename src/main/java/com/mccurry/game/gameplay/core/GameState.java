@@ -15,20 +15,22 @@ import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.console.command.spectator.ToggleSpectatorModeEventHandler;
 import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
+import com.mccurry.game.console.model.GameContext;
 import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
-import com.mccurry.game.gameplay.system.equipment.EquipSystem;
-import com.mccurry.game.gameplay.system.equipment.VisualEquipSystem;
-import com.mccurry.game.gameplay.system.equipment.component.EquipmentComponent;
-import com.mccurry.game.gameplay.system.equipment.component.EquippableComponent;
-import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
+import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.VisualEquipSystem;
+import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
+import com.mccurry.game.gameplay.system.equipment.core.component.EquippableComponent;
+import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
 import com.mccurry.game.gameplay.system.intent.system.IntentSystem;
+import com.mccurry.game.gameplay.system.modelhierarchy.component.HumanoidModelComponent;
 import com.mccurry.game.gameplay.system.movement.MovementEntitySystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.CameraEntitySystem;
@@ -40,6 +42,7 @@ import com.mccurry.game.gameplay.system.player.component.control.PlayerControlle
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
+import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.util.debug.GeometryUtil;
 import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
@@ -51,6 +54,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
+import static com.mccurry.game.util.debug.GeometryUtil.createUnshadedBox;
 
 public class GameState extends BaseAppState {
     private double gameTimeInSeconds = 0;
@@ -91,6 +95,13 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
+
+        var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
+        if(consoleLauncher != null){
+            consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
+        }
+
+        var assetManager = getApplication().getAssetManager();
         entitySystems.add(new MovementEntitySystem(entityStore));
         entitySystems.add(new CameraEntitySystem(entityStore,app.getCamera()));
 
@@ -101,7 +112,7 @@ public class GameState extends BaseAppState {
 
         attackSystem = new AttackSystem(entityStore);
         equipSystem = new EquipSystem(gameEventBus,entityStore);
-        visualEquipSystem = new VisualEquipSystem();
+        visualEquipSystem = new VisualEquipSystem(entityStore);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -151,37 +162,22 @@ public class GameState extends BaseAppState {
         al.setColor(ColorRGBA.White.mult(0.5f));
         universeNode.addLight(al);
 
-
-        for (int i = 0; i < 1; i++) {
-            var node = (Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
-            setupModelLight(node);
-
-
-            var transformComponent = new TransformComponent();
-            transformComponent.getVisualNode().attachChild(node);
-            ((SimpleApplication) getApplication()).getRootNode().attachChild(transformComponent.getOriginNode());
-            transformComponent.getOriginNode().move(0,3,0);
-
-
-            var velocityComponent = new VelocityComponent();
-            entityStore.create(transformComponent, velocityComponent);
-        }
-
-
         var weaponEntity = entityStore.create(
                 new WeaponComponent(10f,0.5f, 0),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
+                        .displayNode(createUnshadedBox(assetManager))
                         .build()
         );
 
 
 
-        var node = (Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
-        setupModelLight(node);
+        var humanoidRootNode = (Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
+        setupModelLight(humanoidRootNode);
 
         var transformComponent = new TransformComponent();
-        transformComponent.getVisualNode().attachChild(node);
+        var humanoidModelComponent = new HumanoidModelComponent(humanoidRootNode);
+        transformComponent.getVisualNode().attachChild(humanoidRootNode);
         ((SimpleApplication) getApplication()).getRootNode().attachChild(transformComponent.getOriginNode());
         transformComponent.getOriginNode().move(0,3,0);
         var velocityComponent = new VelocityComponent();
@@ -192,6 +188,7 @@ public class GameState extends BaseAppState {
 
         var player = entityStore.create(
                 transformComponent,
+                humanoidModelComponent, // required for visual equipping
                 velocityComponent, // can move
                 playerControlled, // player controlled
                 cameraHolder,  // camera is glued to this player

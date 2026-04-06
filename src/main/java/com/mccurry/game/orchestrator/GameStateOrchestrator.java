@@ -21,6 +21,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
@@ -32,6 +33,9 @@ public class GameStateOrchestrator extends BaseAppState {
     private final UserSettingsService userSettingsService;
 
     private final KeyMappingService keyMappingService;
+
+    @Nullable
+    private CheatConsoleLauncher cheatConsoleLauncher;
 
     @Override
     protected void initialize(Application application) {
@@ -62,8 +66,8 @@ public class GameStateOrchestrator extends BaseAppState {
     }
 
     private void registerConsoleLauncher(){
-       var launcher =  new CheatConsoleLauncher(getApplication());
-       launcher.startListening();
+       cheatConsoleLauncher =  new CheatConsoleLauncher(getApplication());
+       cheatConsoleLauncher.startListening();
     }
 
     private EventSubscriber closeInitialBootStateSubscriber(InitialBootState initialBootState) {

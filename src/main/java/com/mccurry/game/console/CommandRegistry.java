@@ -36,7 +36,7 @@ public class CommandRegistry {
             }
 
             @Override
-            public @Nullable String run(EventBus orchestrationBus, Object[] executionArgs) {
+            public @Nullable String run(EventBus orchestrationBus, @Nullable EventBus gameEventBus,  Object[] executionArgs) {
                 var sb = new StringBuilder();
                 sb.append("Available commands:");
                 AVAILABLE_COMMANDS.entrySet().forEach(commandEntry -> {
@@ -60,7 +60,7 @@ public class CommandRegistry {
         put(debugCommand.commandName(), debugCommand);
     }};
 
-    public static String execute(EventBus orchestrationBus, String consoleInput){
+    public static String execute(EventBus orchestrationBus, @Nullable EventBus gameEventBus,  String consoleInput){
         if(!consoleInput.startsWith("/")){
             return redToWhite("Invalid command. Commands must start with \"/\"");
         }
@@ -82,7 +82,7 @@ public class CommandRegistry {
         }
 
         try{
-            var execOutput = executableCommand.run(orchestrationBus,commandArgs);
+            var execOutput = executableCommand.run(orchestrationBus,gameEventBus,commandArgs);
             return greenToWhite(execOutput == null ? "Command executed successfully" : execOutput);
         } catch (Exception e){
             return redToWhite("Exception during command execution: "+e.getMessage());

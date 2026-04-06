@@ -1,13 +1,13 @@
-package com.mccurry.game.gameplay.system.equipment;
+package com.mccurry.game.gameplay.system.equipment.core;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.equipment.component.EquipmentComponent;
-import com.mccurry.game.gameplay.system.equipment.component.EquippableComponent;
-import com.mccurry.game.gameplay.system.equipment.event.HandEquippedEvent;
-import com.mccurry.game.gameplay.system.equipment.model.BodySlot;
-import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
+import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
+import com.mccurry.game.gameplay.system.equipment.core.component.EquippableComponent;
+import com.mccurry.game.gameplay.system.equipment.core.event.HandEquippedEvent;
+import com.mccurry.game.gameplay.system.equipment.core.model.BodySlot;
+import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import lombok.RequiredArgsConstructor;
 
 /**
