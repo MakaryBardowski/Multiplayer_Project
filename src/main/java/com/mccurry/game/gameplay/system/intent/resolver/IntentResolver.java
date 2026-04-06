@@ -1,10 +1,12 @@
 package com.mccurry.game.gameplay.system.intent.resolver;
 
 import com.mccurry.events.core.EventBus;
-import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
-import com.mccurry.game.gameplay.system.intent.model.Intent;
+import com.mccurry.game.gameplay.system.equipment.EquipSystem;
+import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
+import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
+import com.mccurry.game.gameplay.system.intent.resolver.processor.HandEquipActionProcessor;
 import com.mccurry.game.gameplay.system.intent.resolver.processor.IntentProcessor;
 import com.mccurry.game.gameplay.system.intent.resolver.processor.PrimaryActionProcessor;
 
@@ -14,20 +16,20 @@ import java.util.Map;
 
 public class IntentResolver {
 
-    private final Map<Intent, IntentProcessor> processorByIntentMap = new HashMap<>();
+    private final Map<Class<? extends IntentEvent>, IntentProcessor> processorByIntentClassMap = new HashMap<>();
 
-    public IntentResolver(EventBus eventBus, EntityStore entityStore){
-        var attackSystem = new AttackSystem(entityStore);
-
-        var primaryActionProcessor = new PrimaryActionProcessor(eventBus,entityStore, attackSystem);
-        processorByIntentMap.put(primaryActionProcessor.getHandledIntent(), primaryActionProcessor);
+    public IntentResolver(IntentSystems intentSystems, EntityStore entityStore){
+        var primaryActionProcessor = new PrimaryActionProcessor(entityStore, intentSystems.getAttackSystem());
+        var handEquipActionProcessor = new HandEquipActionProcessor(entityStore, intentSystems.getEquipSystem());
+        processorByIntentClassMap.put(primaryActionProcessor.getHandledIntentEvent(), primaryActionProcessor);
+        processorByIntentClassMap.put(handEquipActionProcessor.getHandledIntentEvent(), handEquipActionProcessor);
     }
 
-    public void resolve(Intent entityIntent, Entity targetEntity, double gameTimeSeconds){
-        var processor = processorByIntentMap.get(entityIntent);
+    public void resolve(IntentEvent intentEvent, double gameTimeSeconds){
+        var processor = processorByIntentClassMap.get(intentEvent.getClass());
         if(processor == null){
             return;
         }
-        processor.processIntent(targetEntity, gameTimeSeconds);
+        processor.processIntent(intentEvent, gameTimeSeconds);
     }
 }

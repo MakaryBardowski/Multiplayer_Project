@@ -1,16 +1,21 @@
 package com.mccurry.game.gameplay.system.intent.resolver.processor;
 
 import com.mccurry.events.core.EventBus;
-import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.intent.model.Intent;
-import lombok.RequiredArgsConstructor;
+import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
 
-@RequiredArgsConstructor
-public abstract class IntentProcessor {
-    protected final EventBus eventBus;
+public abstract class IntentProcessor<T extends IntentEvent> {
     protected final EntityStore entityStore;
+    private final Class<T> processedEventType;
 
-    public abstract Intent getHandledIntent();
-    public abstract void processIntent(Entity e, double gameTimeSeconds);
+    public IntentProcessor(EntityStore entityStore, Class<T> intentEventClass){
+        this.entityStore = entityStore;
+        this.processedEventType = intentEventClass;
+    }
+
+    public abstract Class<T> getHandledIntentEvent();
+    protected abstract void processIntentEvent(T intentEvent , double gameTimeSeconds);
+    public void processIntent(IntentEvent intentEvent , double gameTimeSeconds){
+        processIntentEvent(processedEventType.cast(intentEvent), gameTimeSeconds);
+    }
 }

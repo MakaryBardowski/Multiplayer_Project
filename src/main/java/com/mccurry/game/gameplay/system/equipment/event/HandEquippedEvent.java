@@ -2,12 +2,14 @@ package com.mccurry.game.gameplay.system.equipment.event;
 
 import com.mccurry.events.core.Event;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
+import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
 @RequiredArgsConstructor
-public class EquipWeaponEvent implements Event {
+public class HandEquippedEvent implements Event {
     private final Entity owner;
-    private final Entity weapon;
+    private final Entity itemInHands;
+    private final HandSlot targetSlot;
 }

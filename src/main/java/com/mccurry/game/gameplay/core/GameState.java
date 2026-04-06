@@ -19,9 +19,15 @@ import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
+import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
+import com.mccurry.game.gameplay.system.equipment.EquipSystem;
+import com.mccurry.game.gameplay.system.equipment.VisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.component.EquipmentComponent;
+import com.mccurry.game.gameplay.system.equipment.component.EquippableComponent;
 import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
+import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
+import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
 import com.mccurry.game.gameplay.system.intent.system.IntentSystem;
 import com.mccurry.game.gameplay.system.movement.MovementEntitySystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
@@ -55,6 +61,10 @@ public class GameState extends BaseAppState {
     private PlayerInputSystem playerInputSystem;
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
+    private VisualEquipSystem visualEquipSystem;
+
+    private AttackSystem attackSystem;
+    private EquipSystem equipSystem;
 
     private final EventBus gameEventBus = new EventBus();
 
@@ -88,7 +98,14 @@ public class GameState extends BaseAppState {
 
         playerInputSystem = new PlayerInputSystem(entityStore,gameEventBus);
         playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
-        intentSystem = new IntentSystem(gameEventBus, entityStore);
+
+        attackSystem = new AttackSystem(entityStore);
+        equipSystem = new EquipSystem(gameEventBus,entityStore);
+        visualEquipSystem = new VisualEquipSystem();
+        intentSystem = new IntentSystem(
+                new IntentSystems(attackSystem, equipSystem),
+                entityStore
+        );
 
 
         getApplication().getInputManager().addListener(playerInputSystem,
@@ -150,16 +167,18 @@ public class GameState extends BaseAppState {
             entityStore.create(transformComponent, velocityComponent);
         }
 
-        var node = (Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
-        setupModelLight(node);
-
-
 
         var weaponEntity = entityStore.create(
-                new WeaponComponent(10f,0.5f, 0)
+                new WeaponComponent(10f,0.5f, 0),
+                EquippableComponent.builder()
+                        .handSlot(HandSlot.HAND_RIGHT)
+                        .build()
         );
 
 
+
+        var node = (Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o");
+        setupModelLight(node);
 
         var transformComponent = new TransformComponent();
         transformComponent.getVisualNode().attachChild(node);
@@ -171,10 +190,7 @@ public class GameState extends BaseAppState {
         var cameraEffects = new CameraEffectsComponent();
         var equipmentComponent = new EquipmentComponent();
 
-
-        equipmentComponent.setWorn(HandSlot.HAND_RIGHT,weaponEntity);
-
-        entityStore.create(
+        var player = entityStore.create(
                 transformComponent,
                 velocityComponent, // can move
                 playerControlled, // player controlled
@@ -185,7 +201,11 @@ public class GameState extends BaseAppState {
 
 
 
+
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
+
+        subscribeSystems();
+        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity, HandSlot.HAND_RIGHT),null);
     }
 
     @Override
@@ -223,20 +243,30 @@ public class GameState extends BaseAppState {
     protected void onEnable() {
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Cyan);
         GuiGlobals.getInstance().setCursorEventsEnabled(false);
-        gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
-        gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
-        intentSystem.subscribe(gameEventBus);
+        subscribeSystems();
     }
 
     @Override
     protected void onDisable() {
         CameraConstants.applyDefaultTransform(getApplication().getCamera());
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
+        GuiGlobals.getInstance().setCursorEventsEnabled(true);
+        unsubscribeSystems();
+    }
+
+    private void subscribeSystems(){
+        gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
+        gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        visualEquipSystem.subscribe(gameEventBus);
+        intentSystem.subscribe(gameEventBus);
+    }
+
+    private void unsubscribeSystems(){
         getApplication().getInputManager().removeListener(playerInputSystem);
         getApplication().getInputManager().removeListener(playerRotationControlSystem);
-        GuiGlobals.getInstance().setCursorEventsEnabled(true);
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        visualEquipSystem.unsubscribe(gameEventBus);
         intentSystem.unsubscribe(gameEventBus);
     }
 

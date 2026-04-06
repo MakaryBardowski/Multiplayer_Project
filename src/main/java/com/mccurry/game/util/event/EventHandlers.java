@@ -21,4 +21,15 @@ public class EventHandlers {
             }
         };
     }
+
+    public static <EVENT extends Event> SyncEventHandler<EVENT> synchronizedSyncEventHandler(
+            BiConsumer<EVENT, EventLifecycleManager<EVENT>> consumer
+    ){
+        return new SyncEventHandler<EVENT>() {
+            @Override
+            public synchronized void handle(@NonNull EVENT event, @Nullable EventLifecycleManager<EVENT> lifecycleManager) {
+                consumer.accept(event,lifecycleManager);
+            }
+        };
+    }
 }

@@ -4,9 +4,11 @@ import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.AnalogListener;
 import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
+import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
-import com.mccurry.game.gameplay.system.intent.model.Intent;
+import com.mccurry.game.gameplay.system.equipment.model.HandSlot;
+import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
+import com.mccurry.game.gameplay.system.intent.event.PrimaryActionIntentEvent;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
@@ -17,7 +19,7 @@ import java.util.Set;
 
 public class PlayerInputSystem implements ActionListener, AnalogListener {
     private final EntityStore entityStore;
-    private final EventBus orchestrationBus;
+    private final EventBus gameEventBus;
 
     private final Set<String> activeInputs = new HashSet<>();
 
@@ -25,9 +27,9 @@ public class PlayerInputSystem implements ActionListener, AnalogListener {
     private final Vector3f temp2 = new Vector3f();
     private final Vector3f temp3 = new Vector3f();
 
-    public PlayerInputSystem(EntityStore entityStore, EventBus orchestrationBus) {
+    public PlayerInputSystem(EntityStore entityStore, EventBus gameEventBus) {
         this.entityStore = entityStore;
-        this.orchestrationBus = orchestrationBus;
+        this.gameEventBus = gameEventBus;
     }
 
 
@@ -98,8 +100,9 @@ public class PlayerInputSystem implements ActionListener, AnalogListener {
             if (playerControlledEntity == null) {
                 return;
             }
-            orchestrationBus.publish(
-                    new IntentEvent(Intent.PRIMARY_ACTION, playerControlledEntity),
+
+            gameEventBus.publish(
+                    new PrimaryActionIntentEvent(playerControlledEntity),
                     null
             );
         }
