@@ -20,6 +20,8 @@ import com.simsilica.lemur.event.KeyAction;
 import com.simsilica.lemur.event.KeyActionListener;
 import lombok.NonNull;
 import lombok.Setter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.mccurry.game.shared.ui.util.ContainerUtil.noBackgroundContainer;
 
@@ -146,8 +148,12 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
         System.err.println(executionResponse);
     }
 
-    public void setGameContext(GameContext gameContext) {
+    public void setGameContext(@Nullable GameContext gameContext) {
         this.gameContext = gameContext;
+        if(gameContext == null){
+            return;
+        }
+
         if(isEnabled()){
             subscribe(gameContext.getGameEventBus());
         }

@@ -95,12 +95,6 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-
-        var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
-        if(consoleLauncher != null){
-            consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
-        }
-
         var assetManager = getApplication().getAssetManager();
         entitySystems.add(new MovementEntitySystem(entityStore));
         entitySystems.add(new CameraEntitySystem(entityStore,app.getCamera()));
@@ -238,6 +232,11 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void onEnable() {
+        var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
+        if(consoleLauncher != null){
+            consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
+        }
+
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Cyan);
         GuiGlobals.getInstance().setCursorEventsEnabled(false);
         subscribeSystems();
@@ -245,6 +244,12 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void onDisable() {
+        var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
+        if(consoleLauncher != null){
+            consoleLauncher.getCheatConsoleState().setGameContext(null);
+        }
+
+
         CameraConstants.applyDefaultTransform(getApplication().getCamera());
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
