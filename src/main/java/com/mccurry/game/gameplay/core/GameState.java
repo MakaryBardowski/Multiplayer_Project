@@ -23,6 +23,7 @@ import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.FirstPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.ThirdPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquippableComponent;
@@ -65,6 +66,7 @@ public class GameState extends BaseAppState {
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
+    private FirstPersonVisualEquipSystem firstPersonVisualEquipSystem;
 
     private AttackSystem attackSystem;
     private EquipSystem equipSystem;
@@ -141,6 +143,7 @@ public class GameState extends BaseAppState {
         attackSystem = new AttackSystem(entityStore);
         equipSystem = new EquipSystem(gameEventBus,entityStore);
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
+        firstPersonVisualEquipSystem = new FirstPersonVisualEquipSystem(entityStore, GeometryUtil.createUnshadedBox(assetManager));
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -306,6 +309,7 @@ public class GameState extends BaseAppState {
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
         thirdPersonVisualEquipSystem.subscribe(gameEventBus);
+        firstPersonVisualEquipSystem.subscribe(gameEventBus);
         intentSystem.subscribe(gameEventBus);
     }
 
@@ -315,6 +319,7 @@ public class GameState extends BaseAppState {
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
         thirdPersonVisualEquipSystem.unsubscribe(gameEventBus);
+        firstPersonVisualEquipSystem.unsubscribe(gameEventBus);
         intentSystem.unsubscribe(gameEventBus);
     }
 
