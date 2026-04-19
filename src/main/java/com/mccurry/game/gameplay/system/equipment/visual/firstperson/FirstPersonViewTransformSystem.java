@@ -9,11 +9,11 @@ import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.F
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
-public class FirstPersonViewTransformReplicationSystem extends EntitySystem {
+public class FirstPersonViewTransformSystem extends EntitySystem {
 
     private final Node firstPersonViewParentNode;
 
-    public FirstPersonViewTransformReplicationSystem(Node firstPersonViewParentNode, EntityStore entityStore, Class<? extends Component>... requiredComponents) {
+    public FirstPersonViewTransformSystem(Node firstPersonViewParentNode, EntityStore entityStore, Class<? extends Component>... requiredComponents) {
         super(entityStore, requiredComponents);
         this.firstPersonViewParentNode = firstPersonViewParentNode;
     }
@@ -39,7 +39,6 @@ public class FirstPersonViewTransformReplicationSystem extends EntitySystem {
         if(cameraHolderComponent == null){
             return;
         }
-
 
 
         firstPersonViewParentNode.setLocalTranslation(

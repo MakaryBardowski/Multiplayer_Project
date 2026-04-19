@@ -7,6 +7,7 @@ import com.jme3.app.state.BaseAppState;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
@@ -26,7 +27,7 @@ import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
-import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewTransformReplicationSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewTransformSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.ThirdPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
@@ -73,7 +74,7 @@ public class GameState extends BaseAppState {
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
     private FirstPersonVisualEquipSystem firstPersonVisualEquipSystem;
-    private FirstPersonViewTransformReplicationSystem firstPersonViewTransformReplicationSystem;
+    private FirstPersonViewTransformSystem firstPersonViewTransformSystem;
 
     private AttackSystem attackSystem;
     private EquipSystem equipSystem;
@@ -139,6 +140,7 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
+        var firstPersonRootNode = new Node();
         var universeNode = new Node();
         var assetManager = getApplication().getAssetManager();
         var renderManager = getApplication().getRenderManager();
@@ -158,16 +160,17 @@ public class GameState extends BaseAppState {
         var fpHands = setupModelLight((Node) assetManager.loadModel("Models/Hands_fp/Hands_fp.j3o"));
         fpHands.setLocalScale(0.4f);
 
-        fpHands.move(0,-0.2f,0.3f);
+        fpHands.move(-0.2f,-0.5f,0.7f);
+        fpHands.rotate(-FastMath.DEG_TO_RAD*6, FastMath.DEG_TO_RAD*4,0);
         fpHands.getChild("Armature").getControl(AnimComposer.class).setCurrentAction("Hold_SMG_1");
 
         fpCameraNode.attachChild(fpHands);
 
         // if a node that we want to add to a viewport is not attached to root node, it crashes :) gotta love jme
-        universeNode.attachChild(fpCameraNode);
+        firstPersonRootNode.attachChild(fpCameraNode);
         fpViewport.attachScene(fpCameraNode);
 
-        fpCameraNode.attachChild(createViewingFrustum(fpCameraNode.getCamera(), assetManager));
+//        fpCameraNode.attachChild(createViewingFrustum(fpCameraNode.getCamera(), assetManager));
 
 
 
@@ -180,7 +183,7 @@ public class GameState extends BaseAppState {
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
         firstPersonVisualEquipSystem = new FirstPersonVisualEquipSystem(entityStore);
-        firstPersonViewTransformReplicationSystem = new FirstPersonViewTransformReplicationSystem(fpCameraNode,entityStore, FirstPersonViewSourceComponent.class);
+        firstPersonViewTransformSystem = new FirstPersonViewTransformSystem(fpCameraNode,entityStore, FirstPersonViewSourceComponent.class);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -218,16 +221,25 @@ public class GameState extends BaseAppState {
         m.setBlockIdAtPosition(1, 0, 1, BlockType.STONE.blockId);
         m.setBlockIdAtPosition(0, 0, 1, BlockType.STONE.blockId);
         m.setBlockIdAtPosition(1, 0, 0, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(11, 1, 11, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(12, 1, 11, BlockType.STONE.blockId);
 
         var b = new BlockWorld(3, 16, mapX, mapY, mapZ, m, app.getAssetManager(), blockWorldNode);
 
 
         universeNode.attachChild(blockWorldNode);
-        ((SimpleApplication) getApplication()).getRootNode().attachChild(universeNode);
+        var rootNode = ((SimpleApplication)getApplication()).getRootNode();
+        rootNode.attachChild(universeNode);
+        rootNode.attachChild(firstPersonRootNode);
+
+        // todo: to rozpierdala stan gry po wyjsciu, trzeba w onDisable() przywracac rootNode
+        getApplication().getRenderManager().getMainView("Default").detachScene(rootNode);
+        getApplication().getRenderManager().getMainView("Default").attachScene(universeNode);
 
         AmbientLight al = new AmbientLight();
         al.setColor(ColorRGBA.White.mult(0.5f));
         universeNode.addLight(al);
+        firstPersonRootNode.addLight(al);
 
         var weaponEntity1 = entityStore.create(
                 new WeaponComponent(10f, 0.5f, 0),
@@ -278,7 +290,7 @@ public class GameState extends BaseAppState {
 
 
         entitySystems.add(new MovementEntitySystem(entityStore));
-        entitySystems.add(firstPersonViewTransformReplicationSystem); // must be after movement so theres no 1 frame delay between hands and position of holder
+        entitySystems.add(firstPersonViewTransformSystem); // must be after movement so theres no 1 frame delay between hands and position of holder
 
         // todo: clonowac camere + cleanup po wylaczeniu gry
         entitySystems.add(new CameraSystem(entityStore, app.getCamera()));
