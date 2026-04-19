@@ -1,5 +1,6 @@
 package com.mccurry.game.gameplay.core;
 
+import com.jme3.anim.AnimComposer;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -7,6 +8,8 @@ import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.ViewPort;
+import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
@@ -23,18 +26,20 @@ import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
-import com.mccurry.game.gameplay.system.equipment.visual.FirstPersonVisualEquipSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewTransformReplicationSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.ThirdPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquippableComponent;
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewSourceComponent;
 import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
 import com.mccurry.game.gameplay.system.intent.system.IntentSystem;
 import com.mccurry.game.gameplay.system.modelhierarchy.component.HumanoidModelComponent;
 import com.mccurry.game.gameplay.system.movement.MovementEntitySystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
-import com.mccurry.game.gameplay.system.player.CameraEntitySystem;
+import com.mccurry.game.gameplay.system.player.CameraSystem;
 import com.mccurry.game.gameplay.system.player.PlayerInputSystem;
 import com.mccurry.game.gameplay.system.player.PlayerRotationControlSystem;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
@@ -55,6 +60,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
+import static com.mccurry.game.util.debug.GeometryUtil.createViewingFrustum;
 
 public class GameState extends BaseAppState {
     private double gameTimeInSeconds = 0;
@@ -67,6 +73,7 @@ public class GameState extends BaseAppState {
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
     private FirstPersonVisualEquipSystem firstPersonVisualEquipSystem;
+    private FirstPersonViewTransformReplicationSystem firstPersonViewTransformReplicationSystem;
 
     private AttackSystem attackSystem;
     private EquipSystem equipSystem;
@@ -74,9 +81,10 @@ public class GameState extends BaseAppState {
     private final EventBus gameEventBus = new EventBus();
 
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
+    private ViewPort fpViewport;
     private SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable = EventHandlers.syncEventHandler(
             (event, elm) -> {
-                entityStore.forEachEntityWithComponents(0, gameTimeInSeconds,new EntityCallback() {
+                entityStore.forEachEntityWithComponents(0, gameTimeInSeconds, new EntityCallback() {
                     @Override
                     public void execute(Entity entityWithRequiredComponents, float tpf, double currentGameTimeInSeconds) {
 
@@ -90,7 +98,7 @@ public class GameState extends BaseAppState {
                         );
 
                         var humanModelComponent = entityStore.getComponent(entityWithRequiredComponents, HumanoidModelComponent.class);
-                        if(humanModelComponent != null && event.isGranular()){
+                        if (humanModelComponent != null && event.isGranular()) {
                             humanModelComponent.getRightHandAttachmentNode().attachChild(
                                     GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
                             );
@@ -131,19 +139,48 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
+        var universeNode = new Node();
         var assetManager = getApplication().getAssetManager();
-        entitySystems.add(new MovementEntitySystem(entityStore));
-        entitySystems.add(new CameraEntitySystem(entityStore,app.getCamera()));
+        var renderManager = getApplication().getRenderManager();
+        var camera = getApplication().getCamera();
+
+
+        var fpCamera = camera.clone();
+        fpCamera.setFrustumPerspective(45f, (float) fpCamera.getWidth() / fpCamera.getHeight(), 0.01f, 300f);
+
+        // todo: cleanup this viewport
+        fpViewport = renderManager.createMainView("View of firstPersonCamera", fpCamera);
+        fpViewport.setClearFlags(false, true, true);
+
+        var fpCameraNode = new CameraNode("First Person Camera Node", fpCamera);
+        fpCameraNode.setCullHint(Spatial.CullHint.Never);
+
+        var fpHands = setupModelLight((Node) assetManager.loadModel("Models/Hands_fp/Hands_fp.j3o"));
+        fpHands.setLocalScale(0.4f);
+
+        fpHands.move(0,-0.2f,0.3f);
+        fpHands.getChild("Armature").getControl(AnimComposer.class).setCurrentAction("Hold_SMG_1");
+
+        fpCameraNode.attachChild(fpHands);
+
+        // if a node that we want to add to a viewport is not attached to root node, it crashes :) gotta love jme
+        universeNode.attachChild(fpCameraNode);
+        fpViewport.attachScene(fpCameraNode);
+
+        fpCameraNode.attachChild(createViewingFrustum(fpCameraNode.getCamera(), assetManager));
 
 
 
-        playerInputSystem = new PlayerInputSystem(entityStore,gameEventBus);
+
+        playerInputSystem = new PlayerInputSystem(entityStore, gameEventBus);
         playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
 
         attackSystem = new AttackSystem(entityStore);
-        equipSystem = new EquipSystem(gameEventBus,entityStore);
+        equipSystem = new EquipSystem(gameEventBus, entityStore);
+
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
-        firstPersonVisualEquipSystem = new FirstPersonVisualEquipSystem(entityStore, GeometryUtil.createUnshadedBox(assetManager));
+        firstPersonVisualEquipSystem = new FirstPersonVisualEquipSystem(entityStore);
+        firstPersonViewTransformReplicationSystem = new FirstPersonViewTransformReplicationSystem(fpCameraNode,entityStore, FirstPersonViewSourceComponent.class);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -165,7 +202,7 @@ public class GameState extends BaseAppState {
                 MAPPING_MOUSE_MOVE_Y_UP
         );
 
-        var universeNode = new Node();
+
         var blockWorldNode = new Node();
         int mapX = 40;
         int mapY = 10;
@@ -178,12 +215,11 @@ public class GameState extends BaseAppState {
                 m.setBlockIdAtPosition(x, 0, z, BlockType.DIRT.blockId);
             }
         }
-        m.setBlockIdAtPosition(1,0,1, BlockType.STONE.blockId);
-        m.setBlockIdAtPosition(0,0,1, BlockType.STONE.blockId);
-        m.setBlockIdAtPosition(1,0,0, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(1, 0, 1, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(0, 0, 1, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(1, 0, 0, BlockType.STONE.blockId);
 
         var b = new BlockWorld(3, 16, mapX, mapY, mapZ, m, app.getAssetManager(), blockWorldNode);
-
 
 
         universeNode.attachChild(blockWorldNode);
@@ -194,7 +230,7 @@ public class GameState extends BaseAppState {
         universeNode.addLight(al);
 
         var weaponEntity1 = entityStore.create(
-                new WeaponComponent(10f,0.5f, 0),
+                new WeaponComponent(10f, 0.5f, 0),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
                         .handSlot(HandSlot.HAND_LEFT)
@@ -203,7 +239,7 @@ public class GameState extends BaseAppState {
         );
 
         var weaponEntity2 = entityStore.create(
-                new WeaponComponent(10f,0.5f, 0),
+                new WeaponComponent(10f, 0.5f, 0),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
                         .handSlot(HandSlot.HAND_LEFT)
@@ -212,20 +248,19 @@ public class GameState extends BaseAppState {
         );
 
 
-
-
         var humanoidRootNode = setupModelLight((Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o"));
 
         var transformComponent = new TransformComponent();
         var humanoidModelComponent = new HumanoidModelComponent(humanoidRootNode);
         transformComponent.getVisualNode().attachChild(humanoidRootNode);
         universeNode.attachChild(transformComponent.getOriginNode());
-        transformComponent.getOriginNode().move(0,3,0);
+        transformComponent.getOriginNode().move(0, 3, 0);
         var velocityComponent = new VelocityComponent();
         var playerControlled = new PlayerControlledComponent();
-        var cameraHolder = new CameraHolderComponent(new Vector3f(0,2.067f,0));
+        var cameraHolder = new CameraHolderComponent(new Vector3f(0, 2.067f, 0));
         var cameraEffects = new CameraEffectsComponent();
         var equipmentComponent = new EquipmentComponent();
+        var firstPersonSource = new FirstPersonViewSourceComponent();
 
         var player = entityStore.create(
                 transformComponent,
@@ -234,25 +269,30 @@ public class GameState extends BaseAppState {
                 playerControlled, // player controlled
                 cameraHolder,  // camera is glued to this player
                 cameraEffects, // can have camera effects
-                equipmentComponent
+                equipmentComponent,
+                firstPersonSource // first person hands follow this entity
         );
-
-
 
 
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
+
+        entitySystems.add(new MovementEntitySystem(entityStore));
+        entitySystems.add(firstPersonViewTransformReplicationSystem); // must be after movement so theres no 1 frame delay between hands and position of holder
+
+        // todo: clonowac camere + cleanup po wylaczeniu gry
+        entitySystems.add(new CameraSystem(entityStore, app.getCamera()));
+
         subscribeSystems();
-        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT),null);
-        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity2, HandSlot.HAND_LEFT),null);
+
+        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
+        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity2, HandSlot.HAND_LEFT), null);
 
     }
 
     @Override
     public void update(float tpf) {
         long t1 = System.nanoTime();
-
-
 
 
         gameTimeInSeconds += tpf;
@@ -262,10 +302,6 @@ public class GameState extends BaseAppState {
         for (var system : entitySystems) {
             system.processEligibleEntities(tpf, gameTimeInSeconds);
         }
-
-
-
-
 
 
         long t2 = System.nanoTime();
@@ -282,7 +318,7 @@ public class GameState extends BaseAppState {
     @Override
     protected void onEnable() {
         var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
-        if(consoleLauncher != null){
+        if (consoleLauncher != null) {
             consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
         }
 
@@ -294,7 +330,7 @@ public class GameState extends BaseAppState {
     @Override
     protected void onDisable() {
         var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
-        if(consoleLauncher != null){
+        if (consoleLauncher != null) {
             consoleLauncher.getCheatConsoleState().setGameContext(null);
         }
 
@@ -303,9 +339,10 @@ public class GameState extends BaseAppState {
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
         unsubscribeSystems();
+        getApplication().getRenderManager().removeMainView(fpViewport);
     }
 
-    private void subscribeSystems(){
+    private void subscribeSystems() {
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
         thirdPersonVisualEquipSystem.subscribe(gameEventBus);
@@ -313,7 +350,7 @@ public class GameState extends BaseAppState {
         intentSystem.subscribe(gameEventBus);
     }
 
-    private void unsubscribeSystems(){
+    private void unsubscribeSystems() {
         getApplication().getInputManager().removeListener(playerInputSystem);
         getApplication().getInputManager().removeListener(playerRotationControlSystem);
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);

@@ -10,10 +10,10 @@ import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsCom
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
-public class CameraEntitySystem extends SingletonEntitySystem {
+public class CameraSystem extends SingletonEntitySystem {
     private final Camera camera;
 
-    public CameraEntitySystem(EntityStore entityStore, Camera camera) {
+    public CameraSystem(EntityStore entityStore, Camera camera) {
         super(entityStore, CameraHolderComponent.class);
         this.camera = camera;
     }
