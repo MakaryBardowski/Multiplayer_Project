@@ -73,7 +73,7 @@ public class PlayerInputSystem implements ActionListener, AnalogListener {
         }
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_S)) {
-            temp.addLocal(temp2.negate().multLocal(10));
+            temp.addLocal(temp2.negate().multLocal(20*0.75f));
         }
 
         if (activeInputs.contains(KeyMappingRegistry.MAPPING_KEY_A)) {

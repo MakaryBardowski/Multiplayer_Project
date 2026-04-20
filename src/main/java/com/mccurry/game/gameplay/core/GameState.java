@@ -27,7 +27,7 @@ import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
-import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewTransformSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewEffectSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.ThirdPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
@@ -61,7 +61,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
-import static com.mccurry.game.util.debug.GeometryUtil.createViewingFrustum;
 
 public class GameState extends BaseAppState {
     private double gameTimeInSeconds = 0;
@@ -74,7 +73,7 @@ public class GameState extends BaseAppState {
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
     private FirstPersonVisualEquipSystem firstPersonVisualEquipSystem;
-    private FirstPersonViewTransformSystem firstPersonViewTransformSystem;
+    private FirstPersonViewEffectSystem firstPersonViewEffectSystem;
 
     private AttackSystem attackSystem;
     private EquipSystem equipSystem;
@@ -183,7 +182,7 @@ public class GameState extends BaseAppState {
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
         firstPersonVisualEquipSystem = new FirstPersonVisualEquipSystem(entityStore);
-        firstPersonViewTransformSystem = new FirstPersonViewTransformSystem(fpCameraNode,entityStore, FirstPersonViewSourceComponent.class);
+        firstPersonViewEffectSystem = new FirstPersonViewEffectSystem(fpCameraNode,entityStore, FirstPersonViewSourceComponent.class);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -218,6 +217,17 @@ public class GameState extends BaseAppState {
                 m.setBlockIdAtPosition(x, 0, z, BlockType.DIRT.blockId);
             }
         }
+        for (int x = 0; x < mapX; x++) {
+            for (int z = 0; z < mapZ; z++) {
+                m.setBlockIdAtPosition(x, 1, z, BlockType.OFFICE_FLOOR.blockId);
+            }
+        }
+        for (int x = 1; x < mapX-1; x++) {
+            for (int z = 1; z < mapZ-1; z++) {
+                m.setBlockIdAtPosition(x, 1, z, BlockType.AIR.blockId);
+            }
+        }
+
         m.setBlockIdAtPosition(1, 0, 1, BlockType.STONE.blockId);
         m.setBlockIdAtPosition(0, 0, 1, BlockType.STONE.blockId);
         m.setBlockIdAtPosition(1, 0, 0, BlockType.STONE.blockId);
@@ -290,7 +300,7 @@ public class GameState extends BaseAppState {
 
 
         entitySystems.add(new MovementEntitySystem(entityStore));
-        entitySystems.add(firstPersonViewTransformSystem); // must be after movement so theres no 1 frame delay between hands and position of holder
+        entitySystems.add(firstPersonViewEffectSystem); // ! must be after movement so theres no 1 frame delay between hands and position of holder
 
         // todo: clonowac camere + cleanup po wylaczeniu gry
         entitySystems.add(new CameraSystem(entityStore, app.getCamera()));

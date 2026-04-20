@@ -9,11 +9,12 @@ import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.F
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
-public class FirstPersonViewTransformSystem extends EntitySystem {
+public class FirstPersonViewEffectSystem extends EntitySystem {
 
     private final Node firstPersonViewParentNode;
+    private float x;
 
-    public FirstPersonViewTransformSystem(Node firstPersonViewParentNode, EntityStore entityStore, Class<? extends Component>... requiredComponents) {
+    public FirstPersonViewEffectSystem(Node firstPersonViewParentNode, EntityStore entityStore, Class<? extends Component>... requiredComponents) {
         super(entityStore, requiredComponents);
         this.firstPersonViewParentNode = firstPersonViewParentNode;
     }
@@ -40,11 +41,18 @@ public class FirstPersonViewTransformSystem extends EntitySystem {
             return;
         }
 
-
+        //todo: move to a separate system once i optimize the ecs
         firstPersonViewParentNode.setLocalTranslation(
                 transform.getOriginNode().getLocalTranslation().add(cameraHolderComponent.getCurrentCameraOffset())
         );
-
         firstPersonViewParentNode.setLocalRotation(cameraHolderComponent.getCurrentCameraRotation());
+
+
+        x+=(1f/60)*2;
+        firstPersonViewParentNode.getChild(0).setLocalTranslation(
+                (float)Math.sin(x)*0.02f,
+                firstPersonViewParentNode.getChild(0).getLocalTranslation().getY()+(float)Math.sin(x)*0.001f,
+                firstPersonViewParentNode.getChild(0).getLocalTranslation().getZ()
+        );
     }
 }
