@@ -27,16 +27,16 @@ public class CameraSystem extends SingletonEntitySystem {
             return;
         }
 
-        var currentOffset = cameraComponent.getCurrentCameraOffset();
+        var baseOffsetAfterEffects = cameraComponent.getCameraRestOffset().clone();
         var currentRotation = cameraComponent.getCurrentCameraRotation();
 
         var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraEffectsComponent.class);
         if (cameraEffectsComponent != null) {
-            updateSingleInstanceEffects(cameraEffectsComponent, currentOffset, currentRotation);
-            updateMultiInstanceEffects(cameraEffectsComponent, currentOffset, currentRotation);
+            updateSingleInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotation);
+            updateMultiInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotation);
         }
 
-        camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(currentOffset));
+        camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(baseOffsetAfterEffects));
 
 
         camera.setRotation(cameraComponent.getCurrentCameraRotation());
@@ -48,12 +48,8 @@ public class CameraSystem extends SingletonEntitySystem {
         while (multiInstanceIterator.hasNext()) {
             var effect = multiInstanceIterator.next();
 
-            if (effect.isFinished()) {
+            if (effect.isCleanup()) {
                 multiInstanceIterator.remove();
-//                var chained = effect.getChainedEffect(cameraOffset);
-//                if(chained != null){
-//                    cameraEffectsComponent.chainMultiInstance(chained);
-//                }
             }
 
             effect.applyPosition(cameraOffset);
@@ -73,12 +69,8 @@ public class CameraSystem extends SingletonEntitySystem {
         var singleInstanceIterator = singleInstanceEffects.entrySet().iterator();
         while (singleInstanceIterator.hasNext()) {
             var effect = singleInstanceIterator.next().getValue();
-            if (effect.isFinished()) {
+            if (effect.isCleanup()) {
                 singleInstanceIterator.remove();
-//                var chained = effect.getChainedEffect(cameraOffset);
-//                if(chained != null){
-//                    cameraEffectsComponent.chainSingleInstance(chained);
-//                }
             }
             effect.applyPosition(cameraOffset);
             effect.applyRotation(cameraRotation);
@@ -87,7 +79,7 @@ public class CameraSystem extends SingletonEntitySystem {
         var chainedSingleiterator = cameraEffectsComponent.getSingleInstanceChainedEffectsToAdd().iterator();
         while (chainedSingleiterator.hasNext()) {
             var chainedEffect = chainedSingleiterator.next();
-            cameraEffectsComponent.addSingleInstanceEffect(chainedEffect);
+            cameraEffectsComponent.overwriteOrAddSingleInstanceEffect(chainedEffect);
             chainedSingleiterator.remove();
         }
     }

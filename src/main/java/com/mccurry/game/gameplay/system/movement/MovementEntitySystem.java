@@ -7,7 +7,6 @@ import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.model.movement.headbob.HeadbobCameraEffect;
-import com.mccurry.game.gameplay.system.player.component.camera.model.movement.headbob.HeadbobToIdleCameraEffect;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
 public class MovementEntitySystem extends EntitySystem {
@@ -25,18 +24,23 @@ public class MovementEntitySystem extends EntitySystem {
         if (!desiredVelocity.equals(Vector3f.ZERO)) {
             var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraEffectsComponent.class);
             if (cameraEffectsComponent != null) {
-                if (!cameraEffectsComponent.hasSingleInstanceEffect(HeadbobCameraEffect.class)) {
-                    cameraEffectsComponent.addSingleInstanceEffect(
-                            new HeadbobCameraEffect()
+                var existingHeadbob = cameraEffectsComponent.getSingleInstanceEffect(HeadbobCameraEffect.class);
+                if (existingHeadbob == null) {
+                    var headbob = new HeadbobCameraEffect();
+                    headbob.setEnabled(true);
+                    cameraEffectsComponent.overwriteOrAddSingleInstanceEffect(
+                            headbob
                     );
+                }else{
+                    existingHeadbob.setEnabled(true);
                 }
             }
         } else {
             var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraEffectsComponent.class);
             if (cameraEffectsComponent != null) {
-                var headBob = cameraEffectsComponent.removeSingleInstanceEffect(HeadbobCameraEffect.class);
-                if(headBob != null) {
-                    cameraEffectsComponent.addMultiInstanceEffect(new HeadbobToIdleCameraEffect(headBob.getTotalOffsetFromHeadbob()));
+                var headbob = cameraEffectsComponent.getSingleInstanceEffects().get(HeadbobCameraEffect.class);
+                if (headbob != null) {
+                    headbob.setEnabled(false);
                 }
             }
         }
