@@ -6,7 +6,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 
 
-public abstract class CameraEffect {
+public abstract class TransformEffect {
     protected float weight = 0f;
     protected float targetWeight = 0f;
     @Getter(AccessLevel.PUBLIC)

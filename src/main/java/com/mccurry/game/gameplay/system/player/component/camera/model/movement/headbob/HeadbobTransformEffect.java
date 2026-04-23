@@ -3,11 +3,11 @@ package com.mccurry.game.gameplay.system.player.component.camera.model.movement.
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
-import com.mccurry.game.gameplay.system.player.component.camera.model.CameraEffect;
+import com.mccurry.game.gameplay.system.player.component.camera.model.TransformEffect;
 
-import static com.mccurry.game.gameplay.system.player.component.camera.CameraEffectConstants.FIXED_FRAMERATE;
+import static com.mccurry.game.gameplay.sharedcomponents.transformeffect.TransformEffectConstants.FIXED_FRAMERATE;
 
-public class HeadbobCameraEffect extends CameraEffect {
+public class HeadbobTransformEffect extends TransformEffect {
 
     public static final float HEADBOB_SPEED = 1f / FIXED_FRAMERATE;
 

@@ -1,7 +1,5 @@
 package com.mccurry.game.gameplay.system.equipment.visual.firstperson;
 
-import com.jme3.scene.CameraNode;
-import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
@@ -18,14 +16,14 @@ import lombok.NonNull;
 /**
  * Manages the first person model attachment when equipping items by entities
  */
-public class FirstPersonVisualEquipSystem implements EventSubscriber {
+public class FirstPersonEquipSystem implements EventSubscriber {
     // todo: must listen to RefreshFirstPersonView
     private final EntityStore entityStore;
 
 
     private final SyncEventHandler<HandEquippedEvent> handEquippedEventHandler;
 
-    public FirstPersonVisualEquipSystem(
+    public FirstPersonEquipSystem(
             EntityStore entityStore
     ){
         this.entityStore = entityStore;

@@ -6,7 +6,7 @@ import com.jme3.renderer.Camera;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.core.ecs.system.SingletonEntitySystem;
-import com.mccurry.game.gameplay.system.player.component.camera.CameraEffectsComponent;
+import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 
@@ -30,20 +30,18 @@ public class CameraSystem extends SingletonEntitySystem {
         var baseOffsetAfterEffects = cameraComponent.getCameraRestOffset().clone();
         var currentRotation = cameraComponent.getCurrentCameraRotation();
 
-        var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraEffectsComponent.class);
+        var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraTransformEffectsComponent.class);
         if (cameraEffectsComponent != null) {
             updateSingleInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotation);
             updateMultiInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotation);
         }
 
         camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(baseOffsetAfterEffects));
-
-
         camera.setRotation(cameraComponent.getCurrentCameraRotation());
     }
 
-    private void updateMultiInstanceEffects(CameraEffectsComponent cameraEffectsComponent, Vector3f cameraOffset, Quaternion cameraRotation) {
-        var multiInstanceEffects = cameraEffectsComponent.getMultiInstanceEffects();
+    private void updateMultiInstanceEffects(CameraTransformEffectsComponent cameraTransformEffectsComponent, Vector3f cameraOffset, Quaternion cameraRotation) {
+        var multiInstanceEffects = cameraTransformEffectsComponent.getMultiInstanceEffects();
         var multiInstanceIterator = multiInstanceEffects.iterator();
         while (multiInstanceIterator.hasNext()) {
             var effect = multiInstanceIterator.next();
@@ -55,17 +53,10 @@ public class CameraSystem extends SingletonEntitySystem {
             effect.applyPosition(cameraOffset);
             effect.applyRotation(cameraRotation);
         }
-
-        var chainedMultiIterator = cameraEffectsComponent.getMultiInstanceChainedEffectsToAdd().iterator();
-        while (chainedMultiIterator.hasNext()) {
-            var chainedEffect = chainedMultiIterator.next();
-            cameraEffectsComponent.addMultiInstanceEffect(chainedEffect);
-            chainedMultiIterator.remove();
-        }
     }
 
-    private void updateSingleInstanceEffects(CameraEffectsComponent cameraEffectsComponent, Vector3f cameraOffset, Quaternion cameraRotation) {
-        var singleInstanceEffects = cameraEffectsComponent.getSingleInstanceEffects();
+    private void updateSingleInstanceEffects(CameraTransformEffectsComponent cameraTransformEffectsComponent, Vector3f cameraOffset, Quaternion cameraRotation) {
+        var singleInstanceEffects = cameraTransformEffectsComponent.getSingleInstanceEffects();
         var singleInstanceIterator = singleInstanceEffects.entrySet().iterator();
         while (singleInstanceIterator.hasNext()) {
             var effect = singleInstanceIterator.next().getValue();
@@ -74,13 +65,6 @@ public class CameraSystem extends SingletonEntitySystem {
             }
             effect.applyPosition(cameraOffset);
             effect.applyRotation(cameraRotation);
-        }
-
-        var chainedSingleiterator = cameraEffectsComponent.getSingleInstanceChainedEffectsToAdd().iterator();
-        while (chainedSingleiterator.hasNext()) {
-            var chainedEffect = chainedSingleiterator.next();
-            cameraEffectsComponent.overwriteOrAddSingleInstanceEffect(chainedEffect);
-            chainedSingleiterator.remove();
         }
     }
 }
