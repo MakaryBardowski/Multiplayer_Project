@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Getter
 @AllArgsConstructor
-public class WeaponComponent implements Component {
+public class WeaponIdentityComponent implements Component {
     private float baseDamage;
     private float cooldownSeconds;
     private double lastUsedGameTimeSeconds;

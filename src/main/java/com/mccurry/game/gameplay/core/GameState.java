@@ -1,6 +1,7 @@
 package com.mccurry.game.gameplay.core;
 
 import com.jme3.anim.AnimComposer;
+import com.jme3.anim.SkinningControl;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
@@ -9,6 +10,8 @@ import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
+import com.jme3.post.FilterPostProcessor;
+import com.jme3.post.filters.BloomFilter;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
@@ -25,7 +28,9 @@ import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
-import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
+import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
+import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
+import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonEquipSystem;
@@ -51,6 +56,11 @@ import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.shared.sfx.factory.VfxFactories;
+import com.mccurry.game.shared.sfx.model.Vfx;
+import com.mccurry.game.shared.sfx.model.VfxType;
+import com.mccurry.game.shared.sfx.player.VfxPlayer;
+import com.mccurry.game.shared.sfx.pool.VfxPool;
 import com.mccurry.game.util.debug.GeometryUtil;
 import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
@@ -60,6 +70,7 @@ import com.simsilica.lemur.GuiGlobals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
 
@@ -140,11 +151,22 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        var firstPersonRootNode = new Node();
-        var universeNode = new Node();
         var assetManager = getApplication().getAssetManager();
         var renderManager = getApplication().getRenderManager();
         var camera = getApplication().getCamera();
+
+
+        var vfxPool = new VfxPool();
+        Consumer<Vfx> onFinishedPlaying = (vfx) -> {
+            vfxPool.reclaim(vfx);
+        };
+        var vfxFactories = VfxFactories.getFactories(assetManager, onFinishedPlaying);
+        vfxPool.initialize(vfxFactories);
+        var vfxPlayer = new VfxPlayer(vfxPool);
+
+
+        var firstPersonRootNode = new Node();
+        var universeNode = new Node();
 
 
         var fpCamera = camera.clone();
@@ -180,7 +202,7 @@ public class GameState extends BaseAppState {
         playerInputSystem = new PlayerInputSystem(entityStore, gameEventBus);
         playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
 
-        attackSystem = new AttackSystem(entityStore);
+        attackSystem = new AttackSystem(entityStore,vfxPlayer);
         equipSystem = new EquipSystem(gameEventBus, entityStore);
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
@@ -254,24 +276,6 @@ public class GameState extends BaseAppState {
         universeNode.addLight(al);
         firstPersonRootNode.addLight(al);
 
-        var weaponEntity1 = entityStore.create(
-                new WeaponComponent(10f, 0.5f, 0),
-                EquippableComponent.builder()
-                        .handSlot(HandSlot.HAND_RIGHT)
-                        .handSlot(HandSlot.HAND_LEFT)
-                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
-                        .build()
-        );
-
-        var weaponEntity2 = entityStore.create(
-                new WeaponComponent(10f, 0.5f, 0),
-                EquippableComponent.builder()
-                        .handSlot(HandSlot.HAND_RIGHT)
-                        .handSlot(HandSlot.HAND_LEFT)
-                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
-                        .build()
-        );
-
 
         var humanoidRootNode = setupModelLight((Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o"));
 
@@ -315,9 +319,55 @@ public class GameState extends BaseAppState {
 
         subscribeSystems();
 
-        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
-        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity2, HandSlot.HAND_LEFT), null);
 
+        var gun =   setupModelLight(
+                (Node) assetManager.loadModel("Models/mp18_fp/mp18_fp.j3o")
+        );
+
+
+        fpHands.getChild(0).getControl(SkinningControl.class).getAttachmentsNode("HandAttachmentBoneR").attachChild(
+                gun
+        );
+
+
+        System.out.println("Gun children "+gun.getChildren().stream().map(s -> s.getName()).toList());
+
+        var weaponEntity1 = entityStore.create(
+                new WeaponIdentityComponent(10f, 1f/8, 0),
+                EquippableComponent.builder()
+                        .handSlot(HandSlot.HAND_RIGHT)
+                        .handSlot(HandSlot.HAND_LEFT)
+                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+                        .build(),
+                new GunViewModelComponent(
+                        gun,
+                        gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"),
+                        gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Lock"),
+                        GunVfxData.builder()
+                                .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+                                .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+                                .muzzleFlashOffset(new Vector3f(0,0,-0.15f))
+                                .build()
+                )
+        );
+
+
+        gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
+
+
+        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+        // todo: to MUSI byc Objects bo inaczej cala scena sie bedzie swiecic w jasnych miejscach
+        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
+
+        bloom.setBloomIntensity(2f);
+        bloom.setExposurePower(5f);
+        bloom.setExposureCutOff(0.1f);
+
+        // higher factor = less performance tax = looks shittier
+        bloom.setDownSamplingFactor(1f);
+
+        fpp.addFilter(bloom);
+        renderManager.getMainView("Default").addProcessor(fpp);
     }
 
     @Override

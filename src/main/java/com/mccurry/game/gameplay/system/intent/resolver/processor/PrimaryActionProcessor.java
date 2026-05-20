@@ -2,7 +2,7 @@ package com.mccurry.game.gameplay.system.intent.resolver.processor;
 
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
-import com.mccurry.game.gameplay.system.attack.component.WeaponComponent;
+import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import com.mccurry.game.gameplay.system.intent.event.PrimaryActionIntentEvent;
@@ -32,7 +32,7 @@ public class PrimaryActionProcessor extends IntentProcessor<PrimaryActionIntentE
             var heldInRightHand = equipmentComponent.getWorn(HandSlot.HAND_RIGHT);
 
             if (heldInRightHand != null) {
-                var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponComponent.class);
+                var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponIdentityComponent.class);
                 if (weaponComponent != null) {
                     attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent, gameTimeSeconds);
                 }
