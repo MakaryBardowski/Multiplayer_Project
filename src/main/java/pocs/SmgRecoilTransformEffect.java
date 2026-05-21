@@ -6,24 +6,41 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.mccurry.game.gameplay.system.player.component.camera.model.TransformEffect;
 
+import java.util.Random;
+
 import static com.mccurry.game.gameplay.sharedcomponents.transformeffect.TransformEffectConstants.FIXED_FRAMERATE;
 public class SmgRecoilTransformEffect extends TransformEffect {
+    private static final Random RANDOM = new Random();
 
     private final float fadeSpeed = 20f;
 
-    // tuned impulses
-    private final float upKick = 0.0085f;     // ↓ reduced
-    private final float sideKick = 0.0045f;   // ↑ slightly stronger
+    // position recoil tuning
+    private final float upKick = 0.0085f;
+    private final float sideKick = 0.0045f;
+
+    // rotation recoil tuning (independent)
+    private final float rotUpKick = 0.01f;
+    private final float rotSideKick = 0.007f;
 
     // control
-    private final float recoverySpeed = 11f;  // faster return
-    private final float damping = 16f;        // tighter control
+    private final float recoverySpeed = 11f;
+    private final float damping = 16f;
 
+    // POSITION recoil
     private float recoilX = 0f;
     private float recoilY = 0f;
+    private float recoilZ = 0f;
 
     private float velX = 0f;
     private float velY = 0f;
+    private float velZ = 0f;
+
+    // ROTATION recoil (independent system)
+    private float rotPitch = 0f;
+    private float rotYaw = 0f;
+
+    private float rotVelPitch = 0f;
+    private float rotVelYaw = 0f;
 
     private float time = 0f;
 
@@ -32,12 +49,16 @@ public class SmgRecoilTransformEffect extends TransformEffect {
     }
 
     public void onShot() {
-        // reduced vertical stacking
-        velY += upKick;
+        // POSITION recoil
+        velY += RANDOM.nextFloat(upKick * 0.8f, upKick);
 
-        // smoother, slightly stronger sideways motion
         float drift = (float) Math.sin(time * 1.6f);
         velX += drift * sideKick;
+        velZ += RANDOM.nextFloat(0.09f, 0.11f);
+
+        // ROTATION recoil (completely independent)
+        rotVelPitch += RANDOM.nextFloat(rotUpKick * 0.8f, rotUpKick);
+        rotVelYaw   += (RANDOM.nextFloat(-1f, 1f)) * rotSideKick;
 
         targetWeight = 1f;
     }
@@ -49,11 +70,12 @@ public class SmgRecoilTransformEffect extends TransformEffect {
         updateWeight(tpf);
         time += tpf;
 
-        // integrate
+        // integrate position recoil
         recoilX += velX;
         recoilY += velY;
+        recoilZ += -velZ;
 
-        // --- SOFT CAP ON VERTICAL (prevents infinite climb) ---
+        // soft cap vertical
         float maxUp = 0.12f;
         if (recoilY > maxUp) {
             recoilY = FastMath.interpolateLinear(0.2f, recoilY, maxUp);
@@ -62,18 +84,19 @@ public class SmgRecoilTransformEffect extends TransformEffect {
         // damping
         velX *= (1f - tpf * damping);
         velY *= (1f - tpf * damping);
+        velZ *= (1f - tpf * damping);
 
         // recovery
         recoilX += (0f - recoilX) * (1f - FastMath.exp(-tpf * recoverySpeed));
         recoilY += (0f - recoilY) * (1f - FastMath.exp(-tpf * recoverySpeed));
+        recoilZ += (0f - recoilZ) * (1f - FastMath.exp(-tpf * recoverySpeed));
 
         cameraOffset.addLocal(
                 recoilX * weight,
                 recoilY * weight,
-                0
+                recoilZ * weight
         );
 
-        // cleanup
         if (Math.abs(recoilX) < 0.0001f &&
                 Math.abs(recoilY) < 0.0001f &&
                 Math.abs(velX) < 0.0001f &&
@@ -85,11 +108,27 @@ public class SmgRecoilTransformEffect extends TransformEffect {
 
     @Override
     public void applyRotation(Quaternion cameraRotation) {
-        float pitch = -recoilY * 2.3f; // slightly reduced
-        float yaw   = recoilX * 2.2f;  // slightly stronger sideways feel
+        float tpf = 1f / FIXED_FRAMERATE;
+
+        // integrate rotation recoil
+        rotPitch += rotVelPitch;
+        rotYaw   += rotVelYaw;
+
+        // damping
+        rotVelPitch *= (1f - tpf * damping);
+        rotVelYaw   *= (1f - tpf * damping);
+
+        // recovery to neutral
+        rotPitch += (0f - rotPitch) * (1f - FastMath.exp(-tpf * recoverySpeed));
+        rotYaw   += (0f - rotYaw) * (1f - FastMath.exp(-tpf * recoverySpeed));
 
         Quaternion q = new Quaternion();
-        q.fromAngles(pitch * weight, yaw * weight, 0f);
+        q.fromAngles(
+                -rotPitch * weight,
+                rotYaw * weight,
+                0f
+        );
+
         cameraRotation.multLocal(q);
     }
 }

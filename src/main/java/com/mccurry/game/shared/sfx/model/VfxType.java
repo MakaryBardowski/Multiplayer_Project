@@ -12,7 +12,9 @@ import com.jme3.math.Vector3f;
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.renderer.queue.RenderQueue;
+import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.texture.Texture;
 import lombok.AllArgsConstructor;
@@ -39,18 +41,21 @@ public enum VfxType {
 
                 @Override
                 public void play(Node parentNode, Vector3f localOffset, Quaternion localRotation) {
-                    var bullet = assetManager.loadModel("Models/mp18_fp_bullet/mp18_fp_bullet.j3o");
-                    var horizontalSpeed = RANDOM.nextFloat(3f,4f);
+                    var bullet = (Node)assetManager.loadModel("Models/mp18_fp_bullet/mp18_fp_bullet.j3o");
+                    bullet = setupModelLight(bullet,assetManager);
+                    var horizontalSpeed = RANDOM.nextFloat(3f,4f)*3f;
                     var verticalSpeed = RANDOM.nextFloat(3.5f,4.25f);
                     var depthSpeed = RANDOM.nextFloat(0.8f,1f);
+                    bullet.rotate(-FastMath.DEG_TO_RAD*90,0,0);
                     bullet.addControl(new AbstractControl() {
 
                         private float time = 0f;
 
                         // random rotation speeds
-                        private final float rotX = FastMath.nextRandomFloat() * 10f;
-                        private final float rotY = FastMath.nextRandomFloat() * 10f;
-                        private final float rotZ = FastMath.nextRandomFloat() * 10f;
+                        private final float rotX = 4+(FastMath.nextRandomFloat() * 6f);
+                        private final float rotY = 4+(FastMath.nextRandomFloat() * 6f);
+                        private final float rotZ = 4+(FastMath.nextRandomFloat() * 6f);
+
 
                         // movement settings
                         private final float riseSpeed = verticalSpeed;
@@ -156,4 +161,23 @@ public enum VfxType {
         }
     });
     private final BiFunction<AssetManager, Consumer<Vfx>, Vfx> supplier;
+    public static Node setupModelLight(Node node, AssetManager assetManager) {
+        for (Spatial c : node.getChildren()) {
+
+            if (c != null) {
+                if (c instanceof Geometry g) {
+                    Material originalMaterial = g.getMaterial();
+
+                    if (originalMaterial.getTextureParam("BaseColorMap") != null) {
+                        Material newMaterial = new Material(assetManager, "Common/MatDefs/Light/Lighting.j3md");
+                        newMaterial.setTexture("DiffuseMap", originalMaterial.getTextureParam("BaseColorMap").getTextureValue());
+                        g.setMaterial(newMaterial);
+                    }
+                } else if (c instanceof Node n) {
+                    setupModelLight(n,assetManager);
+                }
+            }
+        }
+        return node;
+    }
 }
