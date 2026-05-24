@@ -28,16 +28,16 @@ public class CameraSystem extends SingletonEntitySystem {
         }
 
         var baseOffsetAfterEffects = cameraComponent.getCameraRestOffset().clone();
-        var currentRotation = cameraComponent.getCurrentCameraRotation();
+        var currentRotationAfterEffects = cameraComponent.getCurrentCameraRotation().clone();
 
         var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraTransformEffectsComponent.class);
         if (cameraEffectsComponent != null) {
-            updateSingleInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotation);
-            updateMultiInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotation);
+            updateSingleInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotationAfterEffects);
+            updateMultiInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotationAfterEffects);
         }
 
         camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(baseOffsetAfterEffects));
-        camera.setRotation(cameraComponent.getCurrentCameraRotation());
+        camera.setRotation(currentRotationAfterEffects);
     }
 
     private void updateMultiInstanceEffects(CameraTransformEffectsComponent cameraTransformEffectsComponent, Vector3f cameraOffset, Quaternion cameraRotation) {

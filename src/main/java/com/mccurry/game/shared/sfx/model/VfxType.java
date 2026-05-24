@@ -70,7 +70,7 @@ public enum VfxType {
                             // simulate shell ejection arc
                             velocityY -= gravity * tpf;
                             spatial.move(
-                                    -tpf*horizontalSpeed,
+                                    tpf*horizontalSpeed,
                                     tpf*depthSpeed,
                                     velocityY * tpf
                             );

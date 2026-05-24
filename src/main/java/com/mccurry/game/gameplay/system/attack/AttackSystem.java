@@ -7,9 +7,11 @@ import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
+import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
 import com.mccurry.game.shared.sfx.player.VfxPlayer;
 import lombok.RequiredArgsConstructor;
-import pocs.SmgRecoilTransformEffect;
+import pocs.SmgCameraRecoilTransformEffect;
+import pocs.SmgViewmodelRecoilTransformEffect;
 
 @RequiredArgsConstructor
 public class AttackSystem {
@@ -41,16 +43,35 @@ public class AttackSystem {
             if(gunVfx != null && gunViewModelComponent.getBulletCaseEjectionNode() != null){
                 vfxPlayer.playEffect(gunVfx.getCaseEjection(), gunViewModelComponent.getBulletCaseEjectionNode(), new Vector3f(0,0,0), Quaternion.IDENTITY.clone());
             }
+
+            var animData = gunViewModelComponent.getGunAnimationData();
+            var animComposer = gunViewModelComponent.getAnimComposer();
+            if(animData != null && animComposer != null){
+                var recoilAnim = animData.getLockRecoilAnimName();
+                if(recoilAnim != null && animComposer.getAnimClipsNames().contains(recoilAnim)){
+                    animComposer.setCurrentAction(recoilAnim);
+                }
+            }
         }
 
 
-        var firstPersonEffectsComponent = entityStore.getComponent(attacker, FirstPersonViewTransformEffectsComponent.class);
-        if (firstPersonEffectsComponent != null) {
-            var headbob = new SmgRecoilTransformEffect();
-            headbob.setEnabled(true);
-            headbob.onShot();
-            firstPersonEffectsComponent.addMultiInstanceEffect(
-                    headbob
+        var viewmodelEffectsComponent = entityStore.getComponent(attacker, FirstPersonViewTransformEffectsComponent.class);
+        if (viewmodelEffectsComponent != null) {
+            var viewmodelRecoil = new SmgViewmodelRecoilTransformEffect();
+            viewmodelRecoil.setEnabled(true);
+            viewmodelRecoil.onShot();
+            viewmodelEffectsComponent.addMultiInstanceEffect(
+                    viewmodelRecoil
+            );
+        }
+
+        var cameraEffectsComponent = entityStore.getComponent(attacker, CameraTransformEffectsComponent.class);
+        if(cameraEffectsComponent != null) {
+            var cameraRecoil = new SmgCameraRecoilTransformEffect();
+            cameraRecoil.setEnabled(true);
+            cameraRecoil.onShot();
+            cameraEffectsComponent.addMultiInstanceEffect(
+                    cameraRecoil
             );
         }
     }

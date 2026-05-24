@@ -2,17 +2,15 @@ package pocs;
 
 import com.jme3.math.FastMath;
 import com.jme3.math.Quaternion;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.mccurry.game.gameplay.system.player.component.camera.model.TransformEffect;
 
 import java.util.Random;
 
 import static com.mccurry.game.gameplay.sharedcomponents.transformeffect.TransformEffectConstants.FIXED_FRAMERATE;
-public class SmgRecoilTransformEffect extends TransformEffect {
-    private static final Random RANDOM = new Random();
 
-    private final float fadeSpeed = 20f;
+public class SmgViewmodelRecoilTransformEffect extends TransformEffect {
+    private static final Random RANDOM = new Random();
 
     // position recoil tuning
     private final float upKick = 0.0085f;
@@ -44,9 +42,7 @@ public class SmgRecoilTransformEffect extends TransformEffect {
 
     private float time = 0f;
 
-    private void updateWeight(float tpf) {
-        weight += (targetWeight - weight) * (1f - FastMath.exp(-tpf * fadeSpeed));
-    }
+
 
     public void onShot() {
         // POSITION recoil
@@ -67,7 +63,8 @@ public class SmgRecoilTransformEffect extends TransformEffect {
     public void applyPosition(Vector3f cameraOffset) {
         float tpf = 1f / FIXED_FRAMERATE;
 
-        updateWeight(tpf);
+        weight = targetWeight;
+
         time += tpf;
 
         // integrate position recoil
@@ -99,9 +96,15 @@ public class SmgRecoilTransformEffect extends TransformEffect {
 
         if (Math.abs(recoilX) < 0.0001f &&
                 Math.abs(recoilY) < 0.0001f &&
+                Math.abs(recoilZ) < 0.0001f &&
                 Math.abs(velX) < 0.0001f &&
                 Math.abs(velY) < 0.0001f &&
-                targetWeight == 0f) {
+                Math.abs(velZ) < 0.0001f &&
+                Math.abs(rotPitch) < 0.0001f &&
+                Math.abs(rotYaw) < 0.0001f &&
+                Math.abs(rotVelPitch) < 0.0001f &&
+                Math.abs(rotVelYaw) < 0.0001f
+        ) {
             cleanup = true;
         }
     }
