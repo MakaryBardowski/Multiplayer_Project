@@ -3,6 +3,7 @@ package com.mccurry.game.gameplay.system.player;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
+import com.jme3.scene.Node;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.core.ecs.system.SingletonEntitySystem;
@@ -27,16 +28,18 @@ public class CameraSystem extends SingletonEntitySystem {
             return;
         }
 
-        var baseOffsetAfterEffects = cameraComponent.getCameraRestOffset().clone();
+        var originalOffset = cameraComponent.getCameraRestOffset();
+        var baseOffsetAfterEffectsLocal = cameraComponent.getCameraRestOffset().clone();
         var currentRotationAfterEffects = cameraComponent.getCurrentCameraRotation().clone();
 
         var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraTransformEffectsComponent.class);
         if (cameraEffectsComponent != null) {
-            updateSingleInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotationAfterEffects);
-            updateMultiInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffects, currentRotationAfterEffects);
+            updateSingleInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffectsLocal, currentRotationAfterEffects);
+            updateMultiInstanceEffects(cameraEffectsComponent, baseOffsetAfterEffectsLocal, currentRotationAfterEffects);
         }
 
-        camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(baseOffsetAfterEffects));
+        var worldOffset = currentRotationAfterEffects.mult(baseOffsetAfterEffectsLocal.subtract(originalOffset));
+        camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(worldOffset.addLocal(originalOffset)));
         camera.setRotation(currentRotationAfterEffects);
     }
 
