@@ -47,11 +47,10 @@ public class SmgCameraRecoilTransformEffect extends TransformEffect {
         perlinX+=0.2f;
         perlinY+=0.2f;
 
-        // position recoil tuning
-        float upKick = 0.0055f;
-        velY += RANDOM.nextFloat(upKick * 0.8f, upKick);
-
-        velZ += RANDOM.nextFloat(0.05f, 0.07f);
+        // no trnaslation so i dont get motion sick
+//        float upKick = 0.0055f;
+//        velY += RANDOM.nextFloat(upKick * 0.8f, upKick);
+//        velZ += RANDOM.nextFloat(0.05f, 0.07f);
 
         // ROTATION recoil (completely independent)
         rotVelPitch += RANDOM.nextFloat(rotUpMagnitude * 0.8f, rotUpMagnitude);
