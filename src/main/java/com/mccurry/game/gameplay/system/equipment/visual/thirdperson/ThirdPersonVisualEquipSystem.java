@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplay.system.equipment.visual;
+package com.mccurry.game.gameplay.system.equipment.visual.thirdperson;
 
 import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
@@ -59,13 +59,15 @@ public class ThirdPersonVisualEquipSystem implements EventSubscriber {
             return;
         }
 
-        if(handSlot.equals(HandSlot.HAND_RIGHT)) {
-            var rightHand = humanoidModel.getRightHandAttachmentNode();
-            rightHand.attachChild(displayNode);
-
-        } else if (handSlot.equals(HandSlot.HAND_LEFT)){
-            var leftHand = humanoidModel.getLeftHandAttachmentNode();
-            leftHand.attachChild(displayNode);
+        switch (handSlot){
+            case HAND_RIGHT -> {
+                var rightHand = humanoidModel.getRightHandAttachmentNode();
+                rightHand.attachChild(displayNode);
+            }
+            case HAND_LEFT -> {
+                var leftHand = humanoidModel.getLeftHandAttachmentNode();
+                leftHand.attachChild(displayNode);
+            }
         }
     }
 }

@@ -7,7 +7,7 @@ import com.mccurry.game.gameplay.core.ecs.component.Component;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
-import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewSourceComponent;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.ViewmodelSourceComponent;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
@@ -15,7 +15,7 @@ import com.mccurry.game.gameplay.system.transform.TransformComponent;
 /**
  * Manages the first person model effects (sway etc) and replication of position/rotation of parent entity
  */
-public class FirstPersonViewSystem extends EntitySystem {
+public class ViewmodelSystem extends EntitySystem {
 
     /**
     node to which the parent node of hands is attached
@@ -29,7 +29,7 @@ public class FirstPersonViewSystem extends EntitySystem {
     private Vector3f baseNodePosition;
     private Quaternion baseNodeRotation;
 
-    public FirstPersonViewSystem(
+    public ViewmodelSystem(
             Node firstPersonViewParentNode,
             Node firstPersonNode,
             EntityStore entityStore,
@@ -45,7 +45,7 @@ public class FirstPersonViewSystem extends EntitySystem {
 
     @Override
     public void processEligibleEntities(float tpf, double currentGameTime) {
-        var fpViewSourceEntity = entityStore.getSingletonComponentHolder(FirstPersonViewSourceComponent.class);
+        var fpViewSourceEntity = entityStore.getSingletonComponentHolder(ViewmodelSourceComponent.class);
         if(fpViewSourceEntity == null){
             return;
         }

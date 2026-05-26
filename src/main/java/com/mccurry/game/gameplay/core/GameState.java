@@ -33,13 +33,14 @@ import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationD
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
-import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonViewSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.ViewmodelSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonEquipSystem;
-import com.mccurry.game.gameplay.system.equipment.visual.ThirdPersonVisualEquipSystem;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.HandsViewmodelComponent;
+import com.mccurry.game.gameplay.system.equipment.visual.thirdperson.ThirdPersonVisualEquipSystem;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquippableComponent;
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
-import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewSourceComponent;
+import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.ViewmodelSourceComponent;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
@@ -86,7 +87,7 @@ public class GameState extends BaseAppState {
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
     private FirstPersonEquipSystem firstPersonEquipSystem;
-    private FirstPersonViewSystem firstPersonViewSystem;
+    private ViewmodelSystem viewmodelSystem;
 
     private AttackSystem attackSystem;
     private EquipSystem equipSystem;
@@ -208,7 +209,7 @@ public class GameState extends BaseAppState {
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
         firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore);
-        firstPersonViewSystem = new FirstPersonViewSystem(fpCameraNode, fpHandsNode, entityStore, FirstPersonViewSourceComponent.class);
+        viewmodelSystem = new ViewmodelSystem(fpCameraNode, fpHandsNode, entityStore, ViewmodelSourceComponent.class);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -290,9 +291,9 @@ public class GameState extends BaseAppState {
         var cameraHolder = new CameraHolderComponent(new Vector3f(0, 2.067f, 0));
         var cameraEffects = new CameraTransformEffectsComponent();
         var equipmentComponent = new EquipmentComponent();
-        var firstPersonSource = new FirstPersonViewSourceComponent();
+        var firstPersonSource = new ViewmodelSourceComponent();
         var firstPersonEffects = new FirstPersonViewTransformEffectsComponent();
-
+        var handsViewmodel = new HandsViewmodelComponent(fpHands);
         var player = entityStore.create(
                 transformComponent,
                 velocityComponent, // can move
@@ -304,7 +305,7 @@ public class GameState extends BaseAppState {
                 cameraEffects, // can have camera effects
                 firstPersonSource, // first person hands follow this entity
                 firstPersonEffects, // can have first person view model effects
-
+                handsViewmodel, // has first person hands
                 playerControlled // player controlled
         );
 
@@ -313,7 +314,7 @@ public class GameState extends BaseAppState {
 
 
         entitySystems.add(new MovementEntitySystem(entityStore));
-        entitySystems.add(firstPersonViewSystem); // ! must be after movement so theres no 1 frame delay between hands and position of holder
+        entitySystems.add(viewmodelSystem); // ! must be after movement so theres no 1 frame delay between hands and position of holder
 
         // todo: clonowac camere + cleanup po wylaczeniu gry
         entitySystems.add(new CameraSystem(entityStore, app.getCamera()));
@@ -324,12 +325,6 @@ public class GameState extends BaseAppState {
         var gun =   setupModelLight(
                 (Node) assetManager.loadModel("Models/mp18_fp/mp18_fp.j3o")
         );
-
-
-        fpHands.getChild(0).getControl(SkinningControl.class).getAttachmentsNode("HandAttachmentBoneR").attachChild(
-                gun
-        );
-
 
         System.out.println("Gun children "+gun.getChildren().stream().map(s -> s.getName()).toList());
 
