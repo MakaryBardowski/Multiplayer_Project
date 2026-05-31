@@ -7,6 +7,7 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
+import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
 import com.jme3.math.Vector3f;
@@ -17,6 +18,8 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.shape.Quad;
+import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.console.command.spectator.ToggleSpectatorModeEventHandler;
@@ -32,6 +35,9 @@ import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
+import com.mccurry.game.gameplay.system.crosshair.CrosshairSystem;
+import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
+import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.ViewmodelSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonEquipSystem;
@@ -86,6 +92,7 @@ public class GameState extends BaseAppState {
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
+    private CrosshairSystem crosshairSystem;
     private FirstPersonEquipSystem firstPersonEquipSystem;
     private ViewmodelSystem viewmodelSystem;
 
@@ -93,6 +100,8 @@ public class GameState extends BaseAppState {
     private EquipSystem equipSystem;
 
     private final EventBus gameEventBus = new EventBus();
+
+    private final Node gameHudNode = new Node("Game HUD node");
 
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
     private ViewPort fpViewport;
@@ -203,12 +212,13 @@ public class GameState extends BaseAppState {
 
         playerInputSystem = new PlayerInputSystem(entityStore, gameEventBus);
         playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
+        crosshairSystem = new CrosshairSystem(assetManager, gameHudNode);
 
-        attackSystem = new AttackSystem(entityStore,vfxPlayer);
+        attackSystem = new AttackSystem(gameEventBus,entityStore,vfxPlayer);
         equipSystem = new EquipSystem(gameEventBus, entityStore);
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
-        firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore);
+        firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore, gameEventBus);
         viewmodelSystem = new ViewmodelSystem(fpCameraNode, fpHandsNode, entityStore, ViewmodelSourceComponent.class);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
@@ -310,6 +320,12 @@ public class GameState extends BaseAppState {
         );
 
 
+
+        spawnMob(universeNode);
+
+
+
+
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
 
@@ -326,10 +342,11 @@ public class GameState extends BaseAppState {
                 (Node) assetManager.loadModel("Models/mp18_fp/mp18_fp.j3o")
         );
 
-        System.out.println("Gun children "+gun.getChildren().stream().map(s -> s.getName()).toList());
-
         var weaponEntity1 = entityStore.create(
                 new WeaponIdentityComponent(10f, 1f/8, 0),
+                CrosshairSourceComponent.builder()
+                        .crosshairType(CrosshairType.SMG)
+                        .build(),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
                         .handSlot(HandSlot.HAND_LEFT)
@@ -376,6 +393,24 @@ public class GameState extends BaseAppState {
         renderManager.getMainView("Default").addProcessor(fpp);
     }
 
+    private void spawnMob(Node universeNode) {
+        var humanoidRootNode = setupModelLight((Node) getApplication().getAssetManager().loadModel("Models/HumanArmature/HumanArmature.j3o"));
+
+        var transformComponent = new TransformComponent();
+        var humanoidModelComponent = new HumanoidModelComponent(humanoidRootNode);
+        transformComponent.getVisualNode().attachChild(humanoidRootNode);
+        universeNode.attachChild(transformComponent.getOriginNode());
+        transformComponent.getOriginNode().move(15, 3, 15);
+        var velocityComponent = new VelocityComponent();
+        var equipmentComponent = new EquipmentComponent();
+        entityStore.create(
+                transformComponent,
+                velocityComponent, // can move
+                humanoidModelComponent, // required for visual equipping
+                equipmentComponent
+        );
+    }
+
     @Override
     public void update(float tpf) {
         long t1 = System.nanoTime();
@@ -411,6 +446,8 @@ public class GameState extends BaseAppState {
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Cyan);
         GuiGlobals.getInstance().setCursorEventsEnabled(false);
         subscribeSystems();
+
+        ((SimpleApplication)getApplication()).getGuiNode().attachChild(gameHudNode);
     }
 
     @Override
@@ -426,11 +463,14 @@ public class GameState extends BaseAppState {
         GuiGlobals.getInstance().setCursorEventsEnabled(true);
         unsubscribeSystems();
         getApplication().getRenderManager().removeMainView(fpViewport);
+
+        gameHudNode.removeFromParent();
     }
 
     private void subscribeSystems() {
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        crosshairSystem.subscribe(gameEventBus);
         thirdPersonVisualEquipSystem.subscribe(gameEventBus);
         firstPersonEquipSystem.subscribe(gameEventBus);
         intentSystem.subscribe(gameEventBus);
@@ -441,6 +481,7 @@ public class GameState extends BaseAppState {
         getApplication().getInputManager().removeListener(playerRotationControlSystem);
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        crosshairSystem.unsubscribe(gameEventBus);
         thirdPersonVisualEquipSystem.unsubscribe(gameEventBus);
         firstPersonEquipSystem.unsubscribe(gameEventBus);
         intentSystem.unsubscribe(gameEventBus);

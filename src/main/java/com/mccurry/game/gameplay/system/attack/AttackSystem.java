@@ -2,10 +2,13 @@ package com.mccurry.game.gameplay.system.attack;
 
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
+import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
+import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEvent;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
 import com.mccurry.game.shared.sfx.player.VfxPlayer;
@@ -15,6 +18,7 @@ import pocs.SmgViewmodelRecoilTransformEffect;
 
 @RequiredArgsConstructor
 public class AttackSystem {
+    private final EventBus eventBus;
     private final EntityStore entityStore;
     private final VfxPlayer vfxPlayer;
 
@@ -73,6 +77,11 @@ public class AttackSystem {
             cameraEffectsComponent.addMultiInstanceEffect(
                     cameraRecoil
             );
+        }
+
+        var crosshairSourceComponent = entityStore.getComponent(weaponEntity, CrosshairSourceComponent.class);
+        if(crosshairSourceComponent != null){
+            eventBus.publish(new CrosshairSpreadRequestEvent(), null);
         }
     }
 
