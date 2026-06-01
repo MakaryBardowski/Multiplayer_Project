@@ -48,10 +48,7 @@ public class CrosshairSystem implements EventSubscriber {
         };
 
         onCrosshairSpread = (event, lifecycleManager) -> {
-
-            var newCrosshairType = CrosshairType.values()[new Random().nextInt(CrosshairType.values().length)];
-            onCrosshairChanged.handle(new CrosshairChangeRequestEvent(newCrosshairType),null);
-
+            currentCrosshair.spread(4,15);
         };
     }
 

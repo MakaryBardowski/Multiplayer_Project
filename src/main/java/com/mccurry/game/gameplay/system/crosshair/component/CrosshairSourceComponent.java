@@ -12,6 +12,4 @@ public class CrosshairSourceComponent implements Component {
     @NonNull
     @Builder.Default
     private CrosshairType crosshairType = CrosshairType.DEFAULT;
-    private float spreadOutTimeSeconds;
-    private float spreadInTimeSeconds;
 }
