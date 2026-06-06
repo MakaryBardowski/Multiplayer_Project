@@ -7,14 +7,16 @@ import lombok.Getter;
 
 @Getter
 public class CameraHolderComponent implements SingletonComponent {
-    private final Vector3f currentCameraOffset;
+    private final Vector3f currentActualCameraOffset;
     private final Vector3f cameraRestOffset;
 
-    private final Quaternion currentCameraRotation;
+    private final Quaternion currentDesiredCameraRotation;
+
+    private final Quaternion currentActualCameraRotation = Quaternion.IDENTITY;
 
     public CameraHolderComponent(Vector3f cameraRestOffset){
         this.cameraRestOffset = cameraRestOffset.clone();
-        this.currentCameraOffset = this.cameraRestOffset.clone();
-        this.currentCameraRotation = Quaternion.IDENTITY.clone();
+        this.currentActualCameraOffset = this.cameraRestOffset.clone();
+        this.currentDesiredCameraRotation = Quaternion.IDENTITY.clone();
     }
 }

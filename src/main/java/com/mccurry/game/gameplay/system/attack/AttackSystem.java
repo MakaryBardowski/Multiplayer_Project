@@ -10,7 +10,12 @@ import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelC
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEvent;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
+import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
+import com.mccurry.game.gameplay.system.raycast.mapraycast.MapRaycastSystem;
+import com.mccurry.game.gameplay.system.raycast.model.RaycastResultSelector;
+import com.mccurry.game.gameplay.system.transform.TransformComponent;
+import com.mccurry.game.shared.sfx.model.VfxType;
 import com.mccurry.game.shared.sfx.player.VfxPlayer;
 import lombok.RequiredArgsConstructor;
 import pocs.SmgCameraRecoilTransformEffect;
@@ -18,6 +23,7 @@ import pocs.SmgViewmodelRecoilTransformEffect;
 
 @RequiredArgsConstructor
 public class AttackSystem {
+    private final MapRaycastSystem mapRaycastSystem;
     private final EventBus eventBus;
     private final EntityStore entityStore;
     private final VfxPlayer vfxPlayer;
@@ -35,6 +41,40 @@ public class AttackSystem {
                         weaponIdentityComponent.getCooldownSeconds()
                 )
         );
+
+
+        // assume all weaps are raycast for now
+
+        var attackerTransform = entityStore.getComponent(attacker, TransformComponent.class);
+        var attackerCameraComponent = entityStore.getComponent(attacker, CameraHolderComponent.class);
+        if(attackerCameraComponent != null && attackerTransform != null){
+
+            var camOffset = attackerCameraComponent.getCurrentActualCameraOffset();
+            var dir = attackerCameraComponent.getCurrentActualCameraRotation().mult(Vector3f.UNIT_Z);
+
+            var camPos = attackerTransform.getOriginNode().getLocalTranslation().clone().add(camOffset);
+            System.err.println("shooting from camPos %s dir %s".formatted(camPos,dir));
+            var result = mapRaycastSystem.getOneRaycastResult(camPos, dir, RaycastResultSelector.CLOSEST);
+            if(result != null){
+                System.err.println("hit at "+result.getContactPoint());
+
+                // FP__MUZZLE_FLASH__SMG_1 wojt work at two places simultaneously
+
+                Vector3f normal = result.getContactNormal().normalize();
+
+                Quaternion rot = new Quaternion();
+                rot.lookAt(normal, Vector3f.UNIT_Y);
+
+                vfxPlayer.playEffect(
+                        VfxType.SMG_BULLET_HIT,
+                        attackerTransform.getOriginNode().getParent(),
+                        result.getContactPoint().add(result.getContactNormal().normalize().multLocal(0.05f)),
+                        rot);
+            }
+        }
+        // assume all weaps are raycast for now
+
+
 
         var gunViewModelComponent = entityStore.getComponent(weaponEntity, GunViewModelComponent.class);
 
@@ -82,6 +122,7 @@ public class AttackSystem {
         var crosshairSourceComponent = entityStore.getComponent(weaponEntity, CrosshairSourceComponent.class);
         if(crosshairSourceComponent != null){
             eventBus.publish(new CrosshairSpreadRequestEvent(), null);
+
         }
     }
 

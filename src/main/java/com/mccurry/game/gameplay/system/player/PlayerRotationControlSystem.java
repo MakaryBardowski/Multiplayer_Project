@@ -59,7 +59,7 @@ public class PlayerRotationControlSystem implements AnalogListener {
             return;
         }
 
-        camera.getCurrentCameraRotation().fromAngles(
+        camera.getCurrentDesiredCameraRotation().fromAngles(
                 FastMath.DEG_TO_RAD * pitch,
                 FastMath.DEG_TO_RAD * yaw,
                 0);

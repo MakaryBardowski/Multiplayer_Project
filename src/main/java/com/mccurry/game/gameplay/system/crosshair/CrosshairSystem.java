@@ -41,8 +41,8 @@ public class CrosshairSystem implements EventSubscriber {
             currentCrosshair.removeFromParent();
             currentCrosshair = buildCrosshair(type);
             crosshairParentNode.attachChild(currentCrosshair);
-            float x = 320;
-            float y = 180;
+            float x = 319;
+            float y = 175;
 
             currentCrosshair.setLocalTranslation(x,y,0);
         };

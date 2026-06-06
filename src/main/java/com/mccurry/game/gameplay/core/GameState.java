@@ -60,6 +60,8 @@ import com.mccurry.game.gameplay.system.player.PlayerRotationControlSystem;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
+import com.mccurry.game.gameplay.system.raycast.RaycastService;
+import com.mccurry.game.gameplay.system.raycast.mapraycast.MapRaycastSystem;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
@@ -162,86 +164,6 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void initialize(Application app) {
-        var assetManager = getApplication().getAssetManager();
-        var renderManager = getApplication().getRenderManager();
-        var camera = getApplication().getCamera();
-
-
-        var vfxPool = new VfxPool();
-        Consumer<Vfx> onFinishedPlaying = (vfx) -> {
-            vfxPool.reclaim(vfx);
-        };
-        var vfxFactories = VfxFactories.getFactories(assetManager, onFinishedPlaying);
-        vfxPool.initialize(vfxFactories);
-        var vfxPlayer = new VfxPlayer(vfxPool);
-
-
-        var firstPersonRootNode = new Node();
-        var universeNode = new Node();
-
-
-        var fpCamera = camera.clone();
-        fpCamera.setFrustumPerspective(45f, (float) fpCamera.getWidth() / fpCamera.getHeight(), 0.01f, 300f);
-
-        // todo: cleanup this viewport
-        fpViewport = renderManager.createMainView("View of firstPersonCamera", fpCamera);
-        fpViewport.setClearFlags(false, true, true);
-
-        var fpCameraNode = new CameraNode("First Person Camera Node", fpCamera);
-        fpCameraNode.setCullHint(Spatial.CullHint.Never);
-
-        var fpHands = setupModelLight((Node) assetManager.loadModel("Models/Hands_fp/Hands_fp.j3o"));
-        fpHands.setLocalScale(0.4f);
-
-        fpHands.move(-0.2f,-0.5f,0.7f);
-        fpHands.rotate(-FastMath.DEG_TO_RAD*6, FastMath.DEG_TO_RAD*4,0);
-        fpHands.getChild("Armature").getControl(AnimComposer.class).setCurrentAction("Hold_SMG_1");
-
-        var fpHandsNode = new Node("FP view node");
-        fpHandsNode.attachChild(fpHands);
-        fpCameraNode.attachChild(fpHandsNode);
-
-        // if a node that we want to add to a viewport is not attached to root node, it crashes :) gotta love jme
-        firstPersonRootNode.attachChild(fpCameraNode);
-        fpViewport.attachScene(fpCameraNode);
-
-//        fpCameraNode.attachChild(createViewingFrustum(fpCameraNode.getCamera(), assetManager));
-
-
-
-
-        playerInputSystem = new PlayerInputSystem(entityStore, gameEventBus);
-        playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
-        crosshairSystem = new CrosshairSystem(assetManager, gameHudNode);
-
-        attackSystem = new AttackSystem(gameEventBus,entityStore,vfxPlayer);
-        equipSystem = new EquipSystem(gameEventBus, entityStore);
-
-        thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
-        firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore, gameEventBus);
-        viewmodelSystem = new ViewmodelSystem(fpCameraNode, fpHandsNode, entityStore, ViewmodelSourceComponent.class);
-        intentSystem = new IntentSystem(
-                new IntentSystems(attackSystem, equipSystem),
-                entityStore
-        );
-
-
-        getApplication().getInputManager().addListener(playerInputSystem,
-                KeyMappingRegistry.MAPPING_KEY_W,
-                MAPPING_KEY_S,
-                MAPPING_KEY_A,
-                MAPPING_KEY_D,
-                MAPPING_MOUSE_LEFT
-        );
-
-        getApplication().getInputManager().addListener(playerRotationControlSystem,
-                MAPPING_MOUSE_MOVE_X_LEFT,
-                MAPPING_MOUSE_MOVE_X_RIGHT,
-                MAPPING_MOUSE_MOVE_Y_DOWN,
-                MAPPING_MOUSE_MOVE_Y_UP
-        );
-
-
         var blockWorldNode = new Node();
         int mapX = 40;
         int mapY = 10;
@@ -271,7 +193,95 @@ public class GameState extends BaseAppState {
         m.setBlockIdAtPosition(11, 1, 11, BlockType.STONE.blockId);
         m.setBlockIdAtPosition(12, 1, 11, BlockType.STONE.blockId);
 
-        var b = new BlockWorld(3, 16, mapX, mapY, mapZ, m, app.getAssetManager(), blockWorldNode);
+        var blockWorld = new BlockWorld(3, 16, mapX, mapY, mapZ, m, app.getAssetManager(), blockWorldNode);
+
+
+
+
+
+
+
+        var assetManager = getApplication().getAssetManager();
+        var renderManager = getApplication().getRenderManager();
+        var camera = getApplication().getCamera();
+
+
+        var vfxPool = new VfxPool();
+        Consumer<Vfx> onFinishedPlaying = (vfx) -> {
+            vfxPool.reclaim(vfx);
+        };
+        var vfxFactories = VfxFactories.getFactories(assetManager, onFinishedPlaying);
+        vfxPool.initialize(vfxFactories);
+        var vfxPlayer = new VfxPlayer(vfxPool);
+
+
+        var firstPersonRootNode = new Node();
+        var universeNode = new Node();
+
+
+        var fpCamera = camera.clone();
+        fpCamera.setFrustumPerspective(45f, (float) fpCamera.getWidth() / fpCamera.getHeight(), 0.01f, 300f);
+
+        // todo: cleanup this viewport
+        fpViewport = renderManager.createMainView("View of firstPersonCamera", fpCamera);
+        fpViewport.setClearFlags(false, false, false);
+
+        var fpCameraNode = new CameraNode("First Person Camera Node", fpCamera);
+        fpCameraNode.setCullHint(Spatial.CullHint.Never);
+
+        var fpHands = setupModelLight((Node) assetManager.loadModel("Models/Hands_fp/Hands_fp.j3o"));
+        fpHands.setLocalScale(0.4f);
+
+        fpHands.move(-0.2f,-0.5f,0.7f);
+        fpHands.rotate(-FastMath.DEG_TO_RAD*6, FastMath.DEG_TO_RAD*4,0);
+        fpHands.getChild("Armature").getControl(AnimComposer.class).setCurrentAction("Hold_SMG_1");
+
+        var fpHandsNode = new Node("FP view node");
+        fpHandsNode.attachChild(fpHands);
+        fpCameraNode.attachChild(fpHandsNode);
+
+        // if a node that we want to add to a viewport is not attached to root node, it crashes :) gotta love jme
+        firstPersonRootNode.attachChild(fpCameraNode);
+        fpViewport.attachScene(fpCameraNode);
+
+//        fpCameraNode.attachChild(createViewingFrustum(fpCameraNode.getCamera(), assetManager));
+
+
+
+
+        playerInputSystem = new PlayerInputSystem(entityStore, gameEventBus);
+        playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
+        crosshairSystem = new CrosshairSystem(assetManager, gameHudNode);
+
+        var raycastService = new RaycastService();
+        var mapRaycastSystem = new MapRaycastSystem(blockWorld, raycastService);
+
+        attackSystem = new AttackSystem(mapRaycastSystem, gameEventBus,entityStore,vfxPlayer);
+        equipSystem = new EquipSystem(gameEventBus, entityStore);
+
+        thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
+        firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore, gameEventBus);
+        viewmodelSystem = new ViewmodelSystem(fpCameraNode, fpHandsNode, entityStore, ViewmodelSourceComponent.class);
+        intentSystem = new IntentSystem(
+                new IntentSystems(attackSystem, equipSystem),
+                entityStore
+        );
+
+
+        getApplication().getInputManager().addListener(playerInputSystem,
+                KeyMappingRegistry.MAPPING_KEY_W,
+                MAPPING_KEY_S,
+                MAPPING_KEY_A,
+                MAPPING_KEY_D,
+                MAPPING_MOUSE_LEFT
+        );
+
+        getApplication().getInputManager().addListener(playerRotationControlSystem,
+                MAPPING_MOUSE_MOVE_X_LEFT,
+                MAPPING_MOUSE_MOVE_X_RIGHT,
+                MAPPING_MOUSE_MOVE_Y_DOWN,
+                MAPPING_MOUSE_MOVE_Y_UP
+        );
 
 
         universeNode.attachChild(blockWorldNode);
@@ -329,11 +339,13 @@ public class GameState extends BaseAppState {
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
 
+        // NIE ZMIENIAC KOLEJNOSCI
         entitySystems.add(new MovementEntitySystem(entityStore));
         entitySystems.add(viewmodelSystem); // ! must be after movement so theres no 1 frame delay between hands and position of holder
 
         // todo: clonowac camere + cleanup po wylaczeniu gry
         entitySystems.add(new CameraSystem(entityStore, app.getCamera()));
+        // NIE ZMIENIAC KOLEJNOSCI
 
         subscribeSystems();
 

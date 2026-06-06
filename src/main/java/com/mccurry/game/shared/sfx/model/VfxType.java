@@ -1,5 +1,13 @@
 package com.mccurry.game.shared.sfx.model;
 
+import com.epagagames.particles.BillboardMode;
+import com.epagagames.particles.Emitter;
+import com.epagagames.particles.emittershapes.EmitterCone;
+import com.epagagames.particles.influencers.ColorInfluencer;
+import com.epagagames.particles.influencers.GravityInfluencer;
+import com.epagagames.particles.valuetypes.ColorValueType;
+import com.epagagames.particles.valuetypes.Gradient;
+import com.epagagames.particles.valuetypes.ValueType;
 import com.jme3.asset.AssetManager;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.effect.ParticleMesh;
@@ -17,6 +25,10 @@ import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
 import com.jme3.texture.Texture;
+import com.mccurry.game.util.debug.GeometryUtil;
+import dirty.game.effects.VisualEffects.ParticleInfluencers.CustomSpriteInfluencer;
+import dirty.game.effects.VisualEffects.ParticleInfluencers.RandomInitialRotationInfluencer;
+import dirty.game.effects.VisualEffects.ParticleInfluencers.VelocityDampingInfluencer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.jetbrains.annotations.NotNull;
@@ -29,6 +41,51 @@ import java.util.function.Consumer;
 @AllArgsConstructor
 public enum VfxType {
     NONE(null),
+    SMG_BULLET_HIT(new BiFunction<>() {
+        @Override
+        public Vfx apply(AssetManager assetManager, Consumer<Vfx> onFinishedPlaying) {
+            var smoke = getBulletImpactSmokeEmitter(assetManager);
+            var debris = getBulletImpactDebrisEmitter(assetManager);
+
+
+            return new Vfx(onFinishedPlaying) {
+                private static final Random RANDOM = new Random();
+                @Override
+                public VfxType getType() {
+                    return SMG_BULLET_HIT;
+                }
+
+                @Override
+                public void play(Node parentNode, Vector3f localOffset, Quaternion localRotation) {
+//                    var arrow = GeometryUtil.createArrow(1,Vector3f.UNIT_Z.clone(), ColorRGBA.Blue, assetManager);
+//                    parentNode.attachChild(arrow);
+//                    arrow.setLocalRotation(localRotation);
+//                    arrow.setLocalTranslation(localOffset);
+
+
+                    // nie robic ich pod jednym parent nodem - wtedy czasem nie dziala...
+                    debris.setLocalRotation(localRotation);
+                    debris.setLocalTranslation(localOffset);
+                    smoke.setLocalRotation(localRotation);
+                    smoke.setLocalTranslation(localOffset);
+
+                    parentNode.attachChild(debris);
+                    parentNode.attachChild(smoke);
+
+
+                    debris.rotate(FastMath.DEG_TO_RAD*90,0,0);
+                    smoke.rotate(FastMath.DEG_TO_RAD*90,0,0);
+
+                    smoke.emitNextParticle();
+                    for(int i = 0; i < RANDOM.nextInt(5,8); i++) {
+                        debris.emitNextParticle();
+                    }
+
+                    onFinishedPlaying.accept(this);
+                }
+            };
+        }
+    }),
     FP__BULLET_CASE__SMG_1(new BiFunction<>() {
         @Override
         public Vfx apply(AssetManager assetManager, Consumer<Vfx> onFinishedPlaying) {
@@ -179,5 +236,101 @@ public enum VfxType {
             }
         }
         return node;
+    }
+
+
+    public static Emitter getBulletImpactSmokeEmitter(AssetManager assetManager) {
+
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        Texture tex = assetManager.loadTexture("Textures/Gameplay/Effects/BulletImpact/shotDebris.png");
+        tex.setMagFilter(Texture.MagFilter.Nearest);
+        tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        mat.setTexture("Texture", tex);
+
+        var emitter = new Emitter("Smoke", mat, 100,
+                new ColorInfluencer(),
+                new VelocityDampingInfluencer(0.8f, 0.9f),
+                new CustomSpriteInfluencer(),
+                new RandomInitialRotationInfluencer()
+        );
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteCols(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteRows(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setUseRandomImage(true);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setAnimate(false);
+
+        emitter.setBillboardMode(BillboardMode.Camera);
+
+        emitter.getInfluencer(ColorInfluencer.class).setColorOverTime(new ColorValueType(
+                new Gradient()
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 0.0f), 0.0f)
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 1f), 0.1f)
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 1f), 0.2f)
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 0.0f), 1.0f)
+        ));
+        var oneVoxelParticleSize = 1.5f/32f;
+        emitter.setStartSize(new ValueType(oneVoxelParticleSize*8));
+        emitter.setStartSpeed(new ValueType(2.5f));
+        emitter.setLifeMinMax(new ValueType(0.4f), new ValueType(0.6f));
+        emitter.setLooping(false);
+        emitter.setEmissionsPerSecond(0);
+
+        emitter.setParticlesPerEmission(1);
+        emitter.setShape(new EmitterCone());
+        ((EmitterCone) emitter.getShape()).setRadius(0.1f);
+        ((EmitterCone) emitter.getShape()).setAngle(FastMath.PI * 0.05f);
+        emitter.setParticlesFollowEmitter(false);
+        emitter.reset();
+        emitter.setCullHint(Spatial.CullHint.Never);
+        emitter.setQueueBucket(RenderQueue.Bucket.Opaque); // workaround, inaczej renderuje sie nad wszystkim :)
+        return emitter;
+    }
+
+    public static Emitter getBulletImpactDebrisEmitter(AssetManager assetManager) {
+
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        Texture tex = assetManager.loadTexture("Textures/Gameplay/Effects/BulletImpact/"+"shotDebrisParticles.png");
+        tex.setMagFilter(Texture.MagFilter.Nearest);
+        tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        mat.setTexture("Texture", tex);
+
+        var emitter = new Emitter("Debris", mat, 100,
+                new ColorInfluencer(),
+                new VelocityDampingInfluencer(0.8f, 0.98f),
+                new CustomSpriteInfluencer(),
+                new GravityInfluencer()
+                //             new RandomInitialRotationInfluencer()
+        );
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteCols(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteRows(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setUseRandomImage(true);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setAnimate(false);
+
+        emitter.setBillboardMode(BillboardMode.Camera);
+
+        emitter.getInfluencer(ColorInfluencer.class).setColorOverTime(new ColorValueType(
+                new Gradient()
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 0.5f), 0.0f)
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 0.5f), 0.1f)
+                        .addGradPoint(new ColorRGBA(1, 1, 1, 0.0f), 1.0f)
+        ));
+
+        var oneVoxelParticleSize = 1.5f/32f;
+        emitter.setStartSize(new ValueType(oneVoxelParticleSize));
+        emitter.setStartSpeed(new ValueType(6f));
+        emitter.setLifeMinMax(new ValueType(0.5f), new ValueType(0.6f));
+        emitter.setLooping(false);
+        emitter.setEmissionsPerSecond(0);
+
+        emitter.setParticlesPerEmission(1);
+        emitter.setShape(new EmitterCone());
+        ((EmitterCone) emitter.getShape()).setRadius(0.05f);
+        ((EmitterCone) emitter.getShape()).setAngle(FastMath.PI * 0.4f);
+        emitter.setParticlesFollowEmitter(false);
+        emitter.reset();
+        emitter.setCullHint(Spatial.CullHint.Never);
+        emitter.setQueueBucket(RenderQueue.Bucket.Opaque); // workaround, inaczej renderuje sie nad wszystkim :)
+        return emitter;
     }
 }

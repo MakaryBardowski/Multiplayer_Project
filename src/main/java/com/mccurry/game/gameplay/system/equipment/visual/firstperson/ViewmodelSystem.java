@@ -67,9 +67,9 @@ public class ViewmodelSystem extends EntitySystem {
 
         // the parent always follows player
         firstPersonViewParentNode.setLocalTranslation(
-                transform.getOriginNode().getLocalTranslation().add(cameraHolderComponent.getCurrentCameraOffset())
+                transform.getOriginNode().getLocalTranslation().add(cameraHolderComponent.getCurrentActualCameraOffset())
         );
-        firstPersonViewParentNode.setLocalRotation(cameraHolderComponent.getCurrentCameraRotation());
+        firstPersonViewParentNode.setLocalRotation(cameraHolderComponent.getCurrentDesiredCameraRotation());
         // the parent always follows player
 
 

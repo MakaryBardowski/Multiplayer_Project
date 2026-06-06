@@ -28,8 +28,8 @@ public class ToggleSpectatorModeEventHandler implements SyncEventHandler<ToggleS
     public void handle(@NonNull ToggleSpectatorModeEvent event, @Nullable EventLifecycleManager<ToggleSpectatorModeEvent> lifecycleManager) {
         if (originalCameraHolder != null) {
 
-            var newCamHolderComp = new CameraHolderComponent(originalCamComponent.getCurrentCameraOffset());
-            newCamHolderComp.getCurrentCameraRotation().set(originalCamComponent.getCurrentCameraRotation());
+            var newCamHolderComp = new CameraHolderComponent(originalCamComponent.getCurrentActualCameraOffset());
+            newCamHolderComp.getCurrentDesiredCameraRotation().set(originalCamComponent.getCurrentDesiredCameraRotation());
 
             entityStore.addComponentsToEntity(originalCameraHolder, newCamHolderComp, new PlayerControlledComponent());
 
@@ -54,8 +54,8 @@ public class ToggleSpectatorModeEventHandler implements SyncEventHandler<ToggleS
             originalNodeRot.set(originalTransform.getVisualNode().getLocalRotation());
         }
 
-        var newCamHolderComp = new CameraHolderComponent(originalCamComponent.getCurrentCameraOffset());
-        newCamHolderComp.getCurrentCameraRotation().set(originalCamComponent.getCurrentCameraRotation());
+        var newCamHolderComp = new CameraHolderComponent(originalCamComponent.getCurrentActualCameraOffset());
+        newCamHolderComp.getCurrentDesiredCameraRotation().set(originalCamComponent.getCurrentDesiredCameraRotation());
 
         var transformComponent = new TransformComponent();
         entityStore.create(

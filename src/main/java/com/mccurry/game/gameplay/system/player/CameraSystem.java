@@ -3,7 +3,6 @@ package com.mccurry.game.gameplay.system.player;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.renderer.Camera;
-import com.jme3.scene.Node;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.core.ecs.system.SingletonEntitySystem;
@@ -30,7 +29,7 @@ public class CameraSystem extends SingletonEntitySystem {
 
         var originalOffset = cameraComponent.getCameraRestOffset();
         var baseOffsetAfterEffectsLocal = cameraComponent.getCameraRestOffset().clone();
-        var currentRotationAfterEffects = cameraComponent.getCurrentCameraRotation().clone();
+        var currentRotationAfterEffects = cameraComponent.getCurrentDesiredCameraRotation().clone();
 
         var cameraEffectsComponent = entityStore.getComponent(entityWithRequiredComponents, CameraTransformEffectsComponent.class);
         if (cameraEffectsComponent != null) {
@@ -41,6 +40,7 @@ public class CameraSystem extends SingletonEntitySystem {
         var worldOffset = currentRotationAfterEffects.mult(baseOffsetAfterEffectsLocal.subtract(originalOffset));
         camera.setLocation(transformComponent.getOriginNode().getWorldTranslation().add(worldOffset.addLocal(originalOffset)));
         camera.setRotation(currentRotationAfterEffects);
+        cameraComponent.getCurrentActualCameraRotation().set(currentRotationAfterEffects);
     }
 
     private void updateMultiInstanceEffects(CameraTransformEffectsComponent cameraTransformEffectsComponent, Vector3f cameraOffset, Quaternion cameraRotation) {
