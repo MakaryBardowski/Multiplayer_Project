@@ -12,7 +12,7 @@ public class CameraHolderComponent implements SingletonComponent {
 
     private final Quaternion currentDesiredCameraRotation;
 
-    private final Quaternion currentActualCameraRotation = Quaternion.IDENTITY;
+    private final Quaternion currentActualCameraRotation = Quaternion.IDENTITY.clone();
 
     public CameraHolderComponent(Vector3f cameraRestOffset){
         this.cameraRestOffset = cameraRestOffset.clone();

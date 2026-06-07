@@ -13,7 +13,7 @@ public class GunSwayTransformEffect extends TransformEffect {
 
     private final float frequency = 7f;
 
-    private final float amplitudeX = 0.05f; // left-right
+    private final float amplitudeX = 0.02f; // left-right
     private final float amplitudeY = 0.015f; // slight up at center
 
     private final float wavelength = 2 * FastMath.PI;
