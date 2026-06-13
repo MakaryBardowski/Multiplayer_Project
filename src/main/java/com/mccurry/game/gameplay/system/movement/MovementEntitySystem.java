@@ -80,6 +80,9 @@ public class MovementEntitySystem extends EntitySystem {
         }
 
         actualVelocity.set(desiredVelocity.x, desiredVelocity.y, desiredVelocity.z);
-        transform.getOriginNode().move(actualVelocity.x * tpf, actualVelocity.y * tpf, actualVelocity.z * tpf);
+
+        if(!actualVelocity.equals(Vector3f.ZERO)) {
+            transform.getOriginNode().move(actualVelocity.x * tpf, actualVelocity.y * tpf, actualVelocity.z * tpf);
+        }
     }
 }

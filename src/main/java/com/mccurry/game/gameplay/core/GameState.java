@@ -83,6 +83,7 @@ import com.simsilica.lemur.GuiGlobals;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.function.Consumer;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
@@ -413,11 +414,13 @@ public class GameState extends BaseAppState {
         var equipmentComponent = new EquipmentComponent();
 
 
-        var showHitbox = true;
-        Material mat = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
-        mat.setColor("Color", ColorRGBA.Red);
-        mat.getAdditionalRenderState().setWireframe(true);
+        var showHitbox = false;
+        var matRed = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        matRed.setColor("Color", ColorRGBA.Red);
+        matRed.getAdditionalRenderState().setWireframe(true);
 
+        var matGreen = matRed.clone();
+        matGreen.setColor("Color",ColorRGBA.Green);
 
         var armature = humanoidRootNode.getChild("Armature");
         var raycastHitboxComponent = new EntityRaycastHitboxComponent(armature);
@@ -427,21 +430,30 @@ public class GameState extends BaseAppState {
         var bodyHitbox = new Geometry(null, new Box(7 * 0.05f, 8 * 0.05f, 6f * 0.05f));
         bodyHitbox.move(0, 0.3f, 0.0f);
 
-        var thighHitboxR = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
-        thighHitboxR.move(0, 0.1f, 0);
-        var thighHitboxL = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
-        thighHitboxL.move(0, 0.1f, 0);
+        var thighHitboxR = new Geometry(null, new Box(2 * 0.05f, 5 * 0.05f, 4f * 0.05f));
+        thighHitboxR.move(0, 0.2f, 0.125f);
+        var thighHitboxL = new Geometry(null, new Box(2 * 0.05f, 5 * 0.05f, 4f * 0.05f));
+        thighHitboxL.move(0, 0.2f, 0.125f);
 
-        var shinHitboxR = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
-        shinHitboxR.move(0, 0.1f, 0);
-        var shinHitboxL = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
-        shinHitboxL.move(0, 0.1f, 0);
+        var shinHitboxR = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 2f * 0.05f));
+        shinHitboxR.move(0, 0.125f, 0);
+        var shinHitboxL = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 2f * 0.05f));
+        shinHitboxL.move(0, 0.125f, 0);
 
-        var footHitboxR = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
-        footHitboxR.move(0, 0.1f, 0);
-        var footHitboxL = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
-        footHitboxL.move(0, 0.1f, 0);
+        var footHitboxR = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
+        footHitboxR.move(0, 0.0f, 0);
+        var footHitboxL = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
+        footHitboxL.move(0, 0.0f, 0);
 
+        var armHitboxR = new Geometry(null, new Box(2 * 0.05f, 6 * 0.05f, 2f * 0.05f));
+        armHitboxR.move(0, 0.2f, 0);
+        var armHitboxL = new Geometry(null, new Box(2 * 0.05f, 6 * 0.05f, 2f * 0.05f));
+        armHitboxL.move(0, 0.2f, 0);
+
+        var forearmHitboxR = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
+        forearmHitboxR.move(0, 0.25f, 0);
+        var forearmHitboxL = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
+        forearmHitboxL.move(0, 0.25f, 0);
 
         raycastHitboxComponent.getHitboxes().addAll(
                 List.of(
@@ -455,27 +467,45 @@ public class GameState extends BaseAppState {
                         new EntityRaycastHitbox(shinHitboxL, shinHitboxL.getLocalTranslation()),
 
                         new EntityRaycastHitbox(footHitboxR, footHitboxR.getLocalTranslation()),
-                        new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation())
+                        new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation()),
+
+                        new EntityRaycastHitbox(armHitboxR, armHitboxR.getLocalTranslation()),
+                        new EntityRaycastHitbox(armHitboxL, armHitboxL.getLocalTranslation()),
+
+                        new EntityRaycastHitbox(forearmHitboxR, forearmHitboxR.getLocalTranslation()),
+                        new EntityRaycastHitbox(forearmHitboxL, forearmHitboxL.getLocalTranslation())
                 )
         );
 
-        raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setMaterial(mat.clone()));
+        raycastHitboxComponent.getHitboxes().forEach(hb -> {
+            var mat = matRed;
+            if(hb.getGeometry() != headHitbox){
+                mat = matGreen;
+            }
+            hb.getGeometry().setMaterial(mat.clone());
+        });
 
         armature.getControl(SkinningControl.class).getAttachmentsNode("Head").attachChild(headHitbox);
         armature.getControl(SkinningControl.class).getAttachmentsNode("Spine").attachChild(bodyHitbox);
 
-//        armature.getControl(SkinningControl.class).getAttachmentsNode("ThighR").attachChild(thighHitboxR);
-//        armature.getControl(SkinningControl.class).getAttachmentsNode("ThighL").attachChild(thighHitboxL);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ThighR").attachChild(thighHitboxR);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ThighL").attachChild(thighHitboxL);
+
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ShinR").attachChild(shinHitboxR);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ShinL").attachChild(shinHitboxL);
 //
-//        armature.getControl(SkinningControl.class).getAttachmentsNode("ShinR").attachChild(shinHitboxR);
-//        armature.getControl(SkinningControl.class).getAttachmentsNode("ShinL").attachChild(shinHitboxL);
-//
-//        armature.getControl(SkinningControl.class).getAttachmentsNode("FootR").attachChild(footHitboxR);
-//        armature.getControl(SkinningControl.class).getAttachmentsNode("FootL").attachChild(footHitboxL);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("FootR").attachChild(footHitboxR);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("FootL").attachChild(footHitboxL);
+
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ArmR").attachChild(armHitboxR);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ArmL").attachChild(armHitboxL);
+
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ForearmR").attachChild(forearmHitboxR);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("ForearmL").attachChild(forearmHitboxL);
 
         if (showHitbox) {
             raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Never));
-        }else {
+        } else {
             raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Always));
         }
 
