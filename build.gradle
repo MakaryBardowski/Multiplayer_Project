@@ -67,6 +67,7 @@ dependencies {
 
     implementation 'org.codehaus.groovy:groovy-all:3.0.21'
     compileOnly 'org.projectlombok:lombok:1.18.28'
+    compileOnly 'org.jetbrains:annotations:24.0.0'
     annotationProcessor 'org.projectlombok:lombok:1.18.36'
     runtimeOnly project(':assets')
 

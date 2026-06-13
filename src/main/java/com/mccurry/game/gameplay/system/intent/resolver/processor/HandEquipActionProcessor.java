@@ -22,7 +22,7 @@ public class HandEquipActionProcessor extends IntentProcessor<HandEquipIntentEve
     }
 
     @Override
-    public void processIntentEvent(HandEquipIntentEvent event, double gameTimeSeconds) {
+    public void processIntentEvent(HandEquipIntentEvent event, float tpf, double gameTimeSeconds) {
         equipSystem.equipHand(event.getSlot(), event.getIntendingEntity(), event.getNotValidatedCandidate());
     }
 }

@@ -24,7 +24,7 @@ public class PrimaryActionProcessor extends IntentProcessor<PrimaryActionIntentE
     }
 
     @Override
-    public void processIntentEvent(PrimaryActionIntentEvent event, double gameTimeSeconds) {
+    public void processIntentEvent(PrimaryActionIntentEvent event, float tpf, double gameTimeSeconds) {
         var intentOwner = event.getIntendingEntity();
         var equipmentComponent = entityStore.getComponent(intentOwner, EquipmentComponent.class);
         if (equipmentComponent != null) {
@@ -34,7 +34,7 @@ public class PrimaryActionProcessor extends IntentProcessor<PrimaryActionIntentE
             if (heldInRightHand != null) {
                 var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponIdentityComponent.class);
                 if (weaponComponent != null) {
-                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent, gameTimeSeconds);
+                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent, tpf, gameTimeSeconds);
                 }
             }
         }

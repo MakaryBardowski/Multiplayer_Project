@@ -22,11 +22,11 @@ public class IntentResolver {
         processorByIntentClassMap.put(handEquipActionProcessor.getHandledIntentEvent(), handEquipActionProcessor);
     }
 
-    public void resolve(IntentEvent intentEvent, double gameTimeSeconds){
+    public void resolve(IntentEvent intentEvent, float tpf, double gameTimeSeconds){
         var processor = processorByIntentClassMap.get(intentEvent.getClass());
         if(processor == null){
             return;
         }
-        processor.processIntent(intentEvent, gameTimeSeconds);
+        processor.processIntent(intentEvent, tpf, gameTimeSeconds);
     }
 }

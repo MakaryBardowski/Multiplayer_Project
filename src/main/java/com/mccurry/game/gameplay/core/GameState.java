@@ -10,6 +10,7 @@ import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
@@ -18,8 +19,7 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.shape.Quad;
-import com.jme3.texture.Texture;
+import com.jme3.scene.shape.Box;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.console.command.spectator.ToggleSpectatorModeEventHandler;
@@ -61,6 +61,9 @@ import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformE
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.raycast.RaycastService;
+import com.mccurry.game.gameplay.system.raycast.entityraycast.EntityRaycastSystem;
+import com.mccurry.game.gameplay.system.raycast.entityraycast.component.EntityRaycastHitboxComponent;
+import com.mccurry.game.gameplay.system.raycast.entityraycast.model.EntityRaycastHitbox;
 import com.mccurry.game.gameplay.system.raycast.mapraycast.MapRaycastSystem;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
@@ -181,8 +184,8 @@ public class GameState extends BaseAppState {
                 m.setBlockIdAtPosition(x, 1, z, BlockType.OFFICE_FLOOR.blockId);
             }
         }
-        for (int x = 1; x < mapX-1; x++) {
-            for (int z = 1; z < mapZ-1; z++) {
+        for (int x = 1; x < mapX - 1; x++) {
+            for (int z = 1; z < mapZ - 1; z++) {
                 m.setBlockIdAtPosition(x, 1, z, BlockType.AIR.blockId);
             }
         }
@@ -194,11 +197,6 @@ public class GameState extends BaseAppState {
         m.setBlockIdAtPosition(12, 1, 11, BlockType.STONE.blockId);
 
         var blockWorld = new BlockWorld(3, 16, mapX, mapY, mapZ, m, app.getAssetManager(), blockWorldNode);
-
-
-
-
-
 
 
         var assetManager = getApplication().getAssetManager();
@@ -232,8 +230,8 @@ public class GameState extends BaseAppState {
         var fpHands = setupModelLight((Node) assetManager.loadModel("Models/Hands_fp/Hands_fp.j3o"));
         fpHands.setLocalScale(0.4f);
 
-        fpHands.move(-0.2f,-0.5f,0.7f);
-        fpHands.rotate(-FastMath.DEG_TO_RAD*6, FastMath.DEG_TO_RAD*4,0);
+        fpHands.move(-0.2f, -0.5f, 0.7f);
+        fpHands.rotate(-FastMath.DEG_TO_RAD * 6, FastMath.DEG_TO_RAD * 4, 0);
         fpHands.getChild("Armature").getControl(AnimComposer.class).setCurrentAction("Hold_SMG_1");
 
         var fpHandsNode = new Node("FP view node");
@@ -247,16 +245,15 @@ public class GameState extends BaseAppState {
 //        fpCameraNode.attachChild(createViewingFrustum(fpCameraNode.getCamera(), assetManager));
 
 
-
-
         playerInputSystem = new PlayerInputSystem(entityStore, gameEventBus);
         playerRotationControlSystem = new PlayerRotationControlSystem(entityStore);
         crosshairSystem = new CrosshairSystem(assetManager, gameHudNode);
 
         var raycastService = new RaycastService();
         var mapRaycastSystem = new MapRaycastSystem(blockWorld, raycastService);
+        var entityRaycastSystem = new EntityRaycastSystem(entityStore, raycastService);
 
-        attackSystem = new AttackSystem(mapRaycastSystem, gameEventBus,entityStore,vfxPlayer);
+        attackSystem = new AttackSystem(mapRaycastSystem, entityRaycastSystem, gameEventBus, entityStore, vfxPlayer);
         equipSystem = new EquipSystem(gameEventBus, entityStore);
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
@@ -285,11 +282,11 @@ public class GameState extends BaseAppState {
 
 
         universeNode.attachChild(blockWorldNode);
-        var rootNode = ((SimpleApplication)getApplication()).getRootNode();
+        var rootNode = ((SimpleApplication) getApplication()).getRootNode();
         rootNode.attachChild(universeNode);
         rootNode.attachChild(firstPersonRootNode);
 
-        // todo: to rozpierdala stan gry po wyjsciu, trzeba w onDisable() przywracac rootNode
+        // todo: to rozpierdala stan gry po wyjsciu, trzeba w onDisable() spowrotem przypisywac rootNode
         getApplication().getRenderManager().getMainView("Default").detachScene(rootNode);
         getApplication().getRenderManager().getMainView("Default").attachScene(universeNode);
 
@@ -314,6 +311,8 @@ public class GameState extends BaseAppState {
         var firstPersonSource = new ViewmodelSourceComponent();
         var firstPersonEffects = new FirstPersonViewTransformEffectsComponent();
         var handsViewmodel = new HandsViewmodelComponent(fpHands);
+
+
         var player = entityStore.create(
                 transformComponent,
                 velocityComponent, // can move
@@ -330,10 +329,7 @@ public class GameState extends BaseAppState {
         );
 
 
-
         spawnMob(universeNode);
-
-
 
 
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
@@ -350,12 +346,12 @@ public class GameState extends BaseAppState {
         subscribeSystems();
 
 
-        var gun =   setupModelLight(
+        var gun = setupModelLight(
                 (Node) assetManager.loadModel("Models/mp18_fp/mp18_fp.j3o")
         );
 
         var weaponEntity1 = entityStore.create(
-                new WeaponIdentityComponent(10f, 1f/8, 0),
+                new WeaponIdentityComponent(10f, 1f / 8, 0),
                 CrosshairSourceComponent.builder()
                         .crosshairType(CrosshairType.SMG)
                         .build(),
@@ -380,7 +376,7 @@ public class GameState extends BaseAppState {
                                 GunVfxData.builder()
                                         .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
                                         .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
-                                        .muzzleFlashOffset(new Vector3f(0,0,-0.15f))
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
                                         .build()
                         )
                         .build()
@@ -415,12 +411,85 @@ public class GameState extends BaseAppState {
         transformComponent.getOriginNode().move(15, 3, 15);
         var velocityComponent = new VelocityComponent();
         var equipmentComponent = new EquipmentComponent();
-        entityStore.create(
+
+
+        var showHitbox = true;
+        Material mat = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
+        mat.setColor("Color", ColorRGBA.Red);
+        mat.getAdditionalRenderState().setWireframe(true);
+
+
+        var armature = humanoidRootNode.getChild("Armature");
+        var raycastHitboxComponent = new EntityRaycastHitboxComponent(armature);
+
+        var headHitbox = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        headHitbox.move(0, 0.1f, 0.08f);
+        var bodyHitbox = new Geometry(null, new Box(7 * 0.05f, 8 * 0.05f, 6f * 0.05f));
+        bodyHitbox.move(0, 0.3f, 0.0f);
+
+        var thighHitboxR = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        thighHitboxR.move(0, 0.1f, 0);
+        var thighHitboxL = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        thighHitboxL.move(0, 0.1f, 0);
+
+        var shinHitboxR = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        shinHitboxR.move(0, 0.1f, 0);
+        var shinHitboxL = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        shinHitboxL.move(0, 0.1f, 0);
+
+        var footHitboxR = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        footHitboxR.move(0, 0.1f, 0);
+        var footHitboxL = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
+        footHitboxL.move(0, 0.1f, 0);
+
+
+        raycastHitboxComponent.getHitboxes().addAll(
+                List.of(
+                        new EntityRaycastHitbox(headHitbox, headHitbox.getLocalTranslation()),
+                        new EntityRaycastHitbox(bodyHitbox, bodyHitbox.getLocalTranslation()),
+
+                        new EntityRaycastHitbox(thighHitboxL, thighHitboxL.getLocalTranslation()),
+                        new EntityRaycastHitbox(thighHitboxR, thighHitboxR.getLocalTranslation()),
+
+                        new EntityRaycastHitbox(shinHitboxR, shinHitboxR.getLocalTranslation()),
+                        new EntityRaycastHitbox(shinHitboxL, shinHitboxL.getLocalTranslation()),
+
+                        new EntityRaycastHitbox(footHitboxR, footHitboxR.getLocalTranslation()),
+                        new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation())
+                )
+        );
+
+        raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setMaterial(mat.clone()));
+
+        armature.getControl(SkinningControl.class).getAttachmentsNode("Head").attachChild(headHitbox);
+        armature.getControl(SkinningControl.class).getAttachmentsNode("Spine").attachChild(bodyHitbox);
+
+//        armature.getControl(SkinningControl.class).getAttachmentsNode("ThighR").attachChild(thighHitboxR);
+//        armature.getControl(SkinningControl.class).getAttachmentsNode("ThighL").attachChild(thighHitboxL);
+//
+//        armature.getControl(SkinningControl.class).getAttachmentsNode("ShinR").attachChild(shinHitboxR);
+//        armature.getControl(SkinningControl.class).getAttachmentsNode("ShinL").attachChild(shinHitboxL);
+//
+//        armature.getControl(SkinningControl.class).getAttachmentsNode("FootR").attachChild(footHitboxR);
+//        armature.getControl(SkinningControl.class).getAttachmentsNode("FootL").attachChild(footHitboxL);
+
+        if (showHitbox) {
+            raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Never));
+        }else {
+            raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Always));
+        }
+
+        var created = entityStore.create(
                 transformComponent,
                 velocityComponent, // can move
                 humanoidModelComponent, // required for visual equipping
-                equipmentComponent
+                equipmentComponent,
+                raycastHitboxComponent
         );
+
+        raycastHitboxComponent.getHitboxes().forEach(hitbox -> {
+            hitbox.getGeometry().setUserData("hitboxOwnerEntityId", created.getId());
+        });
     }
 
     @Override
@@ -455,11 +524,11 @@ public class GameState extends BaseAppState {
             consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
         }
 
-        getApplication().getViewPort().setBackgroundColor(ColorRGBA.Cyan);
+        getApplication().getViewPort().setBackgroundColor(ColorRGBA.DarkGray);
         GuiGlobals.getInstance().setCursorEventsEnabled(false);
         subscribeSystems();
 
-        ((SimpleApplication)getApplication()).getGuiNode().attachChild(gameHudNode);
+        ((SimpleApplication) getApplication()).getGuiNode().attachChild(gameHudNode);
     }
 
     @Override

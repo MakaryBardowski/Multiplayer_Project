@@ -38,7 +38,7 @@ public class IntentSystem implements QueueSystem, EventSubscriber {
         while(iterator.hasNext()){
             var event = iterator.next();
             iterator.remove();
-            intentResolver.resolve(event, gameTimeSeconds);
+            intentResolver.resolve(event, tpf, gameTimeSeconds);
         }
     }
 

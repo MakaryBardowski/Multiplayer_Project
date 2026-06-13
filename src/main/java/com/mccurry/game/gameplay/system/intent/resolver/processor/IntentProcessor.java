@@ -14,8 +14,8 @@ public abstract class IntentProcessor<T extends IntentEvent> {
     }
 
     public abstract Class<T> getHandledIntentEvent();
-    protected abstract void processIntentEvent(T intentEvent , double gameTimeSeconds);
-    public void processIntent(IntentEvent intentEvent , double gameTimeSeconds){
-        processIntentEvent(processedEventType.cast(intentEvent), gameTimeSeconds);
+    protected abstract void processIntentEvent(T intentEvent , float tpf, double gameTimeSeconds);
+    public void processIntent(IntentEvent intentEvent, float tpf, double gameTimeSeconds){
+        processIntentEvent(processedEventType.cast(intentEvent), tpf, gameTimeSeconds);
     }
 }

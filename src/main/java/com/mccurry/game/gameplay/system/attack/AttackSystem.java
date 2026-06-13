@@ -12,6 +12,7 @@ import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEv
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
+import com.mccurry.game.gameplay.system.raycast.entityraycast.EntityRaycastSystem;
 import com.mccurry.game.gameplay.system.raycast.mapraycast.MapRaycastSystem;
 import com.mccurry.game.gameplay.system.raycast.model.RaycastResultSelector;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
@@ -24,11 +25,12 @@ import pocs.SmgViewmodelRecoilTransformEffect;
 @RequiredArgsConstructor
 public class AttackSystem {
     private final MapRaycastSystem mapRaycastSystem;
+    private final EntityRaycastSystem entityRaycastSystem;
     private final EventBus eventBus;
     private final EntityStore entityStore;
     private final VfxPlayer vfxPlayer;
 
-    public void processAttack(Entity attacker, Entity weaponEntity, WeaponIdentityComponent weaponIdentityComponent, double gameTimeSeconds) {
+    public void processAttack(Entity attacker, Entity weaponEntity, WeaponIdentityComponent weaponIdentityComponent, float tpf, double gameTimeSeconds) {
         if (weaponIdentityComponent.getLastUsedGameTimeSeconds() + weaponIdentityComponent.getCooldownSeconds() > gameTimeSeconds) {
             return;
         }
@@ -53,14 +55,30 @@ public class AttackSystem {
             var dir = attackerCameraComponent.getCurrentActualCameraRotation().mult(Vector3f.UNIT_Z);
 
             var camPos = attackerTransform.getOriginNode().getLocalTranslation().clone().add(camOffset);
-            System.err.println("shooting from camPos %s dir %s".formatted(camPos,dir));
-            var result = mapRaycastSystem.getOneRaycastResult(camPos, dir, RaycastResultSelector.CLOSEST);
-            if(result != null){
-                System.err.println("hit at "+result.getContactPoint());
 
-                // FP__MUZZLE_FLASH__SMG_1 wojt work at two places simultaneously
+            var mapRaycastResult = mapRaycastSystem.getOneRaycastResult(camPos, dir, RaycastResultSelector.CLOSEST);
+            var entityRaycastResult = entityRaycastSystem.getOneRaycastResult(attacker.getId() ,camPos, dir, RaycastResultSelector.CLOSEST, tpf, gameTimeSeconds);
 
-                Vector3f normal = result.getContactNormal().normalize();
+            boolean isMapCollisionValid = false;
+            boolean isEntityCollisionValid = false;
+
+            if(mapRaycastResult != null){
+                isMapCollisionValid = true;
+            }
+
+            if(entityRaycastResult != null){
+                isEntityCollisionValid = true;
+            }
+
+            if(isEntityCollisionValid && isMapCollisionValid){
+                   var mapCollisionDistance = camPos.distance(mapRaycastResult.getContactPoint());
+                   var entityCollisionDistance = camPos.distance(entityRaycastResult.getContactPoint());
+                   isMapCollisionValid = mapCollisionDistance < entityCollisionDistance;
+                   isEntityCollisionValid = !isMapCollisionValid;
+            }
+
+            if(isMapCollisionValid){
+                Vector3f normal = mapRaycastResult.getContactNormal().normalize();
 
                 Quaternion rot = new Quaternion();
                 rot.lookAt(normal, Vector3f.UNIT_Y);
@@ -68,13 +86,23 @@ public class AttackSystem {
                 vfxPlayer.playEffect(
                         VfxType.SMG_BULLET_HIT,
                         attackerTransform.getOriginNode().getParent(),
-                        result.getContactPoint().add(result.getContactNormal().normalize().multLocal(0.05f)),
+                        mapRaycastResult.getContactPoint().add(mapRaycastResult.getContactNormal().normalize().multLocal(0.05f)),
+                        rot);
+            }
+
+            if(isEntityCollisionValid){
+                Vector3f normal = entityRaycastResult.getContactNormal().normalize();
+
+                Quaternion rot = new Quaternion();
+                rot.lookAt(normal, Vector3f.UNIT_Y);
+
+                vfxPlayer.playEffect(
+                        VfxType.BLOOD_HEADSHOT,
+                        attackerTransform.getOriginNode().getParent(),
+                        entityRaycastResult.getContactPoint().add(entityRaycastResult.getContactNormal().normalize().multLocal(0.05f)),
                         rot);
             }
         }
-        // assume all weaps are raycast for now
-
-
 
         var gunViewModelComponent = entityStore.getComponent(weaponEntity, GunViewModelComponent.class);
 

@@ -12,15 +12,23 @@ import org.jetbrains.annotations.Nullable;
 public class RaycastService {
 
     public @Nullable CollisionResult getOneRaycastResult(
-            @NotNull Vector3f from,
-            @NotNull Vector3f direction,
+            @NotNull Ray ray,
             @NotNull Spatial spatial,
             @NotNull RaycastResultSelector selector
     ){
+        return getOneRaycastResult(ray,spatial,selector,null);
+    }
 
-        var ray = new Ray(from.clone(), direction.normalize());
-
-        var results = new CollisionResults();
+    public @Nullable CollisionResult getOneRaycastResult(
+            @NotNull Ray ray,
+            @NotNull Spatial spatial,
+            @NotNull RaycastResultSelector selector,
+            @Nullable CollisionResults store
+    ){
+        var results = store;
+        if(results == null){
+            results = new CollisionResults();
+        }
 
         spatial.collideWith(ray, results);
 
@@ -28,7 +36,7 @@ public class RaycastService {
             return null;
         }
 
-         return switch (selector){
+        return switch (selector){
             case ANY -> results.getCollision(0);
             case CLOSEST -> results.getClosestCollision();
             case FARTHEST -> results.getFarthestCollision();

@@ -41,6 +41,45 @@ import java.util.function.Consumer;
 @AllArgsConstructor
 public enum VfxType {
     NONE(null),
+    BLOOD_HEADSHOT(new BiFunction<>() {
+        @Override
+        public Vfx apply(AssetManager assetManager, Consumer<Vfx> onFinishedPlaying) {
+            var smoke = getBloodCloudEmitter(assetManager);
+            var debris = getBloodDropsEmitter(assetManager);
+
+
+            return new Vfx(onFinishedPlaying) {
+                private static final Random RANDOM = new Random();
+                @Override
+                public VfxType getType() {
+                    return BLOOD_HEADSHOT;
+                }
+
+                @Override
+                public void play(Node parentNode, Vector3f localOffset, Quaternion localRotation) {
+                    // nie robic ich pod jednym parent nodem - wtedy czasem nie dziala...
+                    debris.setLocalRotation(localRotation);
+                    debris.setLocalTranslation(localOffset);
+                    smoke.setLocalRotation(localRotation);
+                    smoke.setLocalTranslation(localOffset);
+
+                    parentNode.attachChild(debris);
+                    parentNode.attachChild(smoke);
+
+
+                    debris.rotate(FastMath.DEG_TO_RAD*90,0,0);
+                    smoke.rotate(FastMath.DEG_TO_RAD*90,0,0);
+
+                    smoke.emitNextParticle();
+                    for(int i = 0; i < RANDOM.nextInt(5,8); i++) {
+                        debris.emitNextParticle();
+                    }
+
+                    onFinishedPlaying.accept(this);
+                }
+            };
+        }
+    }),
     SMG_BULLET_HIT(new BiFunction<>() {
         @Override
         public Vfx apply(AssetManager assetManager, Consumer<Vfx> onFinishedPlaying) {
@@ -314,6 +353,105 @@ public enum VfxType {
                         .addGradPoint(new ColorRGBA(1, 1, 1, 0.5f), 0.0f)
                         .addGradPoint(new ColorRGBA(1, 1, 1, 0.5f), 0.1f)
                         .addGradPoint(new ColorRGBA(1, 1, 1, 0.0f), 1.0f)
+        ));
+
+        var oneVoxelParticleSize = 1.5f/32f;
+        emitter.setStartSize(new ValueType(oneVoxelParticleSize));
+        emitter.setStartSpeed(new ValueType(6f));
+        emitter.setLifeMinMax(new ValueType(0.5f), new ValueType(0.6f));
+        emitter.setLooping(false);
+        emitter.setEmissionsPerSecond(0);
+
+        emitter.setParticlesPerEmission(1);
+        emitter.setShape(new EmitterCone());
+        ((EmitterCone) emitter.getShape()).setRadius(0.05f);
+        ((EmitterCone) emitter.getShape()).setAngle(FastMath.PI * 0.4f);
+        emitter.setParticlesFollowEmitter(false);
+        emitter.reset();
+        emitter.setCullHint(Spatial.CullHint.Never);
+        emitter.setQueueBucket(RenderQueue.Bucket.Opaque); // workaround, inaczej renderuje sie nad wszystkim :)
+        return emitter;
+    }
+
+
+    public static Emitter getBloodCloudEmitter(AssetManager assetManager) {
+
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        Texture tex = assetManager.loadTexture("Textures/Gameplay/Effects/BulletImpact/shotDebris.png");
+        tex.setMagFilter(Texture.MagFilter.Nearest);
+        tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        mat.setTexture("Texture", tex);
+
+        var emitter = new Emitter("Smoke", mat, 100,
+                new ColorInfluencer(),
+                new VelocityDampingInfluencer(0.8f, 0.9f),
+                new CustomSpriteInfluencer(),
+                new RandomInitialRotationInfluencer()
+        );
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteCols(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteRows(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setUseRandomImage(true);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setAnimate(false);
+
+        emitter.setBillboardMode(BillboardMode.Camera);
+
+        emitter.getInfluencer(ColorInfluencer.class).setColorOverTime(new ColorValueType(
+                new Gradient()
+                        .addGradPoint(new ColorRGBA(0.55f, 0.02f, 0.04f, 1f), 0.0f)   // deep fresh blood
+                        .addGradPoint(new ColorRGBA(0.48f, 0.01f, 0.03f, 1f), 0.2f)   // darker, more viscous
+                        .addGradPoint(new ColorRGBA(0.38f, 0.01f, 0.02f, 0.9f), 0.5f)  // bordeaux core tone
+                        .addGradPoint(new ColorRGBA(0.28f, 0.01f, 0.02f, 0.8f), 0.8f)  // dried dark blood
+                        .addGradPoint(new ColorRGBA(0.18f, 0.01f, 0.01f, 0.0f), 1.0f)  // almost black fade
+        ));
+        var oneVoxelParticleSize = 1.5f/32f;
+        emitter.setStartSize(new ValueType(oneVoxelParticleSize*8));
+        emitter.setStartSpeed(new ValueType(2.5f));
+        emitter.setLifeMinMax(new ValueType(0.4f), new ValueType(0.6f));
+        emitter.setLooping(false);
+        emitter.setEmissionsPerSecond(0);
+
+        emitter.setParticlesPerEmission(1);
+        emitter.setShape(new EmitterCone());
+        ((EmitterCone) emitter.getShape()).setRadius(0.1f);
+        ((EmitterCone) emitter.getShape()).setAngle(FastMath.PI * 0.05f);
+        emitter.setParticlesFollowEmitter(false);
+        emitter.reset();
+        emitter.setCullHint(Spatial.CullHint.Never);
+        emitter.setQueueBucket(RenderQueue.Bucket.Opaque); // workaround, inaczej renderuje sie nad wszystkim :)
+        return emitter;
+    }
+
+    public static Emitter getBloodDropsEmitter(AssetManager assetManager) {
+
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        Texture tex = assetManager.loadTexture("Textures/Gameplay/Effects/BulletImpact/shotBloodDropParticles.png");
+        tex.setMagFilter(Texture.MagFilter.Nearest);
+        tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+        mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
+        mat.setTexture("Texture", tex);
+
+        var emitter = new Emitter("Debris", mat, 100,
+                new ColorInfluencer(),
+                new VelocityDampingInfluencer(0.8f, 0.98f),
+                new CustomSpriteInfluencer(),
+                new GravityInfluencer()
+                //             new RandomInitialRotationInfluencer()
+        );
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteCols(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setSpriteRows(2);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setUseRandomImage(true);
+        emitter.getInfluencer(CustomSpriteInfluencer.class).setAnimate(false);
+
+        emitter.setBillboardMode(BillboardMode.Camera);
+
+        emitter.getInfluencer(ColorInfluencer.class).setColorOverTime(new ColorValueType(
+                new Gradient()
+                        .addGradPoint(new ColorRGBA(0.55f, 0.02f, 0.04f, 1f), 0.0f)   // deep fresh blood
+                        .addGradPoint(new ColorRGBA(0.48f, 0.01f, 0.03f, 1f), 0.2f)   // darker, more viscous
+                        .addGradPoint(new ColorRGBA(0.38f, 0.01f, 0.02f, 0.9f), 0.5f)  // bordeaux core tone
+                        .addGradPoint(new ColorRGBA(0.28f, 0.01f, 0.02f, 0.8f), 0.8f)  // dried dark blood
+                        .addGradPoint(new ColorRGBA(0.18f, 0.01f, 0.01f, 0.0f), 1.0f)  // almost black fade
         ));
 
         var oneVoxelParticleSize = 1.5f/32f;
