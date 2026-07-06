@@ -71,7 +71,7 @@ public enum VfxType {
                     smoke.rotate(FastMath.DEG_TO_RAD*90,0,0);
 
                     smoke.emitNextParticle();
-                    for(int i = 0; i < RANDOM.nextInt(5,8); i++) {
+                    for(int i = 0; i < RANDOM.nextInt(5,15); i++) {
                         debris.emitNextParticle();
                     }
 
@@ -139,7 +139,8 @@ public enum VfxType {
                 public void play(Node parentNode, Vector3f localOffset, Quaternion localRotation) {
                     var bullet = (Node)assetManager.loadModel("Models/mp18_fp_bullet/mp18_fp_bullet.j3o");
                     bullet = setupModelLight(bullet,assetManager);
-                    var horizontalSpeed = RANDOM.nextFloat(3f,4f)*3f;
+                    bullet.setName("sfx smg bullet");
+                    var horizontalSpeed = RANDOM.nextFloat(3f,4f)*4f;
                     var verticalSpeed = RANDOM.nextFloat(3.5f,4.25f);
                     var depthSpeed = RANDOM.nextFloat(0.8f,1f);
                     bullet.rotate(-FastMath.DEG_TO_RAD*90,0,0);
@@ -160,6 +161,9 @@ public enum VfxType {
 
                         @Override
                         protected void controlUpdate(float tpf) {
+                            if(!isEnabled()){
+                                return;
+                            }
 
                             time += tpf;
 
@@ -376,12 +380,14 @@ public enum VfxType {
 
     public static Emitter getBloodCloudEmitter(AssetManager assetManager) {
 
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Texture tex = assetManager.loadTexture("Textures/Gameplay/Effects/BulletImpact/shotDebris.png");
         tex.setMagFilter(Texture.MagFilter.Nearest);
         tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
         mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-        mat.setTexture("Texture", tex);
+        mat.setTexture("ColorMap", tex);
+        mat.setColor("Color", ColorRGBA.Red.clone());
+        mat.setBoolean("VertexColor",true);
 
         var emitter = new Emitter("Smoke", mat, 100,
                 new ColorInfluencer(),
@@ -424,12 +430,16 @@ public enum VfxType {
 
     public static Emitter getBloodDropsEmitter(AssetManager assetManager) {
 
-        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+        Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
         Texture tex = assetManager.loadTexture("Textures/Gameplay/Effects/BulletImpact/shotBloodDropParticles.png");
         tex.setMagFilter(Texture.MagFilter.Nearest);
         tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
         mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
-        mat.setTexture("Texture", tex);
+        mat.setTexture("ColorMap", tex);
+
+
+        mat.setColor("Color", ColorRGBA.Red.clone());
+        mat.setBoolean("VertexColor",true);
 
         var emitter = new Emitter("Debris", mat, 100,
                 new ColorInfluencer(),

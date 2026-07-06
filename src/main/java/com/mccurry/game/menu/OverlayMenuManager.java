@@ -18,21 +18,51 @@ public class OverlayMenuManager {
 
     public void openOverlay(MenuState menu) {
         if (!overlayStack.isEmpty()) {
-            hideCurrentOverlay();
+            hideTopOverlay();
         }
 
         overlayStack.push(menu);
         stateManager.attach(menu);
     }
 
-    private void hideCurrentOverlay() {
-        var previousOverlay = overlayStack.peek();
+    public boolean anyOverlaysActive(){
+        return !overlayStack.isEmpty();
+    }
+
+    private void hideTopOverlay() {
+        var currentOverlay = overlayStack.peek();
+        currentOverlay.setEnabled(false);
+    }
+
+    private void showTopOverlay(){
+        var currentOverlay = overlayStack.peek();
+        currentOverlay.setEnabled(true);
+    }
+
+    public void closeTopOverlay() {
+        var previousOverlay = overlayStack.pop();
         stateManager.detach(previousOverlay);
+
+
+        if (!overlayStack.isEmpty()) {
+            showTopOverlay();
+        }
     }
 
     public void closeOverlay(@NonNull MenuState overlay) {
-        overlayStack.remove(overlay);
-        stateManager.detach(overlay);
+        if(overlayStack.isEmpty()){
+            return;
+        }
+
+        var topOverlay = overlayStack.peek();
+
+        if(topOverlay != overlay){
+            overlayStack.remove(overlay);
+            stateManager.detach(overlay);
+            return;
+        }
+
+        closeTopOverlay();
     }
 
     public void closeAllOverlays(){

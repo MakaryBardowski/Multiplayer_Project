@@ -1,5 +1,7 @@
 package com.mccurry.game;
 
+import com.jme3.app.DebugKeysAppState;
+import com.jme3.app.FlyCamAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.ScreenshotAppState;
 import com.jme3.math.ColorRGBA;
@@ -45,8 +47,10 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
-        flyCam.setEnabled(false);
-        flyCam.setMoveSpeed(30);
+        stateManager.detach(
+                stateManager.getState(FlyCamAppState.class)
+        );
+        clearJmeMappings();
 
         CameraConstants.applyDefaultTransform(getCamera());
 
@@ -114,5 +118,10 @@ public class Main extends SimpleApplication {
     @Override
     public Node getGuiNode(){
         return gameGuiNode;
+    }
+
+    private void clearJmeMappings(){
+        inputManager.deleteMapping(INPUT_MAPPING_EXIT);
+        inputManager.deleteMapping(INPUT_MAPPING_HIDE_STATS);
     }
 }

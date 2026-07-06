@@ -466,6 +466,7 @@ public class SinglePlayerLobbyState extends MenuState {
 
     @Override
     protected void onEnable() {
+        super.onEnable();
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.DarkGray);
         getApplication().getCamera().setLocation(new Vector3f(1, 2, -5)); // 0,1,-5
         getApplication().getCamera().lookAt(new Vector3f(0, 1, 10), Vector3f.UNIT_Y);
@@ -473,6 +474,7 @@ public class SinglePlayerLobbyState extends MenuState {
 
     @Override
     protected void onDisable() {
+        super.onDisable();
         CameraConstants.applyDefaultTransform(getApplication().getCamera());
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
     }

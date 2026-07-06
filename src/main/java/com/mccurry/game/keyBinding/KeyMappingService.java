@@ -53,6 +53,8 @@ public class KeyMappingService implements EventSubscriber, SyncEventHandler<Main
 
         HashMap<String, Trigger> triggersByMapping = new HashMap<>();
 
+        triggersByMapping.put(MAPPING_KEY_ESCAPE, new KeyTrigger(KeyInput.KEY_ESCAPE));
+
         triggersByMapping.put(MAPPING_MOUSE_MOVE_X_LEFT, new MouseAxisTrigger(MouseInput.AXIS_X,true));
         triggersByMapping.put(MAPPING_MOUSE_MOVE_X_RIGHT, new MouseAxisTrigger(MouseInput.AXIS_X,false));
 
@@ -124,10 +126,6 @@ public class KeyMappingService implements EventSubscriber, SyncEventHandler<Main
 
     }
 
-    public @Nullable KeyBind getKeybindForPlayerAction(PlayerAction playerAction) {
-        return currentKeyBinds.get(playerAction);
-    }
-
     public void updateBindings(Map<PlayerAction, KeyBind> newBindings) {
         for (var newBindEntry : newBindings.entrySet()) {
             var reboundPlayerAction = newBindEntry.getKey();
@@ -145,8 +143,8 @@ public class KeyMappingService implements EventSubscriber, SyncEventHandler<Main
                 System.out.println("deleting trigger " + previousBind.getKeyDisplayName() + " for mapping " + mapping);
                 inputManager.addMapping(mapping, newKeybind.getTrigger());
                 System.out.println("added trigger " + newKeybind.getKeyDisplayName() + " for mapping " + mapping);
-            } catch (Exception ignored) {
-                System.err.println("Failed to rebind key... " + ignored.getMessage());
+            } catch (Exception ex) {
+                System.err.println("Failed to rebind key... " + ex.getMessage());
             }
 
         }

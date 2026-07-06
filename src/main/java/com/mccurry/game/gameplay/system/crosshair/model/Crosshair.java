@@ -33,8 +33,14 @@ public class Crosshair extends Node {
         }
 
         addControl(new AbstractControl() {
+
+
             @Override
             protected void controlUpdate(float tpf) {
+
+                if(!isEnabled()){
+                    return;
+                }
 
                 // Recover toward zero.
                 targetSpread = Math.max(0f, targetSpread - RECOVERY_SPEED * tpf);

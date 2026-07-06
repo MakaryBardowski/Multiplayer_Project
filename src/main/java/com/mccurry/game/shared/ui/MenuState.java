@@ -5,10 +5,12 @@ import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Node;
+import lombok.Getter;
 
 public abstract class MenuState extends BaseAppState implements MenuService {
     public static String METADATA_LOCALE_KEY = "LOCALE_KEY";
 
+    @Getter
     private final Node stateGuiNode = new Node(
             "%s-$%s-stateGuiNode".formatted(this.getClass().getSimpleName(),System.identityHashCode(this))
     );
@@ -29,9 +31,6 @@ public abstract class MenuState extends BaseAppState implements MenuService {
             createUiOnce(simpleApp, stateGuiNode);
             initialized = true;
         }
-        var simpleApp = (SimpleApplication) application;
-        simpleApp.getGuiNode().attachChild(stateGuiNode);
-        simpleApp.getRootNode().attachChild(stateSceneNode);
     }
 
     @Override
@@ -41,11 +40,25 @@ public abstract class MenuState extends BaseAppState implements MenuService {
     }
 
     @Override
-    protected void onEnable() {}
+    protected void onEnable() {
+        getParentGuiNode().attachChild(stateGuiNode);
+        getParentRootNode().attachChild(stateSceneNode);
+    }
 
     @Override
-    protected void onDisable() {}
+    protected void onDisable() {
+        stateGuiNode.removeFromParent();
+        stateSceneNode.removeFromParent();
+    }
 
     @Override
     public void createSceneOnce(SimpleApplication application, Node stateSceneNode) {}
+
+    private Node getParentGuiNode(){
+        return ((SimpleApplication) getApplication()).getGuiNode();
+    }
+
+    private Node getParentRootNode(){
+        return ((SimpleApplication) getApplication()).getRootNode();
+    }
 }

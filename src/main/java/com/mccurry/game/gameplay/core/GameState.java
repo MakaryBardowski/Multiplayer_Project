@@ -1,16 +1,16 @@
 package com.mccurry.game.gameplay.core;
 
+import com.epagagames.particles.Emitter;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.effect.ParticleEmitter;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
-import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
@@ -19,6 +19,7 @@ import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.shape.Box;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
@@ -30,6 +31,7 @@ import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
+import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
@@ -67,8 +69,8 @@ import com.mccurry.game.gameplay.system.raycast.entityraycast.model.EntityRaycas
 import com.mccurry.game.gameplay.system.raycast.mapraycast.MapRaycastSystem;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.keyBinding.KeyMappingRegistry;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
+import com.mccurry.game.shared.cursor.CursorService;
 import com.mccurry.game.shared.sfx.factory.VfxFactories;
 import com.mccurry.game.shared.sfx.model.Vfx;
 import com.mccurry.game.shared.sfx.model.VfxType;
@@ -80,10 +82,10 @@ import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
 import com.mccurry.map.visuals.BlockWorld;
 import com.simsilica.lemur.GuiGlobals;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 import java.util.function.Consumer;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
@@ -111,7 +113,19 @@ public class GameState extends BaseAppState {
 
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
     private ViewPort fpViewport;
-    private SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable = EventHandlers.syncEventHandler(
+
+    private final Node universeNode = new Node();
+    private final Node gameStateNode = new Node();
+
+    private final SyncEventHandler<GameplayChangePauseStateRequest> onPauseRequest = EventHandlers.syncEventHandler(
+            (event, elm) -> {
+                switch (event.getDesiredNewState()){
+                    case PAUSED -> this.setEnabled(false);
+                    case UNPAUSED -> this.setEnabled(true);
+                }
+            }
+    );
+    private final SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable = EventHandlers.syncEventHandler(
             (event, elm) -> {
                 entityStore.forEachEntityWithComponents(0, gameTimeInSeconds, new EntityCallback() {
                     @Override
@@ -215,8 +229,6 @@ public class GameState extends BaseAppState {
 
 
         var firstPersonRootNode = new Node();
-        var universeNode = new Node();
-
 
         var fpCamera = camera.clone();
         fpCamera.setFrustumPerspective(45f, (float) fpCamera.getWidth() / fpCamera.getHeight(), 0.01f, 300f);
@@ -265,27 +277,11 @@ public class GameState extends BaseAppState {
                 entityStore
         );
 
-
-        getApplication().getInputManager().addListener(playerInputSystem,
-                KeyMappingRegistry.MAPPING_KEY_W,
-                MAPPING_KEY_S,
-                MAPPING_KEY_A,
-                MAPPING_KEY_D,
-                MAPPING_MOUSE_LEFT
-        );
-
-        getApplication().getInputManager().addListener(playerRotationControlSystem,
-                MAPPING_MOUSE_MOVE_X_LEFT,
-                MAPPING_MOUSE_MOVE_X_RIGHT,
-                MAPPING_MOUSE_MOVE_Y_DOWN,
-                MAPPING_MOUSE_MOVE_Y_UP
-        );
-
-
         universeNode.attachChild(blockWorldNode);
         var rootNode = ((SimpleApplication) getApplication()).getRootNode();
-        rootNode.attachChild(universeNode);
-        rootNode.attachChild(firstPersonRootNode);
+        gameStateNode.attachChild(universeNode);
+        gameStateNode.attachChild(firstPersonRootNode);
+        rootNode.attachChild(gameStateNode);
 
         // todo: to rozpierdala stan gry po wyjsciu, trzeba w onDisable() spowrotem przypisywac rootNode
         getApplication().getRenderManager().getMainView("Default").detachScene(rootNode);
@@ -344,7 +340,7 @@ public class GameState extends BaseAppState {
         entitySystems.add(new CameraSystem(entityStore, app.getCamera()));
         // NIE ZMIENIAC KOLEJNOSCI
 
-        subscribeSystems();
+        setupState();
 
 
         var gun = setupModelLight(
@@ -400,6 +396,7 @@ public class GameState extends BaseAppState {
 
         fpp.addFilter(bloom);
         renderManager.getMainView("Default").addProcessor(fpp);
+
     }
 
     private void spawnMob(Node universeNode) {
@@ -414,7 +411,7 @@ public class GameState extends BaseAppState {
         var equipmentComponent = new EquipmentComponent();
 
 
-        var showHitbox = false;
+        var showHitbox = true;
         var matRed = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
         matRed.setColor("Color", ColorRGBA.Red);
         matRed.getAdditionalRenderState().setWireframe(true);
@@ -435,10 +432,10 @@ public class GameState extends BaseAppState {
         var thighHitboxL = new Geometry(null, new Box(2 * 0.05f, 5 * 0.05f, 4f * 0.05f));
         thighHitboxL.move(0, 0.2f, 0.125f);
 
-        var shinHitboxR = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 2f * 0.05f));
-        shinHitboxR.move(0, 0.125f, 0);
-        var shinHitboxL = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 2f * 0.05f));
-        shinHitboxL.move(0, 0.125f, 0);
+        var shinHitboxR = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 3f * 0.05f));
+        shinHitboxR.move(0, 0.125f, 0.125f/2);
+        var shinHitboxL = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 3f * 0.05f));
+        shinHitboxL.move(0, 0.125f, 0.125f/2);
 
         var footHitboxR = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
         footHitboxR.move(0, 0.0f, 0);
@@ -524,8 +521,11 @@ public class GameState extends BaseAppState {
 
     @Override
     public void update(float tpf) {
-        long t1 = System.nanoTime();
+        if(!isEnabled()){
+            return;
+        }
 
+        long t1 = System.nanoTime();
 
         gameTimeInSeconds += tpf;
         intentSystem.processQueued(tpf, gameTimeInSeconds);
@@ -544,25 +544,32 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
-
     }
 
     @Override
     protected void onEnable() {
+        unpauseGame();
+    }
+
+    @Override
+    protected void onDisable() {
+        pauseGame();
+    }
+
+    private void setupState(){
         var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
         if (consoleLauncher != null) {
             consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
         }
 
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.DarkGray);
-        GuiGlobals.getInstance().setCursorEventsEnabled(false);
-        subscribeSystems();
+        CursorService.cursorEnabled(false);
+        setupSystems();
 
         ((SimpleApplication) getApplication()).getGuiNode().attachChild(gameHudNode);
     }
 
-    @Override
-    protected void onDisable() {
+    private void cleanupState(){
         var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
         if (consoleLauncher != null) {
             consoleLauncher.getCheatConsoleState().setGameContext(null);
@@ -571,33 +578,96 @@ public class GameState extends BaseAppState {
 
         CameraConstants.applyDefaultTransform(getApplication().getCamera());
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
-        GuiGlobals.getInstance().setCursorEventsEnabled(true);
-        unsubscribeSystems();
+        CursorService.cursorEnabled(true);
+        cleanupSystems();
         getApplication().getRenderManager().removeMainView(fpViewport);
 
         gameHudNode.removeFromParent();
     }
 
-    private void subscribeSystems() {
+    private void setupSystems() {
+        var orchestrationBus = getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
+        setupControlsListener();
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
         crosshairSystem.subscribe(gameEventBus);
         thirdPersonVisualEquipSystem.subscribe(gameEventBus);
         firstPersonEquipSystem.subscribe(gameEventBus);
         intentSystem.subscribe(gameEventBus);
+        orchestrationBus.subscribe(GameplayChangePauseStateRequest.class, onPauseRequest);
     }
 
-    private void unsubscribeSystems() {
-        getApplication().getInputManager().removeListener(playerInputSystem);
-        getApplication().getInputManager().removeListener(playerRotationControlSystem);
+    private void cleanupSystems() {
+        var orchestrationBus = getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
+        cleanupControlsListener();
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         gameEventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
         crosshairSystem.unsubscribe(gameEventBus);
         thirdPersonVisualEquipSystem.unsubscribe(gameEventBus);
         firstPersonEquipSystem.unsubscribe(gameEventBus);
         intentSystem.unsubscribe(gameEventBus);
+        orchestrationBus.unsubscribe(GameplayChangePauseStateRequest.class, onPauseRequest);
     }
 
+    private void pauseGame(){
+        cleanupControlsListener();
+
+        setPaused(gameStateNode, true);
+        setPaused(gameHudNode,true);
+        CursorService.cursorEnabled(true);
+    }
+
+    private void unpauseGame(){
+        setupControlsListener();
+
+        setPaused(gameStateNode, false);
+        setPaused(gameHudNode,false);
+        CursorService.cursorEnabled(false);
+    }
+
+    public static void setPaused(Spatial spatial, boolean paused) {
+        if (spatial instanceof Node node) {
+            for (Spatial child : node.getChildren()) {
+                setPaused(child, paused);
+            }
+        }
+
+        for(int i = 0; i < spatial.getNumControls(); i++){
+            var c = spatial.getControl(i);
+            if(c instanceof AbstractControl ac){
+                ac.setEnabled(!paused);
+            }
+        }
+
+        if(spatial instanceof ParticleEmitter pe){
+            pe.setEnabled(!paused);
+        } else if(spatial instanceof Emitter e){
+            e.setEnabled(!paused);
+        }
+    }
+
+
+    private void setupControlsListener(){
+        getApplication().getInputManager().addListener(playerInputSystem,
+                MAPPING_KEY_W,
+                MAPPING_KEY_S,
+                MAPPING_KEY_A,
+                MAPPING_KEY_D,
+                MAPPING_MOUSE_LEFT
+        );
+
+        getApplication().getInputManager().addListener(playerRotationControlSystem,
+                MAPPING_MOUSE_MOVE_X_LEFT,
+                MAPPING_MOUSE_MOVE_X_RIGHT,
+                MAPPING_MOUSE_MOVE_Y_DOWN,
+                MAPPING_MOUSE_MOVE_Y_UP
+        );
+    }
+
+    private void cleanupControlsListener(){
+        getApplication().getInputManager().removeListener(playerInputSystem);
+        getApplication().getInputManager().removeListener(playerRotationControlSystem);
+    }
 
     public Node setupModelLight(Node node) {
         for (Spatial c : node.getChildren()) {
@@ -618,4 +688,5 @@ public class GameState extends BaseAppState {
         }
         return node;
     }
+
 }

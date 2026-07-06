@@ -58,6 +58,7 @@ public class KeyMappingRegistry {
     public static final String MAPPING_KEY_8 = "8";
     public static final String MAPPING_KEY_9 = "9";
 
+    public static final String MAPPING_KEY_ESCAPE = "ESC";
     public static final String MAPPING_KEY_TILDE = "TILDE";
 
     public static final String MAPPING_CTRL_LEFT = "L_Ctrl";

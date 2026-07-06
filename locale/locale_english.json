@@ -37,6 +37,9 @@
   "GAMEMODE_SELECTOR_HOST_MP": "Host Game",
   "GAMEMODE_SELECTOR_JOIN_MP": "Join Game",
 
-  "LOBBY_SP_CONFIRM": "Confirm"
+  "LOBBY_SP_CONFIRM": "Confirm",
 
+  "PAUSE_MENU_CONTINUE": "Continue",
+  "PAUSE_MENU_MAIN_MENU": "Main menu",
+  "PAUSE_MENU_SETTINGS": "Settings"
 }

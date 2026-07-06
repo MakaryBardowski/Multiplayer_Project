@@ -40,7 +40,9 @@ public class GameStateOrchestrator extends BaseAppState {
     @Override
     protected void initialize(Application application) {
         new ScreenTransitionService(application.getStateManager()).subscribe(gameOrchestrationBus);
-        new MenuManager(application).subscribe(gameOrchestrationBus);
+        var menuManager = new MenuManager(application);
+        menuManager.subscribe(gameOrchestrationBus);
+        menuManager.startListening(getApplication().getInputManager());
 
         var bootDoneHandler = new OnAssetLoadingDoneMainMenuLauncher(gameOrchestrationBus);
         gameOrchestrationBus.subscribe(AssetLoadingCompleteEvent.class, bootDoneHandler);
@@ -50,7 +52,6 @@ public class GameStateOrchestrator extends BaseAppState {
         getStateManager().attach(initialBootState);
 
         closeInitialBootStateSubscriber(initialBootState).subscribe(gameOrchestrationBus); // todo: bug? co jesli asset loading skonczy sie przed zarejestrowaniem tego subscribera?
-
     }
 
     @Override
