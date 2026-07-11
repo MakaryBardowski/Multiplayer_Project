@@ -34,7 +34,7 @@ public class PrimaryActionProcessor extends IntentProcessor<PrimaryActionIntentE
             if (heldInRightHand != null) {
                 var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponIdentityComponent.class);
                 if (weaponComponent != null) {
-                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent, tpf, gameTimeSeconds);
+                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent.getPrimaryActionIdentity(), tpf, gameTimeSeconds);
                 }
             }
         }

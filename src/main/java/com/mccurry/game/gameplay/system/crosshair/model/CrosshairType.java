@@ -7,8 +7,9 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @RequiredArgsConstructor
 public enum CrosshairType {
-    DEFAULT(null, null,"Interface/GUI/Crosshair/smg_center.png"),
-    SMG("Interface/GUI/Crosshair/smg_right.png","Interface/GUI/Crosshair/smg_left.png","Interface/GUI/Crosshair/smg_center.png");
+    DEFAULT(null, null, "Interface/GUI/Crosshair/smg/smg_center.png"),
+    SMG("Interface/GUI/Crosshair/smg/smg_right.png", "Interface/GUI/Crosshair/smg/smg_left.png", "Interface/GUI/Crosshair/smg/smg_center.png"),
+    SHOTGUN("Interface/GUI/Crosshair/shotgun/shotgun_left.png", "Interface/GUI/Crosshair/shotgun/shotgun_right.png", "Interface/GUI/Crosshair/shotgun/shotgun_center.png");
 
     @Nullable private final String rightTexturePath;
     @Nullable private final String leftTexturePath;

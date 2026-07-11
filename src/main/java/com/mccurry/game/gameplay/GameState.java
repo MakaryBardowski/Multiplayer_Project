@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplay.core;
+package com.mccurry.game.gameplay;
 
 import com.epagagames.particles.Emitter;
 import com.jme3.anim.AnimComposer;
@@ -81,8 +81,6 @@ import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
 import com.mccurry.map.visuals.BlockWorld;
-import com.simsilica.lemur.GuiGlobals;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -343,14 +341,25 @@ public class GameState extends BaseAppState {
         setupState();
 
 
+
+
         var gun = setupModelLight(
-                (Node) assetManager.loadModel("Models/mp18_fp/mp18_fp.j3o")
+                (Node) assetManager.loadModel(
+                        "Models/double_barrel_fp/double_barrel_fp.j3o"
+                )
         );
 
         var weaponEntity1 = entityStore.create(
-                new WeaponIdentityComponent(10f, 1f / 8, 0),
+                WeaponIdentityComponent.builder()
+                        .primaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                        )
+                        .secondaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                        )
+                        .build(),
                 CrosshairSourceComponent.builder()
-                        .crosshairType(CrosshairType.SMG)
+                        .crosshairType(CrosshairType.SHOTGUN)
                         .build(),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
@@ -359,16 +368,8 @@ public class GameState extends BaseAppState {
                         .build(),
                 GunViewModelComponent.builder()
                         .viewModel(gun)
-                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
-                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
                         .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-                        .gunAnimationData(
-                                GunAnimationData.builder()
-                                        .lockIdleAnimName("Lock_Idle")
-                                        .lockRecoilAnimName("Lock_Pull")
-                                        .lockReturnAnimName("Lock_Return")
-                                        .build()
-                        )
                         .gunVfxData(
                                 GunVfxData.builder()
                                         .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
@@ -378,6 +379,45 @@ public class GameState extends BaseAppState {
                         )
                         .build()
         );
+
+//        var gun = setupModelLight(
+//                (Node) assetManager.loadModel(
+//                        "Models/mp18_fp/mp18_fp.j3o"
+//                )
+//        );
+//
+//        var weaponEntity1 = entityStore.create(
+//                WeaponIdentityComponent.builder()
+//                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(10f, 1f / 8, 0)).build(),
+//                CrosshairSourceComponent.builder()
+//                        .crosshairType(CrosshairType.SMG)
+//                        .build(),
+//                EquippableComponent.builder()
+//                        .handSlot(HandSlot.HAND_RIGHT)
+//                        .handSlot(HandSlot.HAND_LEFT)
+//                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+//                        .build(),
+//                GunViewModelComponent.builder()
+//                        .viewModel(gun)
+//                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
+//                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+//                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
+//                        .gunAnimationData(
+//                                GunAnimationData.builder()
+//                                        .lockIdleAnimName("Lock_Idle")
+//                                        .lockRecoilAnimName("Lock_Pull")
+//                                        .lockReturnAnimName("Lock_Return")
+//                                        .build()
+//                        )
+//                        .gunVfxData(
+//                                GunVfxData.builder()
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+//                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+//                                        .build()
+//                        )
+//                        .build()
+//        );
 
 
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
@@ -653,7 +693,8 @@ public class GameState extends BaseAppState {
                 MAPPING_KEY_S,
                 MAPPING_KEY_A,
                 MAPPING_KEY_D,
-                MAPPING_MOUSE_LEFT
+                MAPPING_MOUSE_LEFT,
+                MAPPING_MOUSE_RIGHT
         );
 
         getApplication().getInputManager().addListener(playerRotationControlSystem,

@@ -6,6 +6,7 @@ import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
 import com.mccurry.game.gameplay.system.intent.resolver.processor.HandEquipActionProcessor;
 import com.mccurry.game.gameplay.system.intent.resolver.processor.IntentProcessor;
 import com.mccurry.game.gameplay.system.intent.resolver.processor.PrimaryActionProcessor;
+import com.mccurry.game.gameplay.system.intent.resolver.processor.SecondaryActionProcessor;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +18,10 @@ public class IntentResolver {
 
     public IntentResolver(IntentSystems intentSystems, EntityStore entityStore){
         var primaryActionProcessor = new PrimaryActionProcessor(entityStore, intentSystems.getAttackSystem());
+        var secondaryActionProcessor = new SecondaryActionProcessor(entityStore, intentSystems.getAttackSystem());
         var handEquipActionProcessor = new HandEquipActionProcessor(entityStore, intentSystems.getEquipSystem());
         processorByIntentClassMap.put(primaryActionProcessor.getHandledIntentEvent(), primaryActionProcessor);
+        processorByIntentClassMap.put(secondaryActionProcessor.getHandledIntentEvent(), secondaryActionProcessor);
         processorByIntentClassMap.put(handEquipActionProcessor.getHandledIntentEvent(), handEquipActionProcessor);
     }
 

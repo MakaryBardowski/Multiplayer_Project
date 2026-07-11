@@ -6,6 +6,7 @@ import com.jme3.math.Vector3f;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.intent.event.PrimaryActionIntentEvent;
+import com.mccurry.game.gameplay.system.intent.event.SecondaryActionIntentEvent;
 import com.mccurry.game.gameplay.system.movement.component.VelocityComponent;
 import com.mccurry.game.gameplay.system.player.component.control.PlayerControlledComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
@@ -100,6 +101,16 @@ public class PlayerInputSystem implements ActionListener, AnalogListener {
 
             gameEventBus.publish(
                     new PrimaryActionIntentEvent(playerControlledEntity),
+                    null
+            );
+        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_RIGHT)){
+            var playerControlledEntity = entityStore.getSingletonComponentHolder(PlayerControlledComponent.class);
+            if (playerControlledEntity == null) {
+                return;
+            }
+
+            gameEventBus.publish(
+                    new SecondaryActionIntentEvent(playerControlledEntity),
                     null
             );
         }

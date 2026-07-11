@@ -13,6 +13,7 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
+import com.mccurry.game.gameplay.event.CloseGameEvent;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
 import com.mccurry.game.gameplay.menu.pausemenu.model.GameplayPauseState;
 import com.mccurry.game.locale.LocalizedString;
@@ -21,6 +22,8 @@ import com.mccurry.game.menu.main.event.OpenMenuRequestEvent;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.MenuState;
 import com.mccurry.game.shared.ui.MenuType;
+import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;
+import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
 import com.mccurry.game.sound.event.PlayGlobalSoundRequestEvent;
 import com.mccurry.game.sound.model.global.GlobalSoundEntry;
 import com.simsilica.lemur.Button;
@@ -55,7 +58,17 @@ public class PauseMenuState extends MenuState {
                     null
             );
         }, true);
-        var mainMenuBtn = newPauseMenuButton(LocaleKeys.MAIN_MENU, null, false);
+        var mainMenuBtn = newPauseMenuButton(LocaleKeys.MAIN_MENU,
+                (btn) -> {
+                    orchestrationBus.publish(new StartScreenFadeInEvent(1,
+                            () -> {
+                                orchestrationBus.publish(OpenMenuRequestEvent.builder().menuType(MenuType.MAIN_MENU).build(),null);
+                                orchestrationBus.publish( new CloseGameEvent() ,null);
+                                orchestrationBus.publish(new StartScreenFadeOutEvent(1), null);
+                            }
+                    ), null);
+
+                }, true);
 
         buttons.add(continueBtn);
         buttons.add(settingsBtn);

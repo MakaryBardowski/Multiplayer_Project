@@ -19,6 +19,7 @@ import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.shared.sfx.model.VfxType;
 import com.mccurry.game.shared.sfx.player.VfxPlayer;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import pocs.SmgCameraRecoilTransformEffect;
 import pocs.SmgViewmodelRecoilTransformEffect;
 
@@ -30,17 +31,17 @@ public class AttackSystem {
     private final EntityStore entityStore;
     private final VfxPlayer vfxPlayer;
 
-    public void processAttack(Entity attacker, Entity weaponEntity, WeaponIdentityComponent weaponIdentityComponent, float tpf, double gameTimeSeconds) {
-        if (weaponIdentityComponent.getLastUsedGameTimeSeconds() + weaponIdentityComponent.getCooldownSeconds() > gameTimeSeconds) {
+    public void processAttack(Entity attacker, Entity weaponEntity, @Nullable WeaponIdentityComponent.WeaponActionIdentity weaponActionIdentity, float tpf, double gameTimeSeconds) {
+        if (weaponActionIdentity == null || weaponActionIdentity.getLastUsedGameTimeSeconds() + weaponActionIdentity.getCooldownSeconds() > gameTimeSeconds) {
             return;
         }
 
-        weaponIdentityComponent.setLastUsedGameTimeSeconds(gameTimeSeconds);
+        weaponActionIdentity.setLastUsedGameTimeSeconds(gameTimeSeconds);
         System.err.println("Entity %s attacks with weapon %s - dealing: %s damage. It will be available for use in %s seconds!".formatted(
                         attacker.getId(),
                         weaponEntity.getId(),
-                        weaponIdentityComponent.getBaseDamage(),
-                        weaponIdentityComponent.getCooldownSeconds()
+                weaponActionIdentity.getBaseDamage(),
+                weaponActionIdentity.getCooldownSeconds()
                 )
         );
 

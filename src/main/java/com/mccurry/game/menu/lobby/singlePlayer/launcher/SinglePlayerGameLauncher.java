@@ -2,7 +2,7 @@ package com.mccurry.game.menu.lobby.singlePlayer.launcher;
 
 
 import com.jme3.app.state.AppStateManager;
-import com.mccurry.game.gameplay.core.GameState;
+import com.mccurry.game.gameplay.GameState;
 import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.ui.MenuType;

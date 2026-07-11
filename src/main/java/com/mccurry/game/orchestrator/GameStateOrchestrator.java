@@ -10,6 +10,8 @@ import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.console.CheatConsoleLauncher;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
+import com.mccurry.game.gameplay.GameState;
+import com.mccurry.game.gameplay.event.CloseGameEvent;
 import com.mccurry.game.menu.MenuManager;
 import com.mccurry.game.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
 import com.mccurry.game.keyBinding.KeyMappingService;
@@ -37,6 +39,15 @@ public class GameStateOrchestrator extends BaseAppState {
     @Nullable
     private CheatConsoleLauncher cheatConsoleLauncher;
 
+    private SyncEventHandler<CloseGameEvent> onGameCloseRequest = (event, lifecycleManager) -> {
+        var state = getStateManager().getState(GameState.class);
+        if(state == null){
+            return;
+        }
+
+        getStateManager().detach(state);
+    };
+
     @Override
     protected void initialize(Application application) {
         new ScreenTransitionService(application.getStateManager()).subscribe(gameOrchestrationBus);
@@ -52,6 +63,7 @@ public class GameStateOrchestrator extends BaseAppState {
         getStateManager().attach(initialBootState);
 
         closeInitialBootStateSubscriber(initialBootState).subscribe(gameOrchestrationBus); // todo: bug? co jesli asset loading skonczy sie przed zarejestrowaniem tego subscribera?
+        gameOrchestrationBus.subscribe(CloseGameEvent.class, onGameCloseRequest);
     }
 
     @Override

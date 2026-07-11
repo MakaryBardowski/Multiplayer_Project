@@ -8,6 +8,7 @@ import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.core.ecs.system.QueueSystem;
 import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
 import com.mccurry.game.gameplay.system.intent.event.PrimaryActionIntentEvent;
+import com.mccurry.game.gameplay.system.intent.event.SecondaryActionIntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.IntentResolver;
 import com.mccurry.game.gameplay.system.intent.event.IntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
@@ -26,6 +27,7 @@ public class IntentSystem implements QueueSystem, EventSubscriber {
     private final List<IntentEvent> intentEventQueue = new ArrayList<>();
     private final Map<Class<? extends IntentEvent>, SyncEventHandler<? extends IntentEvent> > intentHandlersByEventClass = Map.ofEntries(
             genericIntentListenerEntry(PrimaryActionIntentEvent.class, intentEventListener(PrimaryActionIntentEvent.class)),
+            genericIntentListenerEntry(SecondaryActionIntentEvent.class, intentEventListener(SecondaryActionIntentEvent.class)),
             genericIntentListenerEntry(HandEquipIntentEvent.class, intentEventListener(HandEquipIntentEvent.class))
     );
 
