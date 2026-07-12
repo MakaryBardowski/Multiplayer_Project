@@ -20,10 +20,19 @@ public class DebugCommand extends ConsoleCommand {
 
     @Override
     public Object[] parseExecutionArgs(String trimmedArgumentsPart) throws CommandParsingException {
-        if(trimmedArgumentsPart.contains("r")){
-            return new Object[]{DebugType.ROTATION,trimmedArgumentsPart.contains("g")};
+        if(trimmedArgumentsPart.equals("rotation")){
+            return new Object[]{
+                    DebugType.ROTATION,
+                    false
+            };
         }
-        throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['r']".formatted(trimmedArgumentsPart));
+        if(trimmedArgumentsPart.equals("rotation -g")){
+            return new Object[]{
+                    DebugType.ROTATION,
+                    true
+            };
+        }
+        throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['rotation']".formatted(trimmedArgumentsPart));
     }
 
     @Override

@@ -6,6 +6,7 @@ import com.jme3.anim.SkinningControl;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.BaseAppState;
+import com.jme3.asset.AssetManager;
 import com.jme3.effect.ParticleEmitter;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
@@ -28,13 +29,11 @@ import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.console.model.GameContext;
 import com.mccurry.game.constants.CameraConstants;
-import com.mccurry.game.gameplay.core.ecs.entity.Entity;
-import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
+import com.mccurry.game.gameplay.debug.DebugCommandListener;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewModelComponent;
 import com.mccurry.game.gameplay.system.crosshair.CrosshairSystem;
@@ -76,7 +75,6 @@ import com.mccurry.game.shared.sfx.model.Vfx;
 import com.mccurry.game.shared.sfx.model.VfxType;
 import com.mccurry.game.shared.sfx.player.VfxPlayer;
 import com.mccurry.game.shared.sfx.pool.VfxPool;
-import com.mccurry.game.util.debug.GeometryUtil;
 import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
@@ -123,59 +121,9 @@ public class GameState extends BaseAppState {
                 }
             }
     );
-    private final SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable = EventHandlers.syncEventHandler(
-            (event, elm) -> {
-                entityStore.forEachEntityWithComponents(0, gameTimeInSeconds, new EntityCallback() {
-                    @Override
-                    public void execute(Entity entityWithRequiredComponents, float tpf, double currentGameTimeInSeconds) {
 
-                        var transform = entityStore.getComponent(entityWithRequiredComponents, TransformComponent.class);
-                        transform.getOriginNode().attachChild(
-                                GeometryUtil.createArrow(2, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
-                        );
+    private DebugCommandListener debugCommandListener;
 
-                        transform.getVisualNode().attachChild(
-                                GeometryUtil.createArrow(4, Vector3f.UNIT_Z, ColorRGBA.Magenta, getApplication().getAssetManager())
-                        );
-
-                        var humanModelComponent = entityStore.getComponent(entityWithRequiredComponents, HumanoidModelComponent.class);
-                        if (humanModelComponent != null && event.isGranular()) {
-                            humanModelComponent.getRightHandAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
-                            );
-                            humanModelComponent.getRightHandAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_X, ColorRGBA.Red, getApplication().getAssetManager())
-                            );
-                            humanModelComponent.getRightHandAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Y, ColorRGBA.Green, getApplication().getAssetManager())
-                            );
-
-
-                            humanModelComponent.getLeftHandAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
-                            );
-                            humanModelComponent.getLeftHandAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_X, ColorRGBA.Red, getApplication().getAssetManager())
-                            );
-                            humanModelComponent.getLeftHandAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Y, ColorRGBA.Green, getApplication().getAssetManager())
-                            );
-
-
-                            humanModelComponent.getHeadAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Z, ColorRGBA.Blue, getApplication().getAssetManager())
-                            );
-                            humanModelComponent.getHeadAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_X, ColorRGBA.Red, getApplication().getAssetManager())
-                            );
-                            humanModelComponent.getHeadAttachmentNode().attachChild(
-                                    GeometryUtil.createArrow(0.5f, Vector3f.UNIT_Y, ColorRGBA.Green, getApplication().getAssetManager())
-                            );
-                        }
-                    }
-                }, TransformComponent.class);
-            }
-    );
 
 
     @Override
@@ -326,7 +274,7 @@ public class GameState extends BaseAppState {
 
         spawnMob(universeNode);
 
-
+        debugCommandListener = new DebugCommandListener(entityStore, assetManager);
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
 
@@ -372,7 +320,6 @@ public class GameState extends BaseAppState {
                                 GunVfxData.builder()
                                         .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
                                         .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
-                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
                                         .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
                                         .build()
                         )
@@ -380,7 +327,6 @@ public class GameState extends BaseAppState {
                                 GunVfxData.builder()
                                         .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
                                         .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
-                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
                                         .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
                                         .build()
                         )
@@ -576,6 +522,10 @@ public class GameState extends BaseAppState {
         long t1 = System.nanoTime();
 
         gameTimeInSeconds += tpf;
+
+        debugCommandListener.setGameTimeInSeconds(gameTimeInSeconds);
+
+
         intentSystem.processQueued(tpf, gameTimeInSeconds);
 
 
@@ -637,7 +587,7 @@ public class GameState extends BaseAppState {
         var orchestrationBus = getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         setupControlsListener();
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
-        gameEventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        debugCommandListener.subscribe(gameEventBus);
         crosshairSystem.subscribe(gameEventBus);
         thirdPersonVisualEquipSystem.subscribe(gameEventBus);
         firstPersonEquipSystem.subscribe(gameEventBus);
@@ -649,7 +599,7 @@ public class GameState extends BaseAppState {
         var orchestrationBus = getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         cleanupControlsListener();
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
-        gameEventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        debugCommandListener.unsubscribe(gameEventBus);
         crosshairSystem.unsubscribe(gameEventBus);
         thirdPersonVisualEquipSystem.unsubscribe(gameEventBus);
         firstPersonEquipSystem.unsubscribe(gameEventBus);
