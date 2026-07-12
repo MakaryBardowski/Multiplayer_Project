@@ -11,13 +11,11 @@ import org.jetbrains.annotations.Nullable;
 
 @Builder
 @Getter
-public class GunViewModelComponent implements Component {
+public class WeaponViewModelComponent implements Component {
     @Nullable private Spatial viewModel;
     @Nullable private AnimComposer animComposer;
-
-    @Nullable private Node muzzleNode;
-    @Nullable private Node bulletCaseEjectionNode;
-
-    @Nullable private GunVfxData gunVfxData;
     @Nullable private GunAnimationData gunAnimationData;
+
+    @Nullable private GunVfxData primaryActionVfxData;
+    @Nullable private GunVfxData secondaryVfxData;
 }

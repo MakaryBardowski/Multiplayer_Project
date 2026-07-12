@@ -7,6 +7,8 @@ import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentCompon
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import com.mccurry.game.gameplay.system.intent.event.PrimaryActionIntentEvent;
 
+import static com.mccurry.game.gameplay.system.attack.model.AttackAction.PRIMARY;
+
 public class PrimaryActionProcessor extends IntentProcessor<PrimaryActionIntentEvent> {
     private final AttackSystem attackSystem;
 
@@ -33,8 +35,9 @@ public class PrimaryActionProcessor extends IntentProcessor<PrimaryActionIntentE
 
             if (heldInRightHand != null) {
                 var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponIdentityComponent.class);
+
                 if (weaponComponent != null) {
-                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent.getPrimaryActionIdentity(), tpf, gameTimeSeconds);
+                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent.getPrimaryActionIdentity(), PRIMARY, tpf, gameTimeSeconds);
                 }
             }
         }

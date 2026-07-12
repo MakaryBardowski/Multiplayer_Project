@@ -36,7 +36,7 @@ import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
+import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewModelComponent;
 import com.mccurry.game.gameplay.system.crosshair.CrosshairSystem;
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
@@ -366,17 +366,25 @@ public class GameState extends BaseAppState {
                         .handSlot(HandSlot.HAND_LEFT)
                         .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
                         .build(),
-                GunViewModelComponent.builder()
+                WeaponViewModelComponent.builder()
                         .viewModel(gun)
-                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
-                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-                        .gunVfxData(
+                        .primaryActionVfxData(
                                 GunVfxData.builder()
-                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
                                         .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
                                         .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
                                         .build()
                         )
+                        .secondaryVfxData(
+                                GunVfxData.builder()
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
+                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+                                        .build()
+                        )
+                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
                         .build()
         );
 
@@ -397,23 +405,23 @@ public class GameState extends BaseAppState {
 //                        .handSlot(HandSlot.HAND_LEFT)
 //                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
 //                        .build(),
-//                GunViewModelComponent.builder()
+//                WeaponViewModelComponent.builder()
 //                        .viewModel(gun)
-//                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
-//                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+//                        .primaryActionVfxData(
+//                                GunVfxData.builder()
+//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
+//                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+//                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+//                                        .build()
+//                        )
 //                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
 //                        .gunAnimationData(
 //                                GunAnimationData.builder()
 //                                        .lockIdleAnimName("Lock_Idle")
 //                                        .lockRecoilAnimName("Lock_Pull")
 //                                        .lockReturnAnimName("Lock_Return")
-//                                        .build()
-//                        )
-//                        .gunVfxData(
-//                                GunVfxData.builder()
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
-//                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
-//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
 //                                        .build()
 //                        )
 //                        .build()

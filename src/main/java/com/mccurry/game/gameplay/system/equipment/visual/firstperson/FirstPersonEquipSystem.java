@@ -1,13 +1,12 @@
 package com.mccurry.game.gameplay.system.equipment.visual.firstperson;
 
-import com.jme3.asset.AssetManager;
 import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunViewModelComponent;
+import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewModelComponent;
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairChangeRequestEvent;
 import com.mccurry.game.gameplay.system.equipment.core.event.HandEquippedEvent;
@@ -15,7 +14,6 @@ import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.HandsViewmodelComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
-import com.mccurry.game.util.debug.GeometryUtil;
 import com.mccurry.game.util.event.EventHandlers;
 import lombok.NonNull;
 import org.jetbrains.annotations.NotNull;
@@ -93,7 +91,7 @@ public class FirstPersonEquipSystem implements EventSubscriber {
 
     private void attachAt(@NotNull Node attachmentNode, Entity equippedItem){
         attachmentNode.detachAllChildren();
-        var gunViewmodel = entityStore.getComponent(equippedItem, GunViewModelComponent.class);
+        var gunViewmodel = entityStore.getComponent(equippedItem, WeaponViewModelComponent.class);
 
         if(gunViewmodel != null){
             var viewmodel = gunViewmodel.getViewModel();

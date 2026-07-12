@@ -259,7 +259,131 @@ public enum VfxType {
                 }
             };
         }
+    }),
+
+    FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R(new BiFunction<>() {
+        @Override
+        public Vfx apply(AssetManager assetManager, @NotNull Consumer<Vfx> onFinishedPlaying) {
+            // Create emitter
+            ParticleEmitter emitter = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 50);
+            emitter.setParticlesPerSec(0f);
+
+            // Material with your spritesheet
+            Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+            System.out.println(mat.getAdditionalRenderState().getBlendMode() + " <------- blend");
+            mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Additive);
+            var tex = assetManager.loadTexture("Textures/Gameplay/SFX/Muzzle_Flash_1.png");
+
+            tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+            tex.setMagFilter(Texture.MagFilter.Nearest);
+            mat.setTexture("Texture", tex);
+            mat.setTexture("GlowMap", tex);
+
+            emitter.setMaterial(mat);
+
+            // IMPORTANT: 32x32 spritesheet
+            emitter.setImagesX(2);
+            emitter.setImagesY(2);
+
+            // Particle behavior
+            emitter.setStartColor(ColorRGBA.White);
+            emitter.setEndColor(ColorRGBA.White);
+            emitter.setStartSize(0.6f);
+            emitter.setEndSize(1.6f);
+
+            emitter.setGravity(0, 0, 0);
+            emitter.setLowLife(3f / 60f);
+            emitter.setHighLife(3f / 60);
+
+            emitter.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 0, 0));
+            emitter.getParticleInfluencer().setVelocityVariation(0f);
+
+
+            // Optional: random frame selection
+            emitter.setSelectRandomImage(false);
+            emitter.setInWorldSpace(false);
+
+            emitter.setQueueBucket(RenderQueue.Bucket.Transparent);
+            emitter.setShadowMode(RenderQueue.ShadowMode.Off);
+            return new Vfx(onFinishedPlaying) {
+                @Override
+                public VfxType getType() {
+                    return FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R;
+                }
+
+                @Override
+                public void play(Node parentNode, Vector3f localOffset, Quaternion localRotation) {
+                    parentNode.attachChild(emitter);
+                    emitter.setLocalTranslation(localOffset);
+                    emitter.emitParticles(1);
+                    onFinishedPlaying.accept(this);
+                }
+            };
+        }
+    }),
+
+    FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L(new BiFunction<>() {
+        @Override
+        public Vfx apply(AssetManager assetManager, @NotNull Consumer<Vfx> onFinishedPlaying) {
+            // Create emitter
+            ParticleEmitter emitter = new ParticleEmitter("Emitter", ParticleMesh.Type.Triangle, 50);
+            emitter.setParticlesPerSec(0f);
+
+            // Material with your spritesheet
+            Material mat = new Material(assetManager, "Common/MatDefs/Misc/Particle.j3md");
+            System.out.println(mat.getAdditionalRenderState().getBlendMode() + " <------- blend");
+            mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Additive);
+            var tex = assetManager.loadTexture("Textures/Gameplay/SFX/Muzzle_Flash_1.png");
+
+            tex.setMinFilter(Texture.MinFilter.NearestNoMipMaps);
+            tex.setMagFilter(Texture.MagFilter.Nearest);
+            mat.setTexture("Texture", tex);
+            mat.setTexture("GlowMap", tex);
+
+            emitter.setMaterial(mat);
+
+            // IMPORTANT: 32x32 spritesheet
+            emitter.setImagesX(2);
+            emitter.setImagesY(2);
+
+            // Particle behavior
+            emitter.setStartColor(ColorRGBA.White);
+            emitter.setEndColor(ColorRGBA.White);
+            emitter.setStartSize(0.6f);
+            emitter.setEndSize(1.6f);
+
+            emitter.setGravity(0, 0, 0);
+            emitter.setLowLife(3f / 60f);
+            emitter.setHighLife(3f / 60);
+
+            emitter.getParticleInfluencer().setInitialVelocity(new Vector3f(0, 0, 0));
+            emitter.getParticleInfluencer().setVelocityVariation(0f);
+
+
+            // Optional: random frame selection
+            emitter.setSelectRandomImage(false);
+            emitter.setInWorldSpace(false);
+
+            emitter.setQueueBucket(RenderQueue.Bucket.Transparent);
+            emitter.setShadowMode(RenderQueue.ShadowMode.Off);
+            return new Vfx(onFinishedPlaying) {
+                @Override
+                public VfxType getType() {
+                    return FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L;
+                }
+
+                @Override
+                public void play(Node parentNode, Vector3f localOffset, Quaternion localRotation) {
+                    parentNode.attachChild(emitter);
+                    emitter.setLocalTranslation(localOffset);
+                    emitter.emitParticles(1);
+                    onFinishedPlaying.accept(this);
+                }
+            };
+        }
     });
+
+
     private final BiFunction<AssetManager, Consumer<Vfx>, Vfx> supplier;
     public static Node setupModelLight(Node node, AssetManager assetManager) {
         for (Spatial c : node.getChildren()) {
