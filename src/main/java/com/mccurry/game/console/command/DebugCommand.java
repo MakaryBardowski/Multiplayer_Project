@@ -1,6 +1,7 @@
 package com.mccurry.game.console.command;
 
 import com.mccurry.events.core.EventBus;
+import com.mccurry.game.console.event.ToggleHitboxDebugEvent;
 import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.console.exception.CommandParsingException;
 import lombok.NonNull;
@@ -32,7 +33,14 @@ public class DebugCommand extends ConsoleCommand {
                     true
             };
         }
-        throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['rotation']".formatted(trimmedArgumentsPart));
+
+        if(trimmedArgumentsPart.equals("hitbox")){
+            return new Object[]{
+                    DebugType.HITBOX
+            };
+        }
+
+        throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['rotation', 'rotation -g', 'hitbox']".formatted(trimmedArgumentsPart));
     }
 
     @Override
@@ -43,11 +51,18 @@ public class DebugCommand extends ConsoleCommand {
                 return "Toggled rotation debug";
             }
             return "Cannot run command. Not currently in game.";
+        } else if(DebugType.HITBOX.equals(executionArgs[0])){
+            if(gameEventBus != null) {
+                gameEventBus.publish(ToggleHitboxDebugEvent.builder().build(), null);
+                return "Toggled hitbox debug";
+            }
+            return "Cannot run command. Not currently in game.";
         }
         return "Congratulations, this should not happen!";
     }
 
     private enum DebugType{
-        ROTATION
+        ROTATION,
+        HITBOX
     }
 }

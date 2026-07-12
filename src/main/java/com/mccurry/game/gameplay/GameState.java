@@ -342,7 +342,7 @@ public class GameState extends BaseAppState {
 //
 //        var weaponEntity1 = entityStore.create(
 //                WeaponIdentityComponent.builder()
-//                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(10f, 1f / 8, 0)).build(),
+//                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
 //                CrosshairSourceComponent.builder()
 //                        .crosshairType(CrosshairType.SMG)
 //                        .build(),
@@ -405,7 +405,6 @@ public class GameState extends BaseAppState {
         var equipmentComponent = new EquipmentComponent();
 
 
-        var showHitbox = true;
         var matRed = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
         matRed.setColor("Color", ColorRGBA.Red);
         matRed.getAdditionalRenderState().setWireframe(true);
@@ -494,11 +493,9 @@ public class GameState extends BaseAppState {
         armature.getControl(SkinningControl.class).getAttachmentsNode("ForearmR").attachChild(forearmHitboxR);
         armature.getControl(SkinningControl.class).getAttachmentsNode("ForearmL").attachChild(forearmHitboxL);
 
-        if (showHitbox) {
-            raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Never));
-        } else {
-            raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Always));
-        }
+
+        raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Always));
+
 
         var created = entityStore.create(
                 transformComponent,

@@ -5,15 +5,18 @@ import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector3f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
+import com.jme3.scene.Spatial;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.events.lifecycle.EventLifecycleManager;
+import com.mccurry.game.console.event.ToggleHitboxDebugEvent;
 import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.gameplay.system.modelhierarchy.component.HumanoidModelComponent;
+import com.mccurry.game.gameplay.system.raycast.entityraycast.component.EntityRaycastHitboxComponent;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.util.debug.GeometryUtil;
 import lombok.NonNull;
@@ -25,15 +28,17 @@ public class DebugCommandListener implements EventSubscriber {
 
     private final EntityStore entityStore;
     private final AssetManager assetManager;
-    private final SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugEnable;
+
     @Setter
     private double gameTimeInSeconds;
 
+    private final SyncEventHandler<ToggleRotationDebugEvent> onRotationDebugToggle;
+    private final SyncEventHandler<ToggleHitboxDebugEvent> onHitboxDebugToggle;
 
     public DebugCommandListener(EntityStore entityStore, AssetManager assetManager) {
         this.entityStore = entityStore;
         this.assetManager = assetManager;
-        onRotationDebugEnable = new SyncEventHandler<ToggleRotationDebugEvent>() {
+        onRotationDebugToggle = new SyncEventHandler<ToggleRotationDebugEvent>() {
             private boolean enabledMain = false;
             private boolean enabledGranular = false;
 
@@ -70,17 +75,49 @@ public class DebugCommandListener implements EventSubscriber {
                 }, TransformComponent.class);
             }
         };
+
+
+        onHitboxDebugToggle = new SyncEventHandler<ToggleHitboxDebugEvent>() {
+            @Override
+            public void handle(@NonNull ToggleHitboxDebugEvent event, @Nullable EventLifecycleManager<ToggleHitboxDebugEvent> lifecycleManager) {
+                entityStore.forEachEntityWithComponents(
+                        0, gameTimeInSeconds, new EntityCallback() {
+                            @Override
+                            public void execute(Entity entityWithRequiredComponents, float tpf, double currentGameTimeInSeconds) {
+
+                                var hitboxComponent = entityStore.getComponent(entityWithRequiredComponents, EntityRaycastHitboxComponent.class);
+
+                                hitboxComponent.getHitboxes().forEach(
+                                        hitbox -> {
+                                            var geom = hitbox.getGeometry();
+
+                                            if(geom.getCullHint().equals(Spatial.CullHint.Always)){
+                                                geom.setCullHint(Spatial.CullHint.Never);
+                                            } else {
+                                                geom.setCullHint(Spatial.CullHint.Always);
+                                            }
+
+                                        }
+                                );
+
+                            }
+                        }, EntityRaycastHitboxComponent.class
+                );
+            }
+        };
     }
 
 
     @Override
     public void subscribe(@NonNull EventBus eventBus) {
-        eventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        eventBus.subscribe(ToggleRotationDebugEvent.class, onRotationDebugToggle);
+        eventBus.subscribe(ToggleHitboxDebugEvent.class, onHitboxDebugToggle);
     }
 
     @Override
     public void unsubscribe(@NonNull EventBus eventBus) {
-        eventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugEnable);
+        eventBus.unsubscribe(ToggleRotationDebugEvent.class, onRotationDebugToggle);
+        eventBus.unsubscribe(ToggleHitboxDebugEvent.class, onHitboxDebugToggle);
     }
 
     private void toggleAxes(boolean enabled, Node parentNode) {
