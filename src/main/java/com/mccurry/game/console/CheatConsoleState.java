@@ -149,13 +149,16 @@ public class CheatConsoleState extends BaseAppState implements EventSubscriber {
     }
 
     public void setGameContext(@Nullable GameContext gameContext) {
+        if(this.gameContext != null){
+            unsubscribe(this.gameContext.getGameEventBus());
+        }
+
         this.gameContext = gameContext;
-        if(gameContext == null){
+        if(this.gameContext == null){
             return;
         }
 
-        if(isEnabled()){
-            subscribe(gameContext.getGameEventBus());
-        }
+
+        subscribe(this.gameContext.getGameEventBus());
     }
 }

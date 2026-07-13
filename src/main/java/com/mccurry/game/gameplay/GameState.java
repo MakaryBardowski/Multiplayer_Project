@@ -79,6 +79,7 @@ import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
 import com.mccurry.map.visuals.BlockWorld;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -224,14 +225,9 @@ public class GameState extends BaseAppState {
         );
 
         universeNode.attachChild(blockWorldNode);
-        var rootNode = ((SimpleApplication) getApplication()).getRootNode();
+
         gameStateNode.attachChild(universeNode);
         gameStateNode.attachChild(firstPersonRootNode);
-        rootNode.attachChild(gameStateNode);
-
-        // todo: to rozpierdala stan gry po wyjsciu, trzeba w onDisable() spowrotem przypisywac rootNode
-        getApplication().getRenderManager().getMainView("Default").detachScene(rootNode);
-        getApplication().getRenderManager().getMainView("Default").attachScene(universeNode);
 
         AmbientLight al = new AmbientLight();
         al.setColor(ColorRGBA.White.mult(0.5f));
@@ -539,6 +535,24 @@ public class GameState extends BaseAppState {
 
     @Override
     protected void cleanup(Application app) {
+        cleanupState();
+
+        System.out.println("Game event bus:");
+        gameEventBus._debug_getSubscribers().forEach(
+                (clazz, sub) ->{
+                    if(!sub.isEmpty()){
+                        System.out.println("still listening for clazz: %s".formatted(clazz));
+                    }
+            }
+        );
+        System.out.println("\norchestration bus:");
+        getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus()._debug_getSubscribers().forEach(
+                (clazz, sub) ->{
+                    if(!sub.isEmpty()){
+                        System.out.println("still listening for clazz: %s".formatted(clazz));
+                    }
+                }
+        );
     }
 
     @Override
@@ -561,7 +575,13 @@ public class GameState extends BaseAppState {
         CursorService.cursorEnabled(false);
         setupSystems();
 
-        ((SimpleApplication) getApplication()).getGuiNode().attachChild(gameHudNode);
+        var simpleApp = (SimpleApplication) getApplication();
+        simpleApp.getRootNode().attachChild(gameStateNode);
+        simpleApp.getGuiNode().attachChild(gameHudNode);
+
+        var rootNode = ((SimpleApplication) getApplication()).getRootNode();
+        getApplication().getRenderManager().getMainView("Default").detachScene(rootNode);
+        getApplication().getRenderManager().getMainView("Default").attachScene(universeNode);
     }
 
     private void cleanupState(){
@@ -577,6 +597,12 @@ public class GameState extends BaseAppState {
         cleanupSystems();
         getApplication().getRenderManager().removeMainView(fpViewport);
 
+
+        var simpleApp = (SimpleApplication) getApplication();
+        getApplication().getRenderManager().getMainView("Default").attachScene(simpleApp.getRootNode());
+        getApplication().getRenderManager().getMainView("Default").detachScene(universeNode);
+
+        gameStateNode.removeFromParent();
         gameHudNode.removeFromParent();
     }
 
