@@ -51,6 +51,9 @@ public class SinglePlayerLobbyState extends MenuState {
 
     private final SinglePlayerGameLauncher launcher = new SinglePlayerGameLauncher();
 
+
+    private Button confirmButton;
+
     @Override
     public void createSceneOnce(SimpleApplication application, Node stateSceneNode) {
         // Create 20x20 quad
@@ -242,7 +245,7 @@ public class SinglePlayerLobbyState extends MenuState {
         classPanel.setLocalTranslation(new Vector3f(classPanelX, 330, 1));
 
 
-        var confirmButton = confirmButton(LOCALE_KEY_START_GAME, button -> {
+        confirmButton = confirmButton(LOCALE_KEY_START_GAME, button -> {
             playClickSound();
             button.setEnabled(false);
             button.setText("Loading...");
@@ -467,6 +470,8 @@ public class SinglePlayerLobbyState extends MenuState {
     @Override
     protected void onEnable() {
         super.onEnable();
+        confirmButton.setEnabled(true);
+        confirmButton.setText(LocalizedString.get(LOCALE_KEY_START_GAME));
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.DarkGray);
         getApplication().getCamera().setLocation(new Vector3f(1, 2, -5)); // 0,1,-5
         getApplication().getCamera().lookAt(new Vector3f(0, 1, 10), Vector3f.UNIT_Y);
