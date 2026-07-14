@@ -34,6 +34,7 @@ import com.mccurry.game.gameplay.debug.DebugCommandListener;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
+import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewModelComponent;
 import com.mccurry.game.gameplay.system.crosshair.CrosshairSystem;
@@ -79,7 +80,6 @@ import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
 import com.mccurry.map.visuals.BlockWorld;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -124,6 +124,8 @@ public class GameState extends BaseAppState {
     );
 
     private DebugCommandListener debugCommandListener;
+
+    private FilterPostProcessor firstPersonBloomPostProcessor;
 
 
 
@@ -182,7 +184,7 @@ public class GameState extends BaseAppState {
 
         // todo: cleanup this viewport
         fpViewport = renderManager.createMainView("View of firstPersonCamera", fpCamera);
-        fpViewport.setClearFlags(false, false, false);
+        fpViewport.setClearFlags(false, true, false);
 
         var fpCameraNode = new CameraNode("First Person Camera Node", fpCamera);
         fpCameraNode.setCullHint(Spatial.CullHint.Never);
@@ -287,60 +289,23 @@ public class GameState extends BaseAppState {
 
 
 
-        var gun = setupModelLight(
-                (Node) assetManager.loadModel(
-                        "Models/double_barrel_fp/double_barrel_fp.j3o"
-                )
-        );
-
-        var weaponEntity1 = entityStore.create(
-                WeaponIdentityComponent.builder()
-                        .primaryActionIdentity(
-                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-                        )
-                        .secondaryActionIdentity(
-                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-                        )
-                        .build(),
-                CrosshairSourceComponent.builder()
-                        .crosshairType(CrosshairType.SHOTGUN)
-                        .build(),
-                EquippableComponent.builder()
-                        .handSlot(HandSlot.HAND_RIGHT)
-                        .handSlot(HandSlot.HAND_LEFT)
-                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
-                        .build(),
-                WeaponViewModelComponent.builder()
-                        .viewModel(gun)
-                        .primaryActionVfxData(
-                                GunVfxData.builder()
-                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
-                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
-                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-                                        .build()
-                        )
-                        .secondaryVfxData(
-                                GunVfxData.builder()
-                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
-                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
-                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-                                        .build()
-                        )
-                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-                        .build()
-        );
-
 //        var gun = setupModelLight(
 //                (Node) assetManager.loadModel(
-//                        "Models/mp18_fp/mp18_fp.j3o"
+//                        "Models/double_barrel_fp/double_barrel_fp.j3o"
 //                )
 //        );
 //
 //        var weaponEntity1 = entityStore.create(
 //                WeaponIdentityComponent.builder()
-//                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+//                        .primaryActionIdentity(
+//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+//                        )
+//                        .secondaryActionIdentity(
+//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+//                        )
+//                        .build(),
 //                CrosshairSourceComponent.builder()
-//                        .crosshairType(CrosshairType.SMG)
+//                        .crosshairType(CrosshairType.SHOTGUN)
 //                        .build(),
 //                EquippableComponent.builder()
 //                        .handSlot(HandSlot.HAND_RIGHT)
@@ -351,42 +316,63 @@ public class GameState extends BaseAppState {
 //                        .viewModel(gun)
 //                        .primaryActionVfxData(
 //                                GunVfxData.builder()
-//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
-//                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
 //                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-//                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+//                                        .build()
+//                        )
+//                        .secondaryVfxData(
+//                                GunVfxData.builder()
+//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
+//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
 //                                        .build()
 //                        )
 //                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-//                        .gunAnimationData(
-//                                GunAnimationData.builder()
-//                                        .lockIdleAnimName("Lock_Idle")
-//                                        .lockRecoilAnimName("Lock_Pull")
-//                                        .lockReturnAnimName("Lock_Return")
-//                                        .build()
-//                        )
 //                        .build()
 //        );
 
+        var gun = setupModelLight(
+                (Node) assetManager.loadModel(
+                        "Models/mp18_fp/mp18_fp.j3o"
+                )
+        );
+
+        var weaponEntity1 = entityStore.create(
+                WeaponIdentityComponent.builder()
+                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+                CrosshairSourceComponent.builder()
+                        .crosshairType(CrosshairType.SMG)
+                        .build(),
+                EquippableComponent.builder()
+                        .handSlot(HandSlot.HAND_RIGHT)
+                        .handSlot(HandSlot.HAND_LEFT)
+                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+                        .build(),
+                WeaponViewModelComponent.builder()
+                        .viewModel(gun)
+                        .primaryActionVfxData(
+                                GunVfxData.builder()
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
+                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+                                        .build()
+                        )
+                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
+                        .gunAnimationData(
+                                GunAnimationData.builder()
+                                        .lockIdleAnimName("Lock_Idle")
+                                        .lockRecoilAnimName("Lock_Pull")
+                                        .lockReturnAnimName("Lock_Return")
+                                        .build()
+                        )
+                        .build()
+        );
+
 
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
-
-
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-        // todo: to MUSI byc Objects bo inaczej cala scena sie bedzie swiecic w jasnych miejscach
-        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
-
-        bloom.setBloomIntensity(2f);
-        bloom.setExposurePower(5f);
-        bloom.setExposureCutOff(0.1f);
-
-        // higher factor = less performance tax = looks shittier
-        bloom.setDownSamplingFactor(1f);
-
-        fpp.addFilter(bloom);
-        renderManager.getMainView("Default").addProcessor(fpp);
-
     }
 
     private void spawnMob(Node universeNode) {
@@ -582,6 +568,21 @@ public class GameState extends BaseAppState {
         var rootNode = ((SimpleApplication) getApplication()).getRootNode();
         getApplication().getRenderManager().getMainView("Default").detachScene(rootNode);
         getApplication().getRenderManager().getMainView("Default").attachScene(universeNode);
+
+
+        firstPersonBloomPostProcessor = new FilterPostProcessor(getApplication().getAssetManager());
+        // todo: to MUSI byc Objects bo inaczej cala scena sie bedzie swiecic w jasnych miejscach
+        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
+
+        bloom.setBloomIntensity(2f);
+        bloom.setExposurePower(5f);
+        bloom.setExposureCutOff(0.1f);
+
+        // higher factor = less performance tax = looks shittier
+        bloom.setDownSamplingFactor(2f);
+
+        firstPersonBloomPostProcessor.addFilter(bloom);
+        getApplication().getRenderManager().getMainView("Default").addProcessor(firstPersonBloomPostProcessor);
     }
 
     private void cleanupState(){
@@ -604,6 +605,8 @@ public class GameState extends BaseAppState {
 
         gameStateNode.removeFromParent();
         gameHudNode.removeFromParent();
+
+        getApplication().getRenderManager().getMainView("Default").removeProcessor(firstPersonBloomPostProcessor);
     }
 
     private void setupSystems() {

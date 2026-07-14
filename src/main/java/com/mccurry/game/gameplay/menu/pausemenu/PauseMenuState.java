@@ -60,10 +60,12 @@ public class PauseMenuState extends MenuState {
         }, true);
         var mainMenuBtn = newPauseMenuButton(LocaleKeys.MAIN_MENU,
                 (btn) -> {
+                    setButtonsEnabled(false);
                     orchestrationBus.publish(new StartScreenFadeInEvent(1,
                             () -> {
                                 orchestrationBus.publish(OpenMenuRequestEvent.builder().menuType(MenuType.MAIN_MENU).build(),null);
                                 orchestrationBus.publish( new CloseGameEvent() ,null);
+                                setButtonsEnabled(true);
                                 orchestrationBus.publish(new StartScreenFadeOutEvent(1), null);
                             }
                     ), null);
@@ -209,5 +211,10 @@ public class PauseMenuState extends MenuState {
                 new GameplayChangePauseStateRequest(GameplayPauseState.UNPAUSED), null
         );
         blackBackgroundGeom.removeFromParent();
+    }
+
+
+    private void setButtonsEnabled(boolean enabled){
+        buttons.forEach(btn -> btn.setEnabled(enabled));
     }
 }
