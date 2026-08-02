@@ -289,60 +289,23 @@ public class GameState extends BaseAppState {
 
 
 
-//        var gun = setupModelLight(
-//                (Node) assetManager.loadModel(
-//                        "Models/double_barrel_fp/double_barrel_fp.j3o"
-//                )
-//        );
-//
-//        var weaponEntity1 = entityStore.create(
-//                WeaponIdentityComponent.builder()
-//                        .primaryActionIdentity(
-//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-//                        )
-//                        .secondaryActionIdentity(
-//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-//                        )
-//                        .build(),
-//                CrosshairSourceComponent.builder()
-//                        .crosshairType(CrosshairType.SHOTGUN)
-//                        .build(),
-//                EquippableComponent.builder()
-//                        .handSlot(HandSlot.HAND_RIGHT)
-//                        .handSlot(HandSlot.HAND_LEFT)
-//                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
-//                        .build(),
-//                WeaponViewModelComponent.builder()
-//                        .viewModel(gun)
-//                        .primaryActionVfxData(
-//                                GunVfxData.builder()
-//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
-//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-//                                        .build()
-//                        )
-//                        .secondaryVfxData(
-//                                GunVfxData.builder()
-//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
-//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-//                                        .build()
-//                        )
-//                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-//                        .build()
-//        );
-
         var gun = setupModelLight(
                 (Node) assetManager.loadModel(
-                        "Models/mp18_fp/mp18_fp.j3o"
+                        "Models/double_barrel_fp/double_barrel_fp.j3o"
                 )
         );
 
         var weaponEntity1 = entityStore.create(
                 WeaponIdentityComponent.builder()
-                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+                        .primaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                        )
+                        .secondaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                        )
+                        .build(),
                 CrosshairSourceComponent.builder()
-                        .crosshairType(CrosshairType.SMG)
+                        .crosshairType(CrosshairType.SHOTGUN)
                         .build(),
                 EquippableComponent.builder()
                         .handSlot(HandSlot.HAND_RIGHT)
@@ -353,23 +316,60 @@ public class GameState extends BaseAppState {
                         .viewModel(gun)
                         .primaryActionVfxData(
                                 GunVfxData.builder()
-                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
-                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
-                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
                                         .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+                                        .build()
+                        )
+                        .secondaryVfxData(
+                                GunVfxData.builder()
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
                                         .build()
                         )
                         .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-                        .gunAnimationData(
-                                GunAnimationData.builder()
-                                        .lockIdleAnimName("Lock_Idle")
-                                        .lockRecoilAnimName("Lock_Pull")
-                                        .lockReturnAnimName("Lock_Return")
-                                        .build()
-                        )
                         .build()
         );
+
+//        var gun = setupModelLight(
+//                (Node) assetManager.loadModel(
+//                        "Models/mp18_fp/mp18_fp.j3o"
+//                )
+//        );
+//
+//        var weaponEntity1 = entityStore.create(
+//                WeaponIdentityComponent.builder()
+//                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+//                CrosshairSourceComponent.builder()
+//                        .crosshairType(CrosshairType.SMG)
+//                        .build(),
+//                EquippableComponent.builder()
+//                        .handSlot(HandSlot.HAND_RIGHT)
+//                        .handSlot(HandSlot.HAND_LEFT)
+//                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+//                        .build(),
+//                WeaponViewModelComponent.builder()
+//                        .viewModel(gun)
+//                        .primaryActionVfxData(
+//                                GunVfxData.builder()
+//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
+//                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+//                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+//                                        .build()
+//                        )
+//                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
+//                        .gunAnimationData(
+//                                GunAnimationData.builder()
+//                                        .lockIdleAnimName("Lock_Idle")
+//                                        .lockRecoilAnimName("Lock_Pull")
+//                                        .lockReturnAnimName("Lock_Return")
+//                                        .build()
+//                        )
+//                        .build()
+//        );
 
 
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
