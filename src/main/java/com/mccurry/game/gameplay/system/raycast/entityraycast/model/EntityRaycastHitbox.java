@@ -5,6 +5,7 @@ import com.jme3.scene.Geometry;
 import com.mccurry.game.gameplay.system.hitfeedback.model.HitFeedback;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

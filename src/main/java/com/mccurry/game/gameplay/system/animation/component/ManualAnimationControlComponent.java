@@ -11,23 +11,40 @@ import org.jetbrains.annotations.NotNull;
 
 @RequiredArgsConstructor
 public class ManualAnimationControlComponent implements Component {
-    @NotNull private final ManualAnimationControl manualAnimationControl;
+    @NotNull
+    private final ManualAnimationControl manualAnimationControl;
 
     public void rotateBy(Joint joint, Quaternion rotation) {
-        manualAnimationControl.rotateBy(joint,rotation);
+        manualAnimationControl.rotateBy(joint, rotation);
     }
 
     public void translateBy(Joint joint, Vector3f translation) {
-        manualAnimationControl.translateBy(joint,translation);
+        manualAnimationControl.translateBy(joint, translation);
     }
 
     public void rotateBy(EntityRaycastHitbox hitbox, Quaternion rotation) {
-        manualAnimationControl.rotateBy(hitbox,rotation);
+        manualAnimationControl.rotateBy(hitbox, rotation);
 
     }
 
     public void translateBy(EntityRaycastHitbox hitbox, Vector3f translation) {
-        manualAnimationControl.translateBy(hitbox,translation);
+        manualAnimationControl.translateBy(hitbox, translation);
+    }
 
+
+    public void addRotationTemporary(Joint joint, Quaternion rotation) {
+        manualAnimationControl.addRotationTemporary(joint, rotation);
+    }
+
+    public void addRotationTemporary(EntityRaycastHitbox hitbox, Quaternion rotation) {
+        manualAnimationControl.addRotationTemporary(hitbox, rotation);
+    }
+
+    public void addTranslationTemporary(Joint joint, Vector3f translation) {
+        manualAnimationControl.addTranslationTemporary(joint, translation);
+    }
+
+    public void addTranslationTemporary(EntityRaycastHitbox hitbox, Vector3f translation) {
+        manualAnimationControl.addTranslationTemporary(hitbox, translation);
     }
 }
