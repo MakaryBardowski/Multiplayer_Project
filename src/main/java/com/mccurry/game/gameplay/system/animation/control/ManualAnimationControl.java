@@ -33,17 +33,19 @@ public class ManualAnimationControl extends AbstractControl {
 
 
             /*
-             * Remove our previous frame contribution.
-             * What remains is the animation/default pose.
+             * Remove previous frame contribution.
              */
-            if (!state.appliedRotation.equals(IDENTITY)) {
+            if (state.hasAppliedRotation) {
+
                 joint.setLocalRotation(
                         new Quaternion(joint.getLocalRotation())
                                 .multLocal(state.appliedRotation.inverse())
                 );
             }
 
-            if (!state.appliedTranslation.equals(ZERO)) {
+
+            if (state.hasAppliedTranslation) {
+
                 joint.setLocalTranslation(
                         new Vector3f(joint.getLocalTranslation())
                                 .subtractLocal(state.appliedTranslation)
@@ -52,26 +54,43 @@ public class ManualAnimationControl extends AbstractControl {
 
 
             /*
-             * Temporary effects decay back to neutral.
+             * Temporary impulse follows target.
              */
             state.temporaryRotation.slerp(
+                    state.temporaryTargetRotation,
+                    deltaTime * state.temporaryFollowSpeed
+            );
+
+
+            state.temporaryTranslation.interpolateLocal(
+                    state.temporaryTargetTranslation,
+                    deltaTime * state.temporaryFollowSpeed
+            );
+
+
+            /*
+             * Temporary target returns to neutral.
+             */
+            state.temporaryTargetRotation.slerp(
                     IDENTITY,
                     deltaTime * state.temporaryReturnSpeed
             );
 
-            state.temporaryTranslation.interpolateLocal(
+
+            state.temporaryTargetTranslation.interpolateLocal(
                     ZERO,
                     deltaTime * state.temporaryReturnSpeed
             );
 
 
             /*
-             * Smooth permanent layer.
+             * Persistent animation layer.
              */
             state.currentRotation.slerp(
                     state.targetRotation,
                     deltaTime * state.rotationSpeed
             );
+
 
             state.currentTranslation.interpolateLocal(
                     state.targetTranslation,
@@ -80,11 +99,12 @@ public class ManualAnimationControl extends AbstractControl {
 
 
             /*
-             * Combine manual layers.
+             * Combine layers.
              */
             Quaternion manualRotation = new Quaternion()
                     .set(state.currentRotation)
                     .multLocal(state.temporaryRotation);
+
 
             Vector3f manualTranslation = new Vector3f(
                     state.currentTranslation
@@ -92,12 +112,13 @@ public class ManualAnimationControl extends AbstractControl {
 
 
             /*
-             * Apply manual layer.
+             * Apply.
              */
             joint.setLocalRotation(
                     new Quaternion(joint.getLocalRotation())
                             .multLocal(manualRotation)
             );
+
 
             joint.setLocalTranslation(
                     new Vector3f(joint.getLocalTranslation())
@@ -106,15 +127,22 @@ public class ManualAnimationControl extends AbstractControl {
 
 
             /*
-             * Remember what we added so we can remove it next frame.
+             * Store contribution for next frame removal.
              */
             state.appliedRotation.set(manualRotation);
             state.appliedTranslation.set(manualTranslation);
+
+            state.hasAppliedRotation = true;
+            state.hasAppliedTranslation =
+                    manualTranslation.lengthSquared() > 0.000001f;
         }
     }
 
 
-    public void registerHitTarget(EntityRaycastHitbox hitbox, Joint joint) {
+    public void registerHitTarget(
+            EntityRaycastHitbox hitbox,
+            Joint joint
+    ) {
         hitTargets.put(hitbox, joint);
     }
 
@@ -123,17 +151,30 @@ public class ManualAnimationControl extends AbstractControl {
     // Persistent offsets
     // ------------------------------------------------------------------------
 
-    public void rotateBy(Joint joint, Quaternion rotation) {
-        state(joint).targetRotation.multLocal(rotation);
+    public void rotateBy(
+            Joint joint,
+            Quaternion rotation
+    ) {
+        state(joint)
+                .targetRotation
+                .multLocal(rotation);
     }
 
 
-    public void translateBy(Joint joint, Vector3f translation) {
-        state(joint).targetTranslation.addLocal(translation);
+    public void translateBy(
+            Joint joint,
+            Vector3f translation
+    ) {
+        state(joint)
+                .targetTranslation
+                .addLocal(translation);
     }
 
 
-    public void rotateBy(EntityRaycastHitbox hitbox, Quaternion rotation) {
+    public void rotateBy(
+            EntityRaycastHitbox hitbox,
+            Quaternion rotation
+    ) {
         Joint joint = hitTargets.get(hitbox);
 
         if (joint != null) {
@@ -142,7 +183,10 @@ public class ManualAnimationControl extends AbstractControl {
     }
 
 
-    public void translateBy(EntityRaycastHitbox hitbox, Vector3f translation) {
+    public void translateBy(
+            EntityRaycastHitbox hitbox,
+            Vector3f translation
+    ) {
         Joint joint = hitTargets.get(hitbox);
 
         if (joint != null) {
@@ -155,13 +199,27 @@ public class ManualAnimationControl extends AbstractControl {
     // Temporary offsets
     // ------------------------------------------------------------------------
 
-    public void addRotationTemporary(Joint joint, Quaternion rotation) {
-        state(joint).temporaryRotation.multLocal(rotation);
+    public void addRotationTemporary(
+            Joint joint,
+            Quaternion rotation
+    ) {
+        JointTransformState state = state(joint);
+
+        state.temporaryTargetRotation
+                .multLocal(rotation);
+
+        state.temporaryTargetRotation.normalizeLocal();
     }
 
 
-    public void addTranslationTemporary(Joint joint, Vector3f translation) {
-        state(joint).temporaryTranslation.addLocal(translation);
+    public void addTranslationTemporary(
+            Joint joint,
+            Vector3f translation
+    ) {
+        JointTransformState state = state(joint);
+
+        state.temporaryTargetTranslation
+                .addLocal(translation);
     }
 
 
@@ -190,6 +248,7 @@ public class ManualAnimationControl extends AbstractControl {
 
 
     private JointTransformState state(Joint joint) {
+
         return states.computeIfAbsent(
                 joint,
                 j -> new JointTransformState()
@@ -213,24 +272,33 @@ public class ManualAnimationControl extends AbstractControl {
         Quaternion targetRotation = new Quaternion();
         Vector3f targetTranslation = new Vector3f();
 
-        // Smoothed persistent offsets
         Quaternion currentRotation = new Quaternion();
         Vector3f currentTranslation = new Vector3f();
 
 
-        // Temporary effects
+        // Temporary impulse layer
         Quaternion temporaryRotation = new Quaternion();
+        Quaternion temporaryTargetRotation = new Quaternion();
+
         Vector3f temporaryTranslation = new Vector3f();
+        Vector3f temporaryTargetTranslation = new Vector3f();
 
 
-        // What we added last frame
+        // Previous frame contribution
         Quaternion appliedRotation = new Quaternion();
         Vector3f appliedTranslation = new Vector3f();
 
+        boolean hasAppliedRotation = false;
+        boolean hasAppliedTranslation = false;
 
-        float rotationSpeed = 1f;
+
+        // Persistent smoothing
+        float rotationSpeed = 8f;
         float translationSpeed = 8f;
 
-        float temporaryReturnSpeed = 1f;
+
+        // Temporary hit reaction
+        float temporaryFollowSpeed = 25f;
+        float temporaryReturnSpeed = 3f;
     }
 }
