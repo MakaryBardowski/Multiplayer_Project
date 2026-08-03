@@ -6,10 +6,15 @@ import com.jme3.asset.AssetManager;
 import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
+import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
+import com.jme3.renderer.RenderManager;
+import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
+import com.jme3.scene.control.AbstractControl;
 import com.jme3.scene.shape.Box;
 import com.jme3.scene.shape.Quad;
 import com.jme3.texture.Texture;
@@ -107,78 +112,78 @@ public class SinglePlayerLobbyState extends MenuState {
         composer.setCurrentAction("Upper_AimRifle", "UpperBody");
 
 
-//        armatureRootNode.getChild("Armature").addControl(new AbstractControl() {
-//                                                             private float pitch = 0;
-//
-//                                                             boolean up = true;
-//                                                             boolean down = false;
-//
-//                                                             @Override
-//                                                             protected void controlUpdate(float deltaTime) {
-//                                                                 var maxDownPitch = 80 * FastMath.DEG_TO_RAD;
-//                                                                 var maxUpPitch = 70*FastMath.DEG_TO_RAD;
-//                                                                 if (up) {
-//                                                                     pitch += 90 * deltaTime * FastMath.DEG_TO_RAD;
-//                                                                     if (pitch >= maxUpPitch) {
-//                                                                         down = true;
-//                                                                         up = false;
-//                                                                         pitch = maxUpPitch;
-//                                                                     }
-//                                                                 }
-//                                                                 if (down) {
-//                                                                     pitch += -90 * deltaTime * FastMath.DEG_TO_RAD;
-//                                                                     if (pitch <= -maxDownPitch) {
-//                                                                         down = false;
-//                                                                         up = true;
-//                                                                         pitch = -maxDownPitch;
-//                                                                     }
-//                                                                 }
-//
-//                                                                 armatureRootNode.rotate(0, 0.2f * deltaTime, 0);
-//                                                             }
-//
-//                                                             @Override
-//                                                             protected void controlRender(RenderManager renderManager, ViewPort viewPort) {
-//                                                                 // todo: rece musza obracac sie TYLKO gdy celujesz (zadna inna animacja)
-//
-//                                                                 var head = armature.getJoint("Head");
-//                                                                 var torso = armature.getJoint("Spine");
-//                                                                 var upperArmR = armature.getJoint("ArmR");
-//                                                                 var upperArmL = armature.getJoint("ArmL");
-//
-//
-//                                                                 var torsoPitchFraction = 0.3f;
-//                                                                 var headPitchFraction = 1f/3f;
-//                                                                 var handsPitchFraction = 1 - torsoPitchFraction-0.1f; // because hands are attached to torso, the sum is = pitch instead of rotating both by pitch
-//
-//
-//                                                                 if(pitch > 0*FastMath.DEG_TO_RAD){
-//                                                                     torsoPitchFraction = 0.4f;
-//                                                                     headPitchFraction = 0.3f;
-//                                                                     handsPitchFraction = 1 - torsoPitchFraction-0.2f;
-//                                                                 }
-//
-//
-//                                                                 // rotate around heads local X axis
-//                                                                 var headXAxis = head.getLocalRotation().mult(Vector3f.UNIT_X);
-//                                                                 var handsPitchQuat = new Quaternion().fromAngleAxis(pitch*handsPitchFraction, headXAxis);
-//                                                                 upperArmR.setLocalRotation(handsPitchQuat.mult(upperArmR.getLocalRotation()));
-//                                                                 upperArmL.setLocalRotation(handsPitchQuat.mult(upperArmL.getLocalRotation()));
-//
-//                                                                 var headPitchQuat = new Quaternion().fromAngleAxis(pitch*headPitchFraction, headXAxis);
-//                                                                 head.setLocalRotation(headPitchQuat.mult(head.getLocalRotation()));
-//
-//
-//                                                                 var torsoXAxis = torso.getLocalRotation().mult(Vector3f.UNIT_X);
-//                                                                 var torsoPitch = new Quaternion().fromAngleAxis(pitch *torsoPitchFraction, torsoXAxis);
-//                                                                 torso.setLocalRotation(torsoPitch.mult(torso.getLocalRotation()));
-//
-//
-//                                                                 // torso is parent of both upper arms and head so updates them too
-//                                                                 torso.update();
-//                                                             }
-//                                                         }
-//        );
+        armatureRootNode.getChild("Armature").addControl(new AbstractControl() {
+                                                             private float pitch = 0;
+
+                                                             boolean up = true;
+                                                             boolean down = false;
+
+                                                             @Override
+                                                             protected void controlUpdate(float deltaTime) {
+                                                                 var maxDownPitch = 80 * FastMath.DEG_TO_RAD;
+                                                                 var maxUpPitch = 70*FastMath.DEG_TO_RAD;
+                                                                 if (up) {
+                                                                     pitch += 90 * deltaTime * FastMath.DEG_TO_RAD;
+                                                                     if (pitch >= maxUpPitch) {
+                                                                         down = true;
+                                                                         up = false;
+                                                                         pitch = maxUpPitch;
+                                                                     }
+                                                                 }
+                                                                 if (down) {
+                                                                     pitch += -90 * deltaTime * FastMath.DEG_TO_RAD;
+                                                                     if (pitch <= -maxDownPitch) {
+                                                                         down = false;
+                                                                         up = true;
+                                                                         pitch = -maxDownPitch;
+                                                                     }
+                                                                 }
+
+                                                                 armatureRootNode.rotate(0, 0.2f * deltaTime, 0);
+                                                             }
+
+                                                             @Override
+                                                             protected void controlRender(RenderManager renderManager, ViewPort viewPort) {
+                                                                 // todo: rece musza obracac sie TYLKO gdy celujesz (zadna inna animacja)
+
+                                                                 var head = armature.getJoint("Head");
+                                                                 var torso = armature.getJoint("Spine");
+                                                                 var upperArmR = armature.getJoint("ArmR");
+                                                                 var upperArmL = armature.getJoint("ArmL");
+
+
+                                                                 var torsoPitchFraction = 0.3f;
+                                                                 var headPitchFraction = 1f/3f;
+                                                                 var handsPitchFraction = 1 - torsoPitchFraction-0.1f; // because hands are attached to torso, the sum is = pitch instead of rotating both by pitch
+
+
+                                                                 if(pitch > 0*FastMath.DEG_TO_RAD){
+                                                                     torsoPitchFraction = 0.4f;
+                                                                     headPitchFraction = 0.3f;
+                                                                     handsPitchFraction = 1 - torsoPitchFraction-0.2f;
+                                                                 }
+
+
+                                                                 // rotate around heads local X axis
+                                                                 var headXAxis = head.getLocalRotation().mult(Vector3f.UNIT_X);
+                                                                 var handsPitchQuat = new Quaternion().fromAngleAxis(pitch*handsPitchFraction, headXAxis);
+                                                                 upperArmR.setLocalRotation(handsPitchQuat.mult(upperArmR.getLocalRotation()));
+                                                                 upperArmL.setLocalRotation(handsPitchQuat.mult(upperArmL.getLocalRotation()));
+
+                                                                 var headPitchQuat = new Quaternion().fromAngleAxis(pitch*headPitchFraction, headXAxis);
+                                                                 head.setLocalRotation(headPitchQuat.mult(head.getLocalRotation()));
+
+
+                                                                 var torsoXAxis = torso.getLocalRotation().mult(Vector3f.UNIT_X);
+                                                                 var torsoPitch = new Quaternion().fromAngleAxis(pitch *torsoPitchFraction, torsoXAxis);
+                                                                 torso.setLocalRotation(torsoPitch.mult(torso.getLocalRotation()));
+
+
+                                                                 // torso is parent of both upper arms and head so updates them too
+                                                                 torso.update();
+                                                             }
+                                                         }
+        );
 
 
         // wazne! skinning control musi byc PO controlu ktory ustawia rotacje kosci

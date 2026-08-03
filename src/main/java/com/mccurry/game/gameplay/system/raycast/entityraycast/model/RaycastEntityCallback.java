@@ -2,9 +2,11 @@ package com.mccurry.game.gameplay.system.raycast.entityraycast.model;
 
 import com.jme3.collision.CollisionResults;
 import com.jme3.math.Ray;
+import com.jme3.math.Vector3f;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityCallback;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
+import com.mccurry.game.gameplay.system.animation.component.ManualAnimationControlComponent;
 import com.mccurry.game.gameplay.system.raycast.RaycastService;
 import com.mccurry.game.gameplay.system.raycast.entityraycast.component.EntityRaycastHitboxComponent;
 import com.mccurry.game.gameplay.system.raycast.model.RaycastResultSelector;
@@ -13,6 +15,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Random;
 import java.util.Set;
 
 public class RaycastEntityCallback implements EntityCallback {
@@ -39,7 +42,22 @@ public class RaycastEntityCallback implements EntityCallback {
         if(intersects){
             for(var hitbox : component.getHitboxes()) {
                 var hitboxGeom = hitbox.getGeometry();
-                raycastService.getOneRaycastResult(currentRay, hitboxGeom, RaycastResultSelector.ANY, mutableResults);
+                var collisionResult = raycastService.getOneRaycastResult(currentRay, hitboxGeom, RaycastResultSelector.ANY, mutableResults);
+
+                var hitFeedback = hitbox.getHitFeedback();
+                if(collisionResult != null && hitFeedback != null){ // hitboxGeom was hit
+                    var manualAnimation = entityStore.getComponent(entityWithRequiredComponents, ManualAnimationControlComponent.class);
+
+                    if(manualAnimation != null){
+                        manualAnimation.translateBy(hitbox, new Vector3f(
+                                new Random().nextFloat(-0.5f,0.5f),
+                                new Random().nextFloat(-0.5f,0.5f),
+                                new Random().nextFloat(-0.5f,0.5f)
+                        ));
+                    }
+
+                }
+
             }
         }
     }

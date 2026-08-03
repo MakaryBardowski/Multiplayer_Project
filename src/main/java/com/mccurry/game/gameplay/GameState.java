@@ -2,6 +2,7 @@ package com.mccurry.game.gameplay;
 
 import com.epagagames.particles.Emitter;
 import com.jme3.anim.AnimComposer;
+import com.jme3.anim.ArmatureMask;
 import com.jme3.anim.SkinningControl;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -12,9 +13,11 @@ import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
+import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
+import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
@@ -32,6 +35,8 @@ import com.mccurry.game.constants.CameraConstants;
 import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.debug.DebugCommandListener;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
+import com.mccurry.game.gameplay.system.animation.component.ManualAnimationControlComponent;
+import com.mccurry.game.gameplay.system.animation.control.ManualAnimationControl;
 import com.mccurry.game.gameplay.system.attack.AttackSystem;
 import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
@@ -50,6 +55,7 @@ import com.mccurry.game.gameplay.system.equipment.core.component.EquippableCompo
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.ViewmodelSourceComponent;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
+import com.mccurry.game.gameplay.system.hitfeedback.model.HitFeedback;
 import com.mccurry.game.gameplay.system.intent.event.HandEquipIntentEvent;
 import com.mccurry.game.gameplay.system.intent.resolver.model.IntentSystems;
 import com.mccurry.game.gameplay.system.intent.system.IntentSystem;
@@ -116,7 +122,7 @@ public class GameState extends BaseAppState {
 
     private final SyncEventHandler<GameplayChangePauseStateRequest> onPauseRequest = EventHandlers.syncEventHandler(
             (event, elm) -> {
-                switch (event.getDesiredNewState()){
+                switch (event.getDesiredNewState()) {
                     case PAUSED -> this.setEnabled(false);
                     case UNPAUSED -> this.setEnabled(true);
                 }
@@ -126,7 +132,6 @@ public class GameState extends BaseAppState {
     private DebugCommandListener debugCommandListener;
 
     private FilterPostProcessor firstPersonBloomPostProcessor;
-
 
 
     @Override
@@ -253,7 +258,6 @@ public class GameState extends BaseAppState {
         var firstPersonEffects = new FirstPersonViewTransformEffectsComponent();
         var handsViewmodel = new HandsViewmodelComponent(fpHands);
 
-
         var player = entityStore.create(
                 transformComponent,
                 velocityComponent, // can move
@@ -287,62 +291,23 @@ public class GameState extends BaseAppState {
         setupState();
 
 
-
-
-        var gun = setupModelLight(
-                (Node) assetManager.loadModel(
-                        "Models/double_barrel_fp/double_barrel_fp.j3o"
-                )
-        );
-
-        var weaponEntity1 = entityStore.create(
-                WeaponIdentityComponent.builder()
-                        .primaryActionIdentity(
-                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-                        )
-                        .secondaryActionIdentity(
-                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-                        )
-                        .build(),
-                CrosshairSourceComponent.builder()
-                        .crosshairType(CrosshairType.SHOTGUN)
-                        .build(),
-                EquippableComponent.builder()
-                        .handSlot(HandSlot.HAND_RIGHT)
-                        .handSlot(HandSlot.HAND_LEFT)
-                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
-                        .build(),
-                WeaponViewModelComponent.builder()
-                        .viewModel(gun)
-                        .primaryActionVfxData(
-                                GunVfxData.builder()
-                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
-                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
-                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-                                        .build()
-                        )
-                        .secondaryVfxData(
-                                GunVfxData.builder()
-                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
-                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
-                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-                                        .build()
-                        )
-                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-                        .build()
-        );
-
 //        var gun = setupModelLight(
 //                (Node) assetManager.loadModel(
-//                        "Models/mp18_fp/mp18_fp.j3o"
+//                        "Models/double_barrel_fp/double_barrel_fp.j3o"
 //                )
 //        );
 //
 //        var weaponEntity1 = entityStore.create(
 //                WeaponIdentityComponent.builder()
-//                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+//                        .primaryActionIdentity(
+//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+//                        )
+//                        .secondaryActionIdentity(
+//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+//                        )
+//                        .build(),
 //                CrosshairSourceComponent.builder()
-//                        .crosshairType(CrosshairType.SMG)
+//                        .crosshairType(CrosshairType.SHOTGUN)
 //                        .build(),
 //                EquippableComponent.builder()
 //                        .handSlot(HandSlot.HAND_RIGHT)
@@ -353,23 +318,60 @@ public class GameState extends BaseAppState {
 //                        .viewModel(gun)
 //                        .primaryActionVfxData(
 //                                GunVfxData.builder()
-//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
-//                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
 //                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-//                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+//                                        .build()
+//                        )
+//                        .secondaryVfxData(
+//                                GunVfxData.builder()
+//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
+//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
+//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
 //                                        .build()
 //                        )
 //                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-//                        .gunAnimationData(
-//                                GunAnimationData.builder()
-//                                        .lockIdleAnimName("Lock_Idle")
-//                                        .lockRecoilAnimName("Lock_Pull")
-//                                        .lockReturnAnimName("Lock_Return")
-//                                        .build()
-//                        )
 //                        .build()
 //        );
+
+        var gun = setupModelLight(
+                (Node) assetManager.loadModel(
+                        "Models/mp18_fp/mp18_fp.j3o"
+                )
+        );
+
+        var weaponEntity1 = entityStore.create(
+                WeaponIdentityComponent.builder()
+                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+                CrosshairSourceComponent.builder()
+                        .crosshairType(CrosshairType.SMG)
+                        .build(),
+                EquippableComponent.builder()
+                        .handSlot(HandSlot.HAND_RIGHT)
+                        .handSlot(HandSlot.HAND_LEFT)
+                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+                        .build(),
+                WeaponViewModelComponent.builder()
+                        .viewModel(gun)
+                        .primaryActionVfxData(
+                                GunVfxData.builder()
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle"))
+                                        .bulletCaseEjectionNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("CasingSpawnpoint"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__SMG_1)
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+                                        .caseEjection(VfxType.FP__BULLET_CASE__SMG_1)
+                                        .build()
+                        )
+                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
+                        .gunAnimationData(
+                                GunAnimationData.builder()
+                                        .lockIdleAnimName("Lock_Idle")
+                                        .lockRecoilAnimName("Lock_Pull")
+                                        .lockReturnAnimName("Lock_Return")
+                                        .build()
+                        )
+                        .build()
+        );
 
 
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
@@ -392,9 +394,14 @@ public class GameState extends BaseAppState {
         matRed.getAdditionalRenderState().setWireframe(true);
 
         var matGreen = matRed.clone();
-        matGreen.setColor("Color",ColorRGBA.Green);
+        matGreen.setColor("Color", ColorRGBA.Green);
+
+        var matBlue = matRed.clone();
+        matBlue.setColor("Color", ColorRGBA.Blue);
 
         var armature = humanoidRootNode.getChild("Armature");
+        var skinningControl = armature.getControl(SkinningControl.class);
+
         var raycastHitboxComponent = new EntityRaycastHitboxComponent(armature);
 
         var headHitbox = new Geometry(null, new Box(5 * 0.05f, 6 * 0.05f, 5.2f * 0.05f));
@@ -408,9 +415,9 @@ public class GameState extends BaseAppState {
         thighHitboxL.move(0, 0.2f, 0.125f);
 
         var shinHitboxR = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 3f * 0.05f));
-        shinHitboxR.move(0, 0.125f, 0.125f/2);
+        shinHitboxR.move(0, 0.125f, 0.125f / 2);
         var shinHitboxL = new Geometry(null, new Box(2 * 0.05f, 3 * 0.05f, 3f * 0.05f));
-        shinHitboxL.move(0, 0.125f, 0.125f/2);
+        shinHitboxL.move(0, 0.125f, 0.125f / 2);
 
         var footHitboxR = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
         footHitboxR.move(0, 0.0f, 0);
@@ -427,31 +434,37 @@ public class GameState extends BaseAppState {
         var forearmHitboxL = new Geometry(null, new Box(2 * 0.05f, 4 * 0.05f, 2f * 0.05f));
         forearmHitboxL.move(0, 0.25f, 0);
 
+        var headRaycastHitbox = new EntityRaycastHitbox(headHitbox, headHitbox.getLocalTranslation(), new HitFeedback());
+        var bodyRaycastHitbox = new EntityRaycastHitbox(bodyHitbox, bodyHitbox.getLocalTranslation(), new HitFeedback());
+
         raycastHitboxComponent.getHitboxes().addAll(
                 List.of(
-                        new EntityRaycastHitbox(headHitbox, headHitbox.getLocalTranslation()),
-                        new EntityRaycastHitbox(bodyHitbox, bodyHitbox.getLocalTranslation()),
+                        headRaycastHitbox,
+                        bodyRaycastHitbox,
 
-                        new EntityRaycastHitbox(thighHitboxL, thighHitboxL.getLocalTranslation()),
-                        new EntityRaycastHitbox(thighHitboxR, thighHitboxR.getLocalTranslation()),
+                        new EntityRaycastHitbox(thighHitboxL, thighHitboxL.getLocalTranslation(), null),
+                        new EntityRaycastHitbox(thighHitboxR, thighHitboxR.getLocalTranslation(), null),
 
-                        new EntityRaycastHitbox(shinHitboxR, shinHitboxR.getLocalTranslation()),
-                        new EntityRaycastHitbox(shinHitboxL, shinHitboxL.getLocalTranslation()),
+                        new EntityRaycastHitbox(shinHitboxR, shinHitboxR.getLocalTranslation(), null),
+                        new EntityRaycastHitbox(shinHitboxL, shinHitboxL.getLocalTranslation(), null),
 
-                        new EntityRaycastHitbox(footHitboxR, footHitboxR.getLocalTranslation()),
-                        new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation()),
+                        new EntityRaycastHitbox(footHitboxR, footHitboxR.getLocalTranslation(), null),
+                        new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation(), null),
 
-                        new EntityRaycastHitbox(armHitboxR, armHitboxR.getLocalTranslation()),
-                        new EntityRaycastHitbox(armHitboxL, armHitboxL.getLocalTranslation()),
+                        new EntityRaycastHitbox(armHitboxR, armHitboxR.getLocalTranslation(), null),
+                        new EntityRaycastHitbox(armHitboxL, armHitboxL.getLocalTranslation(), null),
 
-                        new EntityRaycastHitbox(forearmHitboxR, forearmHitboxR.getLocalTranslation()),
-                        new EntityRaycastHitbox(forearmHitboxL, forearmHitboxL.getLocalTranslation())
+                        new EntityRaycastHitbox(forearmHitboxR, forearmHitboxR.getLocalTranslation(), null),
+                        new EntityRaycastHitbox(forearmHitboxL, forearmHitboxL.getLocalTranslation(), null)
                 )
         );
 
         raycastHitboxComponent.getHitboxes().forEach(hb -> {
-            var mat = matRed;
-            if(hb.getGeometry() != headHitbox){
+            var mat = matBlue;
+            if (hb.getGeometry() == headHitbox) {
+                mat = matRed;
+            }
+            if(hb.getGeometry() == bodyHitbox){
                 mat = matGreen;
             }
             hb.getGeometry().setMaterial(mat.clone());
@@ -479,22 +492,59 @@ public class GameState extends BaseAppState {
         raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Always));
 
 
+        var manualAnimControl = new ManualAnimationControl();
+        var manualControlComponent = new ManualAnimationControlComponent(manualAnimControl);
+
+        manualAnimControl.registerHitTarget(headRaycastHitbox, skinningControl.getArmature().getJoint("Head"));
+
         var created = entityStore.create(
                 transformComponent,
                 velocityComponent, // can move
                 humanoidModelComponent, // required for visual equipping
                 equipmentComponent,
-                raycastHitboxComponent
+                raycastHitboxComponent,
+                manualControlComponent
         );
 
         raycastHitboxComponent.getHitboxes().forEach(hitbox -> {
             hitbox.getGeometry().setUserData("hitboxOwnerEntityId", created.getId());
         });
+
+
+        var composer = armature.getControl(AnimComposer.class);
+
+        var legsMask = new ArmatureMask();
+        legsMask.addBones(skinningControl.getArmature(), "Pelvis", "ThighR", "ThighL", "ShinR", "ShinL", "FootR", "FootL");
+
+        var upperBodyMask = new ArmatureMask();
+        upperBodyMask.addBones(skinningControl.getArmature(),
+                "Head",
+                "Spine", "ArmL", "ArmR", "ForearmR", "ForearmL", "HandR", "HandL");
+
+        composer.makeLayer("LowerBody", legsMask);
+        composer.makeLayer("UpperBody", upperBodyMask);
+
+        composer.setCurrentAction("Lower_Stand", "LowerBody");
+
+
+//        composer.setCurrentAction("Upper_HoldRifle", "UpperBody");
+        composer.setCurrentAction("Upper_AimRifle", "UpperBody");
+
+
+
+        armature.addControl(manualAnimControl);
+
+
+        // wazne! skinning control musi byc PO controlu ktory ustawia rotacje kosci
+        armature.removeControl(skinningControl);
+        armature.addControl(skinningControl);
+        // wazne! skinning control musi byc PO controlu ktory ustawia rotacje kosci
+
     }
 
     @Override
     public void update(float tpf) {
-        if(!isEnabled()){
+        if (!isEnabled()) {
             return;
         }
 
@@ -525,16 +575,16 @@ public class GameState extends BaseAppState {
 
         System.out.println("Game event bus:");
         gameEventBus._debug_getSubscribers().forEach(
-                (clazz, sub) ->{
-                    if(!sub.isEmpty()){
+                (clazz, sub) -> {
+                    if (!sub.isEmpty()) {
                         System.out.println("still listening for clazz: %s".formatted(clazz));
                     }
-            }
+                }
         );
         System.out.println("\norchestration bus:");
         getApplication().getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus()._debug_getSubscribers().forEach(
-                (clazz, sub) ->{
-                    if(!sub.isEmpty()){
+                (clazz, sub) -> {
+                    if (!sub.isEmpty()) {
                         System.out.println("still listening for clazz: %s".formatted(clazz));
                     }
                 }
@@ -551,7 +601,7 @@ public class GameState extends BaseAppState {
         pauseGame();
     }
 
-    private void setupState(){
+    private void setupState() {
         var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
         if (consoleLauncher != null) {
             consoleLauncher.getCheatConsoleState().setGameContext(new GameContext(gameEventBus));
@@ -585,7 +635,7 @@ public class GameState extends BaseAppState {
         getApplication().getRenderManager().getMainView("Default").addProcessor(firstPersonBloomPostProcessor);
     }
 
-    private void cleanupState(){
+    private void cleanupState() {
         var consoleLauncher = getApplication().getStateManager().getState(GameStateOrchestrator.class).getCheatConsoleLauncher();
         if (consoleLauncher != null) {
             consoleLauncher.getCheatConsoleState().setGameContext(null);
@@ -633,19 +683,19 @@ public class GameState extends BaseAppState {
         orchestrationBus.unsubscribe(GameplayChangePauseStateRequest.class, onPauseRequest);
     }
 
-    private void pauseGame(){
+    private void pauseGame() {
         cleanupControlsListener();
 
         setPaused(gameStateNode, true);
-        setPaused(gameHudNode,true);
+        setPaused(gameHudNode, true);
         CursorService.cursorEnabled(true);
     }
 
-    private void unpauseGame(){
+    private void unpauseGame() {
         setupControlsListener();
 
         setPaused(gameStateNode, false);
-        setPaused(gameHudNode,false);
+        setPaused(gameHudNode, false);
         CursorService.cursorEnabled(false);
     }
 
@@ -656,22 +706,22 @@ public class GameState extends BaseAppState {
             }
         }
 
-        for(int i = 0; i < spatial.getNumControls(); i++){
+        for (int i = 0; i < spatial.getNumControls(); i++) {
             var c = spatial.getControl(i);
-            if(c instanceof AbstractControl ac){
+            if (c instanceof AbstractControl ac) {
                 ac.setEnabled(!paused);
             }
         }
 
-        if(spatial instanceof ParticleEmitter pe){
+        if (spatial instanceof ParticleEmitter pe) {
             pe.setEnabled(!paused);
-        } else if(spatial instanceof Emitter e){
+        } else if (spatial instanceof Emitter e) {
             e.setEnabled(!paused);
         }
     }
 
 
-    private void setupControlsListener(){
+    private void setupControlsListener() {
         getApplication().getInputManager().addListener(playerInputSystem,
                 MAPPING_KEY_W,
                 MAPPING_KEY_S,
@@ -689,7 +739,7 @@ public class GameState extends BaseAppState {
         );
     }
 
-    private void cleanupControlsListener(){
+    private void cleanupControlsListener() {
         getApplication().getInputManager().removeListener(playerInputSystem);
         getApplication().getInputManager().removeListener(playerRotationControlSystem);
     }
