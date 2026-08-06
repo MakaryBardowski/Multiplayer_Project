@@ -286,7 +286,7 @@ public class GameState extends BaseAppState {
 
         setupState();
         spawnMob(universeNode);
-        "to nie dziala"
+
         var weaponEntity1 = shotgunEntity(assetManager);
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
     }
