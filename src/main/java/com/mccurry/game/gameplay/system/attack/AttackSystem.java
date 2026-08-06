@@ -61,6 +61,9 @@ public class AttackSystem {
 
         var attackerTransform = entityStore.getComponent(attacker, TransformComponent.class);
         var attackerCameraComponent = entityStore.getComponent(attacker, CameraHolderComponent.class);
+
+        CrosshairSpreadRequestEvent.CrosshairHitmarkerTrigger hitmarkerTrigger = null;
+
         if (attackerCameraComponent != null && attackerTransform != null) {
 
             var camOffset = attackerCameraComponent.getCurrentActualCameraOffset();
@@ -103,6 +106,8 @@ public class AttackSystem {
             }
 
             if (isEntityCollisionValid) {
+                hitmarkerTrigger = new CrosshairSpreadRequestEvent.CrosshairHitmarkerTrigger(false);
+
                 Vector3f normal = entityRaycastResult.getContactNormal().normalize();
 
                 Quaternion rot = new Quaternion();
@@ -166,7 +171,7 @@ public class AttackSystem {
 
         var crosshairSourceComponent = entityStore.getComponent(weaponEntity, CrosshairSourceComponent.class);
         if (crosshairSourceComponent != null) {
-            eventBus.publish(new CrosshairSpreadRequestEvent(), null);
+            eventBus.publish(new CrosshairSpreadRequestEvent(hitmarkerTrigger), null);
 
         }
     }

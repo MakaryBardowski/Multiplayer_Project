@@ -11,16 +11,20 @@ import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
+import com.mccurry.game.gameplay.system.crosshair.control.HitmarkerControl;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairChangeRequestEvent;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEvent;
 import com.mccurry.game.gameplay.system.crosshair.model.Crosshair;
 import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
+import com.mccurry.game.gameplay.system.crosshair.model.Hitmarker;
+import de.lessvoid.nifty.loaderv2.types.apply.ApplyRendererImage;
 import lombok.NonNull;
 
 import java.util.Random;
 
 public class CrosshairSystem implements EventSubscriber {
-
+    private final float CROSSHAIR_CENTER_X = 319;
+    private final float CROSSHAIR_CENTER_Y = 175;
     private final AssetManager assetManager;
     private final Node crosshairParentNode; // todo: have some cleanup INSIDE system
     private final SyncEventHandler<CrosshairChangeRequestEvent> onCrosshairChanged;
@@ -28,6 +32,7 @@ public class CrosshairSystem implements EventSubscriber {
 
     private final Crosshair defaultCrosshair;
     private Crosshair currentCrosshair;
+    private final Hitmarker hitmarker;
 
     public CrosshairSystem(AssetManager assetManager, Node crosshairParentNode) {
         this.assetManager = assetManager;
@@ -35,20 +40,28 @@ public class CrosshairSystem implements EventSubscriber {
 
         defaultCrosshair = buildCrosshair(CrosshairType.DEFAULT);
         currentCrosshair = defaultCrosshair;
+        hitmarker = new Hitmarker(assetManager);
 
         onCrosshairChanged = (event, lifecycleManager) -> {
             var type = event.getNewCrosshairType();
             currentCrosshair.removeFromParent();
             currentCrosshair = buildCrosshair(type);
             crosshairParentNode.attachChild(currentCrosshair);
-            float x = 319;
-            float y = 175;
 
-            currentCrosshair.setLocalTranslation(x,y,0);
+
+            currentCrosshair.setLocalTranslation(CROSSHAIR_CENTER_X,CROSSHAIR_CENTER_Y,0);
         };
 
         onCrosshairSpread = (event, lifecycleManager) -> {
             currentCrosshair.spread(4,15);
+
+            var hitmarkerTrigger = event.getHitmarkerTrigger();
+            if(hitmarkerTrigger != null){
+                hitmarker.initialize(hitmarkerTrigger.isKill());
+                crosshairParentNode.attachChild(hitmarker);
+                hitmarker.setLocalTranslation(CROSSHAIR_CENTER_X,CROSSHAIR_CENTER_Y,0);
+            }
+
         };
     }
 
@@ -90,7 +103,7 @@ public class CrosshairSystem implements EventSubscriber {
             centerGeom = new Geometry("TexturedQuad", centerQuad);
             Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             mat.setTexture("ColorMap", tex);
-            mat.setColor("Color", ColorRGBA.White);
+            mat.setColor("Color", ColorRGBA.White.clone());
             mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
             centerGeom.setMaterial(mat);
 
@@ -109,7 +122,7 @@ public class CrosshairSystem implements EventSubscriber {
             rightSideGeom = new Geometry("TexturedQuad", quad);
             Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             mat.setTexture("ColorMap", tex);
-            mat.setColor("Color", ColorRGBA.White);
+            mat.setColor("Color", ColorRGBA.White.clone());
             mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
             rightSideGeom.setMaterial(mat);
 
@@ -134,7 +147,7 @@ public class CrosshairSystem implements EventSubscriber {
             leftSideGeom = new Geometry("TexturedQuad", quad);
             Material mat = new Material(assetManager, "Common/MatDefs/Misc/Unshaded.j3md");
             mat.setTexture("ColorMap", tex);
-            mat.setColor("Color", ColorRGBA.White);
+            mat.setColor("Color", ColorRGBA.White.clone());
             mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
             leftSideGeom.setMaterial(mat);
 
@@ -148,6 +161,9 @@ public class CrosshairSystem implements EventSubscriber {
                 leftSideGeom.move( -quad.getWidth(), 0, 0);
             }
         }
+
+
+
 
         var crosshair = new Crosshair(rightSideGeom,leftSideGeom);
 
@@ -165,4 +181,7 @@ public class CrosshairSystem implements EventSubscriber {
 
         return crosshair;
     }
+
+
+
 }

@@ -13,11 +13,9 @@ import com.jme3.light.AmbientLight;
 import com.jme3.material.Material;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
-import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
 import com.jme3.scene.CameraNode;
 import com.jme3.scene.Geometry;
@@ -28,7 +26,6 @@ import com.jme3.scene.shape.Box;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.console.command.spectator.ToggleSpectatorModeEventHandler;
-import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.console.model.GameContext;
 import com.mccurry.game.constants.CameraConstants;
@@ -275,8 +272,6 @@ public class GameState extends BaseAppState {
         );
 
 
-
-
         debugCommandListener = new DebugCommandListener(entityStore, assetManager);
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
@@ -292,7 +287,7 @@ public class GameState extends BaseAppState {
         setupState();
         spawnMob(universeNode);
 
-        var weaponEntity1 = gunEntity(assetManager);
+        var weaponEntity1 = shotgunEntity(assetManager);
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
     }
 
@@ -355,10 +350,21 @@ public class GameState extends BaseAppState {
 
         var headRaycastHitbox = new EntityRaycastHitbox(headHitbox, headHitbox.getLocalTranslation(), new HitFeedback(7f));
         var bodyRaycastHitbox = new EntityRaycastHitbox(bodyHitbox, bodyHitbox.getLocalTranslation(), new HitFeedback(15f));
+
         var thighLRaycastHitbox = new EntityRaycastHitbox(thighHitboxL, thighHitboxL.getLocalTranslation(), new HitFeedback(8f));
         var thighRRaycastHitbox = new EntityRaycastHitbox(thighHitboxR, thighHitboxR.getLocalTranslation(), new HitFeedback(8f));
+
         var armHitboxRRaycastHitbox = new EntityRaycastHitbox(armHitboxR, armHitboxR.getLocalTranslation(), new HitFeedback(8f));
         var armHitboxLRaycastHitbox = new EntityRaycastHitbox(armHitboxL, armHitboxL.getLocalTranslation(), new HitFeedback(8f));
+
+        var shinHitboxRRaycastHitbox = new EntityRaycastHitbox(shinHitboxR, shinHitboxR.getLocalTranslation(), new HitFeedback(8f));
+        var shinHitboxLRaycastHitbox = new EntityRaycastHitbox(shinHitboxL, shinHitboxL.getLocalTranslation(), new HitFeedback(8f));
+
+        var footHitboxRRaycastHitbox = new EntityRaycastHitbox(footHitboxR, footHitboxR.getLocalTranslation(), new HitFeedback(8f));
+        var footHitboxLRaycastHitbox = new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation(), new HitFeedback(8f));
+
+        var forearmHitboxRRaycastHitbox = new EntityRaycastHitbox(forearmHitboxR, forearmHitboxR.getLocalTranslation(), new HitFeedback(8f));
+        var forearmHitboxLRaycastHitbox = new EntityRaycastHitbox(forearmHitboxL, forearmHitboxL.getLocalTranslation(), new HitFeedback(8f));
 
         raycastHitboxComponent.getHitboxes().addAll(
                 List.of(
@@ -368,17 +374,17 @@ public class GameState extends BaseAppState {
                         thighLRaycastHitbox,
                         thighRRaycastHitbox,
 
-                        new EntityRaycastHitbox(shinHitboxR, shinHitboxR.getLocalTranslation(), null),
-                        new EntityRaycastHitbox(shinHitboxL, shinHitboxL.getLocalTranslation(), null),
-
-                        new EntityRaycastHitbox(footHitboxR, footHitboxR.getLocalTranslation(), null),
-                        new EntityRaycastHitbox(footHitboxL, footHitboxL.getLocalTranslation(), null),
+                        shinHitboxRRaycastHitbox,
+                        shinHitboxLRaycastHitbox,
 
                         armHitboxRRaycastHitbox,
                         armHitboxLRaycastHitbox,
 
-                        new EntityRaycastHitbox(forearmHitboxR, forearmHitboxR.getLocalTranslation(), null),
-                        new EntityRaycastHitbox(forearmHitboxL, forearmHitboxL.getLocalTranslation(), null)
+                        footHitboxRRaycastHitbox,
+                        footHitboxLRaycastHitbox,
+
+                        forearmHitboxRRaycastHitbox,
+                        forearmHitboxLRaycastHitbox
                 )
         );
 
@@ -387,7 +393,7 @@ public class GameState extends BaseAppState {
             if (hb.getGeometry() == headHitbox) {
                 mat = matRed;
             }
-            if(hb.getGeometry() == bodyHitbox){
+            if (hb.getGeometry() == bodyHitbox) {
                 mat = matGreen;
             }
             hb.getGeometry().setMaterial(mat.clone());
@@ -396,14 +402,23 @@ public class GameState extends BaseAppState {
         var manualAnimControl = new ManualAnimationControl();
         var manualControlComponent = new ManualAnimationControlComponent(manualAnimControl);
 
-        manualAnimControl.registerHitTarget(headRaycastHitbox, skinningControl.getArmature().getJoint("Head"));
+        manualAnimControl.registerHitTarget(headRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
         manualAnimControl.registerHitTarget(bodyRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
 
-        manualAnimControl.registerHitTarget(armHitboxRRaycastHitbox, skinningControl.getArmature().getJoint("ArmR"));
-        manualAnimControl.registerHitTarget(armHitboxLRaycastHitbox, skinningControl.getArmature().getJoint("ArmL"));
+        manualAnimControl.registerHitTarget(armHitboxRRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+        manualAnimControl.registerHitTarget(armHitboxLRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
 
-        manualAnimControl.registerHitTarget(thighRRaycastHitbox, skinningControl.getArmature().getJoint("ThighR"));
-        manualAnimControl.registerHitTarget(thighLRaycastHitbox, skinningControl.getArmature().getJoint("ThighL"));
+        manualAnimControl.registerHitTarget(thighRRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+        manualAnimControl.registerHitTarget(thighLRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+
+        manualAnimControl.registerHitTarget(shinHitboxRRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+        manualAnimControl.registerHitTarget(shinHitboxLRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+
+        manualAnimControl.registerHitTarget(footHitboxRRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+        manualAnimControl.registerHitTarget(footHitboxLRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+
+        manualAnimControl.registerHitTarget(forearmHitboxRRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
+        manualAnimControl.registerHitTarget(forearmHitboxLRaycastHitbox, skinningControl.getArmature().getJoint("Spine"));
 
         armature.getControl(SkinningControl.class).getAttachmentsNode("Head").attachChild(headHitbox);
         armature.getControl(SkinningControl.class).getAttachmentsNode("Spine").attachChild(bodyHitbox);
@@ -425,8 +440,6 @@ public class GameState extends BaseAppState {
 
 
         raycastHitboxComponent.getHitboxes().forEach(hb -> hb.getGeometry().setCullHint(Spatial.CullHint.Always));
-
-
 
 
         var created = entityStore.create(
@@ -457,8 +470,7 @@ public class GameState extends BaseAppState {
         composer.makeLayer("UpperBody", upperBodyMask);
 
         composer.setCurrentAction("Lower_Stand", "LowerBody");
-        composer.setCurrentAction("Upper_AimRifle", "UpperBody");
-
+//        composer.setCurrentAction("Upper_AimRifle", "UpperBody");
 
 
         armature.addControl(manualAnimControl);
@@ -469,7 +481,7 @@ public class GameState extends BaseAppState {
         armature.addControl(skinningControl);
         // wazne! skinning control musi byc PO controlu ktory ustawia rotacje kosci
 
-        var weaponEntity1 = gunEntity(getApplication().getAssetManager());
+        var weaponEntity1 = smgEntity(getApplication().getAssetManager());
         gameEventBus.publish(new HandEquipIntentEvent(created, weaponEntity1, HandSlot.HAND_RIGHT), null);
     }
 
@@ -695,50 +707,7 @@ public class GameState extends BaseAppState {
         return node;
     }
 
-    private Entity gunEntity(AssetManager assetManager){
-//        var gun = setupModelLight(
-//                (Node) assetManager.loadModel(
-//                        "Models/double_barrel_fp/double_barrel_fp.j3o"
-//                )
-//        );
-//
-//        var weaponEntity1 = entityStore.create(
-//                WeaponIdentityComponent.builder()
-//                        .primaryActionIdentity(
-//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-//                        )
-//                        .secondaryActionIdentity(
-//                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
-//                        )
-//                        .build(),
-//                CrosshairSourceComponent.builder()
-//                        .crosshairType(CrosshairType.SHOTGUN)
-//                        .build(),
-//                EquippableComponent.builder()
-//                        .handSlot(HandSlot.HAND_RIGHT)
-//                        .handSlot(HandSlot.HAND_LEFT)
-//                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
-//                        .build(),
-//                WeaponViewModelComponent.builder()
-//                        .viewModel(gun)
-//                        .primaryActionVfxData(
-//                                GunVfxData.builder()
-//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
-//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-//                                        .build()
-//                        )
-//                        .secondaryVfxData(
-//                                GunVfxData.builder()
-//                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
-//                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
-//                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
-//                                        .build()
-//                        )
-//                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
-//                        .build()
-//        );
-
+    private Entity smgEntity(AssetManager assetManager) {
         var gun = setupModelLight(
                 (Node) assetManager.loadModel(
                         "Models/mp18_fp/mp18_fp.j3o"
@@ -780,4 +749,50 @@ public class GameState extends BaseAppState {
         return weaponEntity1;
     }
 
+    private Entity shotgunEntity(AssetManager assetManager) {
+        var gun = setupModelLight(
+                (Node) assetManager.loadModel(
+                        "Models/double_barrel_fp/double_barrel_fp.j3o"
+                )
+        );
+
+        var weaponEntity1 = entityStore.create(
+                WeaponIdentityComponent.builder()
+                        .primaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                        )
+                        .secondaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                        )
+                        .build(),
+                CrosshairSourceComponent.builder()
+                        .crosshairType(CrosshairType.SHOTGUN)
+                        .build(),
+                EquippableComponent.builder()
+                        .handSlot(HandSlot.HAND_RIGHT)
+                        .handSlot(HandSlot.HAND_LEFT)
+                        .displayNode(setupModelLight((Node) assetManager.loadModel("Models/mp18_tp/mp18_tp.j3o")))
+                        .build(),
+                WeaponViewModelComponent.builder()
+                        .viewModel(gun)
+                        .primaryActionVfxData(
+                                GunVfxData.builder()
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_L"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_L)
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+                                        .build()
+                        )
+                        .secondaryVfxData(
+                                GunVfxData.builder()
+                                        .muzzleNode(gun.getChild("Armature").getControl(SkinningControl.class).getAttachmentsNode("Muzzle_R"))
+                                        .muzzleFlash(VfxType.FP__MUZZLE_FLASH__DOUBLE_BARREL_1_R)
+                                        .muzzleFlashOffset(new Vector3f(0, 0, -0.15f))
+                                        .build()
+                        )
+                        .animComposer(gun.getChild("Armature").getControl(AnimComposer.class))
+                        .build()
+        );
+
+        return weaponEntity1;
+    }
 }

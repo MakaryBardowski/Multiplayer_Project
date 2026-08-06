@@ -1,8 +1,18 @@
 package com.mccurry.game.gameplay.system.crosshair.event;
 
 import com.mccurry.events.core.Event;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 
+@Getter
 @RequiredArgsConstructor
 public class CrosshairSpreadRequestEvent implements Event {
+    @Nullable private final CrosshairHitmarkerTrigger hitmarkerTrigger;
+
+    @Getter
+    @RequiredArgsConstructor
+    public static class CrosshairHitmarkerTrigger{
+        private final boolean isKill;
+    }
 }

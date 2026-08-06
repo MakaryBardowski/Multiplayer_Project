@@ -6,16 +6,21 @@ import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.control.AbstractControl;
+import com.mccurry.game.gameplay.system.crosshair.control.CrosshairControl;
+import lombok.Getter;
+import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
+@Getter
+@Setter
 public class Crosshair extends Node {
-    private static final float RECOVERY_SPEED = 20f; // px/sec
+    private final float RECOVERY_SPEED = 20f; // px/sec
 
     @Nullable private final Spatial rightSide;
     @Nullable private final Spatial leftSide;
 
-    private Vector3f initialRightSidePos;
-    private Vector3f initialLeftSidePos;
+    @Nullable private Vector3f initialRightSidePos;
+    @Nullable private Vector3f initialLeftSidePos;
 
     private float currentSpread = 0f;
     private float targetSpread = 0f;
@@ -32,29 +37,7 @@ public class Crosshair extends Node {
             initialLeftSidePos = leftSide.getLocalTranslation().clone();
         }
 
-        addControl(new AbstractControl() {
-
-
-            @Override
-            protected void controlUpdate(float tpf) {
-
-                if(!isEnabled()){
-                    return;
-                }
-
-                // Recover toward zero.
-                targetSpread = Math.max(0f, targetSpread - RECOVERY_SPEED * tpf);
-
-                // Smoothly move current spread toward target.
-                currentSpread += (targetSpread - currentSpread) * Math.min(1f, tpf * 2260f);
-
-                applySpread(currentSpread);
-            }
-
-            @Override
-            protected void controlRender(RenderManager rm, ViewPort vp) {
-            }
-        });
+        addControl(new CrosshairControl(this));
     }
 
     public void spread(float spreadAmountPx, float maxSpread) {
@@ -64,22 +47,4 @@ public class Crosshair extends Node {
         );
     }
 
-    private void applySpread(float spread) {
-
-        if (rightSide != null) {
-            rightSide.setLocalTranslation(
-                    initialRightSidePos.x + spread,
-                    initialRightSidePos.y,
-                    initialRightSidePos.z
-            );
-        }
-
-        if (leftSide != null) {
-            leftSide.setLocalTranslation(
-                    initialLeftSidePos.x - spread,
-                    initialLeftSidePos.y,
-                    initialLeftSidePos.z
-            );
-        }
-    }
 }
