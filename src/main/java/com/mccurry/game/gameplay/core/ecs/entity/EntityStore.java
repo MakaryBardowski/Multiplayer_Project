@@ -60,6 +60,19 @@ public class EntityStore {
                 entitiesIterator.remove();
             }
         }
+
+
+        var iterator = singletonComponentHolders.entrySet().iterator();
+        while (iterator.hasNext()) {
+            var entry = iterator.next();
+
+            if (entry.getValue().getId().equals(targetEntityId)) {
+                iterator.remove();
+                break;
+            }
+        }
+
+        componentStore.flushComponents(targetEntityId);
     }
 
     public <T extends Component> @Nullable T getComponent(Entity entity, Class<T> componentClass){

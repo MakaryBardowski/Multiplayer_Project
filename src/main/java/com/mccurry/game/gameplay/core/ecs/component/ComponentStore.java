@@ -54,4 +54,8 @@ public class ComponentStore {
 
         existingComponents.removeIf(component -> component.getClass().equals(componentClass));
     }
+
+    public void flushComponents(@NotNull Integer targetEntityId){
+        entityComponentsByEntityId.remove(targetEntityId);
+    }
 }
