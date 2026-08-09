@@ -87,15 +87,15 @@ public class HitmarkerControl extends AbstractControl {
 
     public void initialize(boolean isKillingBlow) {
         noColorFalloffRemainingDurationSeconds = POP_DURATION;
-
         // Smoothly transition to the desired color.
         colorFadeRemainingSeconds = COLOR_FADE_DURATION;
         targetColor.set(isKillingBlow ? ColorRGBA.Red : defaultHitmarkerColor);
+        var targetPopSize = POP_SCALE * (isKillingBlow ? 1.3f : 1 );
 
         // Restart the pop animation.
-        hitmarkerNode.setLocalScale(defaultScale.x * POP_SCALE,
-                defaultScale.y * POP_SCALE,
-                defaultScale.z * POP_SCALE);
+        hitmarkerNode.setLocalScale(defaultScale.x * targetPopSize,
+                defaultScale.y * targetPopSize,
+                defaultScale.z * targetPopSize);
 
         popRemainingSeconds = POP_DURATION;
         popping = true;
