@@ -43,6 +43,7 @@ import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewMod
 import com.mccurry.game.gameplay.system.crosshair.CrosshairSystem;
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
+import com.mccurry.game.gameplay.system.damage.DamageSystem;
 import com.mccurry.game.gameplay.system.equipment.core.EquipSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.ViewmodelSystem;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.FirstPersonEquipSystem;
@@ -71,6 +72,9 @@ import com.mccurry.game.gameplay.system.raycast.entityraycast.EntityRaycastSyste
 import com.mccurry.game.gameplay.system.raycast.entityraycast.component.EntityRaycastHitboxComponent;
 import com.mccurry.game.gameplay.system.raycast.entityraycast.model.EntityRaycastHitbox;
 import com.mccurry.game.gameplay.system.raycast.mapraycast.MapRaycastSystem;
+import com.mccurry.game.gameplay.system.stats.StatisticsComponent;
+import com.mccurry.game.gameplay.system.stats.health.Health;
+import com.mccurry.game.gameplay.system.stats.health.HealthCalculationSystem;
 import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
@@ -106,6 +110,7 @@ public class GameState extends BaseAppState {
     private ViewmodelSystem viewmodelSystem;
 
     private AttackSystem attackSystem;
+    private DamageSystem damageSystem;
     private EquipSystem equipSystem;
 
     private final EventBus gameEventBus = new EventBus();
@@ -255,6 +260,14 @@ public class GameState extends BaseAppState {
         var firstPersonSource = new ViewmodelSourceComponent();
         var firstPersonEffects = new FirstPersonViewTransformEffectsComponent();
         var handsViewmodel = new HandsViewmodelComponent(fpHands);
+        var statsComponent = StatisticsComponent.builder()
+                .health(
+                        Health.builder()
+                                .base(10)
+                                .max(10)
+                                .current(10)
+                                .build()
+                ).build();
 
         var player = entityStore.create(
                 transformComponent,
@@ -268,11 +281,15 @@ public class GameState extends BaseAppState {
                 firstPersonSource, // first person hands follow this entity
                 firstPersonEffects, // can have first person view model effects
                 handsViewmodel, // has first person hands
-                playerControlled // player controlled
+                playerControlled, // player controlled
+                statsComponent
         );
 
 
         debugCommandListener = new DebugCommandListener(entityStore, assetManager);
+
+        var healthCalculationSystem = new HealthCalculationSystem();
+        damageSystem = new DamageSystem(entityStore, healthCalculationSystem);
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
 
 
@@ -301,6 +318,14 @@ public class GameState extends BaseAppState {
         transformComponent.getOriginNode().move(15, 3, 15);
         var velocityComponent = new VelocityComponent();
         var equipmentComponent = new EquipmentComponent();
+        var statsComponent = StatisticsComponent.builder()
+                .health(
+                        Health.builder()
+                                .base(10)
+                                .max(10)
+                                .current(10)
+                                .build()
+                ).build();
 
 
         var matRed = new Material(getApplication().getAssetManager(), "Common/MatDefs/Misc/Unshaded.j3md");
@@ -448,7 +473,8 @@ public class GameState extends BaseAppState {
                 humanoidModelComponent, // required for visual equipping
                 equipmentComponent,
                 raycastHitboxComponent,
-                manualControlComponent
+                manualControlComponent,
+                statsComponent
         );
 
         raycastHitboxComponent.getHitboxes().forEach(hitbox -> {
@@ -607,6 +633,7 @@ public class GameState extends BaseAppState {
         setupControlsListener();
         gameEventBus.subscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         debugCommandListener.subscribe(gameEventBus);
+        damageSystem.subscribe(gameEventBus);
         crosshairSystem.subscribe(gameEventBus);
         thirdPersonVisualEquipSystem.subscribe(gameEventBus);
         firstPersonEquipSystem.subscribe(gameEventBus);
@@ -619,6 +646,7 @@ public class GameState extends BaseAppState {
         cleanupControlsListener();
         gameEventBus.unsubscribe(ToggleSpectatorModeEvent.class, spectatorModeEventHandler);
         debugCommandListener.unsubscribe(gameEventBus);
+        damageSystem.unsubscribe(gameEventBus);
         crosshairSystem.unsubscribe(gameEventBus);
         thirdPersonVisualEquipSystem.unsubscribe(gameEventBus);
         firstPersonEquipSystem.unsubscribe(gameEventBus);
@@ -716,7 +744,7 @@ public class GameState extends BaseAppState {
 
         var weaponEntity1 = entityStore.create(
                 WeaponIdentityComponent.builder()
-                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(3f, 1f / 8, 0)).build(),
+                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(2f, 1f / 8, 0)).build(),
                 CrosshairSourceComponent.builder()
                         .crosshairType(CrosshairType.SMG)
                         .build(),

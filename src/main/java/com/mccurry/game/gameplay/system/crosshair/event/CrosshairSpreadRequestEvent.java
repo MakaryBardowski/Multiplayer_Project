@@ -7,12 +7,4 @@ import org.jetbrains.annotations.Nullable;
 
 @Getter
 @RequiredArgsConstructor
-public class CrosshairSpreadRequestEvent implements Event {
-    @Nullable private final CrosshairHitmarkerTrigger hitmarkerTrigger;
-
-    @Getter
-    @RequiredArgsConstructor
-    public static class CrosshairHitmarkerTrigger{
-        private final boolean isKill;
-    }
-}
+public class CrosshairSpreadRequestEvent implements Event {}

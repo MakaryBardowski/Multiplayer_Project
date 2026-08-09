@@ -17,6 +17,7 @@ import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEv
 import com.mccurry.game.gameplay.system.crosshair.model.Crosshair;
 import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
 import com.mccurry.game.gameplay.system.crosshair.model.Hitmarker;
+import com.mccurry.game.gameplay.system.hitmarker.event.HitmarkerTriggerEvent;
 import de.lessvoid.nifty.loaderv2.types.apply.ApplyRendererImage;
 import lombok.NonNull;
 
@@ -29,6 +30,7 @@ public class CrosshairSystem implements EventSubscriber {
     private final Node crosshairParentNode; // todo: have some cleanup INSIDE system
     private final SyncEventHandler<CrosshairChangeRequestEvent> onCrosshairChanged;
     private final SyncEventHandler<CrosshairSpreadRequestEvent> onCrosshairSpread;
+    private final SyncEventHandler<HitmarkerTriggerEvent> onHitmarkerTrigger;
 
     private final Crosshair defaultCrosshair;
     private Crosshair currentCrosshair;
@@ -49,19 +51,17 @@ public class CrosshairSystem implements EventSubscriber {
             crosshairParentNode.attachChild(currentCrosshair);
 
 
-            currentCrosshair.setLocalTranslation(CROSSHAIR_CENTER_X,CROSSHAIR_CENTER_Y,0);
+            currentCrosshair.setLocalTranslation(CROSSHAIR_CENTER_X, CROSSHAIR_CENTER_Y, 0);
         };
 
         onCrosshairSpread = (event, lifecycleManager) -> {
-            currentCrosshair.spread(4,15);
+            currentCrosshair.spread(4, 15);
+        };
 
-            var hitmarkerTrigger = event.getHitmarkerTrigger();
-            if(hitmarkerTrigger != null){
-                hitmarker.initialize(hitmarkerTrigger.isKill());
-                crosshairParentNode.attachChild(hitmarker);
-                hitmarker.setLocalTranslation(CROSSHAIR_CENTER_X,CROSSHAIR_CENTER_Y,0);
-            }
-
+        onHitmarkerTrigger = (event, lifecycleManager) -> {
+            hitmarker.initialize(event.isKill());
+            crosshairParentNode.attachChild(hitmarker);
+            hitmarker.setLocalTranslation(CROSSHAIR_CENTER_X, CROSSHAIR_CENTER_Y, 0);
         };
     }
 
@@ -70,12 +70,14 @@ public class CrosshairSystem implements EventSubscriber {
     public void subscribe(@NonNull EventBus eventBus) {
         eventBus.subscribe(CrosshairChangeRequestEvent.class, onCrosshairChanged);
         eventBus.subscribe(CrosshairSpreadRequestEvent.class, onCrosshairSpread);
+        eventBus.subscribe(HitmarkerTriggerEvent.class, onHitmarkerTrigger);
     }
 
     @Override
     public void unsubscribe(@NonNull EventBus eventBus) {
         eventBus.unsubscribe(CrosshairChangeRequestEvent.class, onCrosshairChanged);
         eventBus.unsubscribe(CrosshairSpreadRequestEvent.class, onCrosshairSpread);
+        eventBus.unsubscribe(HitmarkerTriggerEvent.class, onHitmarkerTrigger);
     }
 
     private Crosshair buildCrosshair(CrosshairType crosshairType) {
@@ -126,7 +128,7 @@ public class CrosshairSystem implements EventSubscriber {
             mat.getAdditionalRenderState().setBlendMode(RenderState.BlendMode.Alpha);
             rightSideGeom.setMaterial(mat);
 
-            rightSideGeom.move(0, -(int)(quad.getHeight()/2), 0);
+            rightSideGeom.move(0, -(int) (quad.getHeight() / 2), 0);
 
             if (centerQuad != null) {
                 rightSideGeom.move(centerQuad.getWidth(), 0, 0);
@@ -152,36 +154,31 @@ public class CrosshairSystem implements EventSubscriber {
             leftSideGeom.setMaterial(mat);
 
 
-
-
-            leftSideGeom.move(0, -(int)(quad.getHeight()/2), 0);
+            leftSideGeom.move(0, -(int) (quad.getHeight() / 2), 0);
 
 
             if (centerQuad != null) {
-                leftSideGeom.move( -quad.getWidth(), 0, 0);
+                leftSideGeom.move(-quad.getWidth(), 0, 0);
             }
         }
 
 
+        var crosshair = new Crosshair(rightSideGeom, leftSideGeom);
 
-
-        var crosshair = new Crosshair(rightSideGeom,leftSideGeom);
-
-        if(centerGeom != null){
+        if (centerGeom != null) {
             crosshair.attachChild(centerGeom);
         }
 
-        if(leftSideGeom != null){
+        if (leftSideGeom != null) {
             crosshair.attachChild(leftSideGeom);
         }
 
-        if(rightSideGeom != null){
+        if (rightSideGeom != null) {
             crosshair.attachChild(rightSideGeom);
         }
 
         return crosshair;
     }
-
 
 
 }

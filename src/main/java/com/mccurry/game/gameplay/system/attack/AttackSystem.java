@@ -13,7 +13,10 @@ import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewMod
 import com.mccurry.game.gameplay.system.attack.model.AttackAction;
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEvent;
+import com.mccurry.game.gameplay.system.damage.event.DamageRequestEvent;
+import com.mccurry.game.gameplay.system.damage.model.DamageInstance;
 import com.mccurry.game.gameplay.system.equipment.visual.firstperson.component.FirstPersonViewTransformEffectsComponent;
+import com.mccurry.game.gameplay.system.hitmarker.event.HitmarkerTriggerEvent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraHolderComponent;
 import com.mccurry.game.gameplay.system.player.component.camera.CameraTransformEffectsComponent;
 import com.mccurry.game.gameplay.system.raycast.entityraycast.EntityRaycastSystem;
@@ -62,8 +65,6 @@ public class AttackSystem {
         var attackerTransform = entityStore.getComponent(attacker, TransformComponent.class);
         var attackerCameraComponent = entityStore.getComponent(attacker, CameraHolderComponent.class);
 
-        CrosshairSpreadRequestEvent.CrosshairHitmarkerTrigger hitmarkerTrigger = null;
-
         if (attackerCameraComponent != null && attackerTransform != null) {
 
             var camOffset = attackerCameraComponent.getCurrentActualCameraOffset();
@@ -106,7 +107,6 @@ public class AttackSystem {
             }
 
             if (isEntityCollisionValid) {
-                hitmarkerTrigger = new CrosshairSpreadRequestEvent.CrosshairHitmarkerTrigger(false);
 
                 Vector3f normal = entityRaycastResult.getContactNormal().normalize();
 
@@ -118,6 +118,17 @@ public class AttackSystem {
                         attackerTransform.getOriginNode().getParent(),
                         entityRaycastResult.getContactPoint().add(entityRaycastResult.getContactNormal().normalize().multLocal(0.05f)),
                         rot);
+
+                eventBus.publish(new DamageRequestEvent(
+                                entityRaycastResult.getHitEntityId(),
+                                new DamageInstance(new DamageInstance.DamageTypeInstance(weaponActionIdentity.getBaseDamage())),
+                                (damageResult -> {
+                                    eventBus.publish(new HitmarkerTriggerEvent(damageResult.isTargetDied()), null);
+
+                                })
+                        ),
+                        null
+                );
             }
         }
 
@@ -126,7 +137,7 @@ public class AttackSystem {
         if (gunViewModelComponent != null) {
             var gunVfx = gunViewModelComponent.getPrimaryActionVfxData();
 
-            if(action.equals(AttackAction.SECONDARY)){
+            if (action.equals(AttackAction.SECONDARY)) {
                 gunVfx = gunViewModelComponent.getSecondaryVfxData();
             }
 
@@ -171,8 +182,7 @@ public class AttackSystem {
 
         var crosshairSourceComponent = entityStore.getComponent(weaponEntity, CrosshairSourceComponent.class);
         if (crosshairSourceComponent != null) {
-            eventBus.publish(new CrosshairSpreadRequestEvent(hitmarkerTrigger), null);
-
+            eventBus.publish(new CrosshairSpreadRequestEvent(), null);
         }
     }
 

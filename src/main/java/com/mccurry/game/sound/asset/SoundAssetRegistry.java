@@ -13,7 +13,7 @@ public class SoundAssetRegistry {
     public static final List<GlobalSoundAsset> GLOBAL_SOUND_ASSETS = new ArrayList<>(){{
         add(
                 GlobalSoundAsset.builder()
-                        .assetPath(soundPath+"Buffered/MainMenuButtonClick.wav")
+                        .assetPath(soundPath+"MainMenu/MainMenuButtonClick.wav")
                         .soundEntry(GlobalSoundEntry.MENU_BUTTON_CLICK)
                         .soundCategory(SoundCategory.SFX)
                         .type(AudioData.DataType.Buffer)

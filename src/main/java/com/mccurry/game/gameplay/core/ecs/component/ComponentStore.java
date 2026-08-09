@@ -1,6 +1,7 @@
 package com.mccurry.game.gameplay.core.ecs.component;
 
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -9,7 +10,12 @@ public class ComponentStore {
     private final Map<Integer, List<Component>> entityComponentsByEntityId = new HashMap<>();
 
     public <T extends Component> @Nullable T getComponent(Entity entity, Class<T> componentClass) {
-        var entityComponents = entityComponentsByEntityId.get(entity.getId());
+        return getComponent(entity.getId(), componentClass);
+    }
+
+
+    public <T extends Component> @Nullable T getComponent(@NotNull Integer entityId, Class<T> componentClass) {
+        var entityComponents = entityComponentsByEntityId.get(entityId);
         if (entityComponents == null) {
             return null;
         }
@@ -24,6 +30,7 @@ public class ComponentStore {
 
         return null;
     }
+
 
     public void addComponent(Entity entity, Component component){
         var entityId = entity.getId();

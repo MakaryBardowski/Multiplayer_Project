@@ -3,6 +3,7 @@ package com.mccurry.game.gameplay.core.ecs.entity;
 import com.mccurry.game.gameplay.core.ecs.component.Component;
 import com.mccurry.game.gameplay.core.ecs.component.ComponentStore;
 import com.mccurry.game.gameplay.core.ecs.component.SingletonComponent;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -49,8 +50,24 @@ public class EntityStore {
         return entity;
     }
 
+    public void destroy(@NotNull Integer targetEntityId){
+        var entitiesIterator = entities.iterator();
+
+        Entity entity;
+        while(entitiesIterator.hasNext()){
+            entity = entitiesIterator.next();
+            if(entity.getId().equals(targetEntityId)){
+                entitiesIterator.remove();
+            }
+        }
+    }
+
     public <T extends Component> @Nullable T getComponent(Entity entity, Class<T> componentClass){
         return componentStore.getComponent(entity,componentClass);
+    }
+
+    public <T extends Component> @Nullable T getComponent(Integer entityId, Class<T> componentClass){
+        return componentStore.getComponent(entityId,componentClass);
     }
 
 

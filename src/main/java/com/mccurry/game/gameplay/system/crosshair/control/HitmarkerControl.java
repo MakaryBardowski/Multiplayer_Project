@@ -86,7 +86,7 @@ public class HitmarkerControl extends AbstractControl {
     }
 
     public void initialize(boolean isKillingBlow) {
-        noColorFalloffRemainingDurationSeconds = 0.5f;
+        noColorFalloffRemainingDurationSeconds = POP_DURATION;
 
         // Smoothly transition to the desired color.
         colorFadeRemainingSeconds = COLOR_FADE_DURATION;
