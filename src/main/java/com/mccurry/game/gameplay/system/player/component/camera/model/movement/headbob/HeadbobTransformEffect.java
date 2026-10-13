@@ -5,11 +5,11 @@ import com.jme3.math.Quaternion;
 import com.jme3.math.Vector3f;
 import com.mccurry.game.gameplay.system.player.component.camera.model.TransformEffect;
 
-import static com.mccurry.game.gameplay.sharedcomponents.transformeffect.TransformEffectConstants.FIXED_FRAMERATE;
+import static com.mccurry.game.gameplay.core.ecs.CoreConstants.DELTA_TIME_60_FPS;
 
 public class HeadbobTransformEffect extends TransformEffect {
 
-    public static final float HEADBOB_SPEED = 1f / FIXED_FRAMERATE;
+    public static final float HEADBOB_SPEED = DELTA_TIME_60_FPS;
 
     private final float frequency = 15f;
     private final float amplitude = 0.06f;

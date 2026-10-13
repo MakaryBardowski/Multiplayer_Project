@@ -6,31 +6,38 @@ import com.jme3.scene.control.AbstractControl;
 import com.mccurry.game.gameplay.system.crosshair.model.Crosshair;
 import lombok.RequiredArgsConstructor;
 
+import static com.mccurry.game.gameplay.core.ecs.CoreConstants.DELTA_TIME_60_FPS;
+
 @RequiredArgsConstructor
 public class CrosshairControl extends AbstractControl {
     private final Crosshair crosshair;
 
     @Override
     protected void controlUpdate(float tpf) {
-        if(!isEnabled()){
+        if (!isEnabled()) {
             return;
         }
 
         // Recover toward zero.
-        crosshair.setTargetSpread(Math.max(0f, crosshair.getTargetSpread() - crosshair.getRECOVERY_SPEED() * tpf));
-
-        // Smoothly move current spread toward target.
-        var currentSpreadIncrement = (crosshair.getTargetSpread() - crosshair.getCurrentSpread()) * Math.min(1f, tpf * 2260f);;
-        crosshair.setCurrentSpread(
-                crosshair.getCurrentSpread() + currentSpreadIncrement
+        crosshair.setTargetSpreadPx(
+                Math.clamp(
+                        crosshair.getTargetSpreadPx() + crosshair.getInterpolationSpeedPxPerSec() * DELTA_TIME_60_FPS,
+                        crosshair.getMinSpreadPx(),
+                        crosshair.getMaxSpreadPx()
+                )
         );
 
+        // Smoothly move current spread toward target.
+        var currentSpreadIncrement = (crosshair.getTargetSpreadPx() - crosshair.getCurrentSpreadPx()) * Math.min(1f, DELTA_TIME_60_FPS * 2260f);
+        crosshair.setCurrentSpreadPx(crosshair.getCurrentSpreadPx() + currentSpreadIncrement);
 
-        applySpread(crosshair.getCurrentSpread());
+
+        applySpread(crosshair.getCurrentSpreadPx());
     }
 
     @Override
-    protected void controlRender(RenderManager rm, ViewPort vp) {}
+    protected void controlRender(RenderManager rm, ViewPort vp) {
+    }
 
     private void applySpread(float spread) {
         var rightSide = crosshair.getRightSide();

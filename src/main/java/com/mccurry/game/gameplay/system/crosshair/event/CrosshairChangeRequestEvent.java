@@ -9,4 +9,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CrosshairChangeRequestEvent implements Event {
     private final CrosshairType newCrosshairType;
+    private final float angleChangePerSec;
+    private final float minSpreadAngle;
+    private final float maxSpreadAngle;
 }

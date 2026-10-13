@@ -35,11 +35,12 @@ import com.mccurry.game.gameplay.debug.DebugCommandListener;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
 import com.mccurry.game.gameplay.system.animation.component.ManualAnimationControlComponent;
 import com.mccurry.game.gameplay.system.animation.control.ManualAnimationControl;
-import com.mccurry.game.gameplay.system.attack.AttackSystem;
-import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunAnimationData;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.GunVfxData;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewModelComponent;
+import com.mccurry.game.gameplay.system.attack.core.AttackSystem;
+import com.mccurry.game.gameplay.system.attack.core.component.WeaponIdentityComponent;
+import com.mccurry.game.gameplay.system.attack.core.component.viewmodel.GunAnimationData;
+import com.mccurry.game.gameplay.system.attack.core.component.viewmodel.GunVfxData;
+import com.mccurry.game.gameplay.system.attack.core.component.viewmodel.WeaponViewModelComponent;
+import com.mccurry.game.gameplay.system.attack.spread.model.SpreadData;
 import com.mccurry.game.gameplay.system.crosshair.CrosshairSystem;
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
@@ -304,7 +305,7 @@ public class GameState extends BaseAppState {
         setupState();
         spawnMob(universeNode);
 
-        var weaponEntity1 = smgEntity(assetManager);
+        var weaponEntity1 = shotgunEntity(assetManager);
         gameEventBus.publish(new HandEquipIntentEvent(player, weaponEntity1, HandSlot.HAND_RIGHT), null);
     }
 
@@ -744,7 +745,26 @@ public class GameState extends BaseAppState {
 
         var weaponEntity1 = entityStore.create(
                 WeaponIdentityComponent.builder()
-                        .primaryActionIdentity(new WeaponIdentityComponent.WeaponActionIdentity(2f, 1f / 8, 0)).build(),
+                        .spreadData(
+                                new SpreadData(
+                                        new SpreadData.Spread(1f),
+                                        new SpreadData.Spread(3f),
+                                        new SpreadData.Heat(10, 3f,-11f)
+                                )
+                        )
+                        .primaryActionIdentity(
+                                new WeaponIdentityComponent.WeaponActionIdentity(
+                                        1f / 8,
+                                        new WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig(
+                                                new WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileIdentity(
+                                                        2f
+                                                ),
+                                                WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileRelativeSpreadStrategy.FULL_RANDOM,
+                                                WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileType.HITSCAN,
+                                                1
+                                        )
+                                )
+                        ).build(),
                 CrosshairSourceComponent.builder()
                         .crosshairType(CrosshairType.SMG)
                         .build(),
@@ -786,11 +806,38 @@ public class GameState extends BaseAppState {
 
         var weaponEntity1 = entityStore.create(
                 WeaponIdentityComponent.builder()
+                        .spreadData(
+                                new SpreadData(
+                                        new SpreadData.Spread(2),
+                                        new SpreadData.Spread(3f),
+                                        new SpreadData.Heat(10, 7.5f,-25.5f)
+                                )
+                        )
                         .primaryActionIdentity(
-                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                                new WeaponIdentityComponent.WeaponActionIdentity(
+                                        1f,
+                                        new WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig(
+                                                new WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileIdentity(
+                                                        3f
+                                                ),
+                                                WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileRelativeSpreadStrategy.SUNFLOWER,
+                                                WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileType.HITSCAN,
+                                                5
+                                        )
+                                )
                         )
                         .secondaryActionIdentity(
-                                new WeaponIdentityComponent.WeaponActionIdentity(15f, 1f, 0)
+                                new WeaponIdentityComponent.WeaponActionIdentity(
+                                        1f,
+                                        new WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig(
+                                                new WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileIdentity(
+                                                        3f
+                                                ),
+                                                WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileRelativeSpreadStrategy.SUNFLOWER,
+                                                WeaponIdentityComponent.WeaponActionIdentity.WeaponProjectileSpawnConfig.ProjectileType.HITSCAN,
+                                                5
+                                        )
+                                )
                         )
                         .build(),
                 CrosshairSourceComponent.builder()

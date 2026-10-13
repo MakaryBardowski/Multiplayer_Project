@@ -1,15 +1,13 @@
 package com.mccurry.game.gameplay.system.intent.resolver.processor;
 
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.attack.AttackSystem;
-import com.mccurry.game.gameplay.system.attack.component.WeaponIdentityComponent;
-import com.mccurry.game.gameplay.system.attack.model.AttackAction;
+import com.mccurry.game.gameplay.system.attack.core.AttackSystem;
+import com.mccurry.game.gameplay.system.attack.core.component.WeaponIdentityComponent;
 import com.mccurry.game.gameplay.system.equipment.core.component.EquipmentComponent;
 import com.mccurry.game.gameplay.system.equipment.core.model.HandSlot;
-import com.mccurry.game.gameplay.system.intent.event.PrimaryActionIntentEvent;
 import com.mccurry.game.gameplay.system.intent.event.SecondaryActionIntentEvent;
 
-import static com.mccurry.game.gameplay.system.attack.model.AttackAction.SECONDARY;
+import static com.mccurry.game.gameplay.system.attack.core.model.AttackAction.SECONDARY;
 
 public class SecondaryActionProcessor extends IntentProcessor<SecondaryActionIntentEvent> {
     private final AttackSystem attackSystem;
@@ -38,7 +36,7 @@ public class SecondaryActionProcessor extends IntentProcessor<SecondaryActionInt
             if (heldInRightHand != null) {
                 var weaponComponent = entityStore.getComponent(heldInRightHand, WeaponIdentityComponent.class);
                 if (weaponComponent != null) {
-                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent.getSecondaryActionIdentity(), SECONDARY, tpf, gameTimeSeconds);
+                    attackSystem.processAttack(intentOwner, heldInRightHand, weaponComponent, SECONDARY, tpf, gameTimeSeconds);
                 }
             }
         }

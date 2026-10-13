@@ -7,7 +7,7 @@ import com.mccurry.game.gameplay.system.player.component.camera.model.TransformE
 
 import java.util.Random;
 
-import static com.mccurry.game.gameplay.sharedcomponents.transformeffect.TransformEffectConstants.FIXED_FRAMERATE;
+import static com.mccurry.game.gameplay.core.ecs.CoreConstants.DELTA_TIME_60_FPS;
 
 public class SmgViewmodelRecoilTransformEffect extends TransformEffect {
     private static final Random RANDOM = new Random();
@@ -61,7 +61,7 @@ public class SmgViewmodelRecoilTransformEffect extends TransformEffect {
 
     @Override
     public void applyPosition(Vector3f cameraOffset) {
-        float tpf = 1f / FIXED_FRAMERATE;
+        float tpf = DELTA_TIME_60_FPS;
 
         weight = targetWeight;
 
@@ -111,7 +111,7 @@ public class SmgViewmodelRecoilTransformEffect extends TransformEffect {
 
     @Override
     public void applyRotation(Quaternion cameraRotation) {
-        float tpf = 1f / FIXED_FRAMERATE;
+        float tpf = DELTA_TIME_60_FPS;
 
         // integrate rotation recoil
         rotPitch += rotVelPitch;

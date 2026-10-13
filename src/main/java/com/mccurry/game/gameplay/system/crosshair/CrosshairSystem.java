@@ -11,19 +11,16 @@ import com.jme3.texture.Texture;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
-import com.mccurry.game.gameplay.system.crosshair.control.HitmarkerControl;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairChangeRequestEvent;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairSpreadRequestEvent;
 import com.mccurry.game.gameplay.system.crosshair.model.Crosshair;
 import com.mccurry.game.gameplay.system.crosshair.model.CrosshairType;
 import com.mccurry.game.gameplay.system.crosshair.model.Hitmarker;
 import com.mccurry.game.gameplay.system.hitmarker.event.HitmarkerTriggerEvent;
-import de.lessvoid.nifty.loaderv2.types.apply.ApplyRendererImage;
 import lombok.NonNull;
 
-import java.util.Random;
-
 public class CrosshairSystem implements EventSubscriber {
+    public static final float ANGLE_TO_PX_SPREAD_CONVERSION = 5.5f;
     private final float CROSSHAIR_CENTER_X = 319;
     private final float CROSSHAIR_CENTER_Y = 175;
     private final AssetManager assetManager;
@@ -40,14 +37,14 @@ public class CrosshairSystem implements EventSubscriber {
         this.assetManager = assetManager;
         this.crosshairParentNode = crosshairParentNode;
 
-        defaultCrosshair = buildCrosshair(CrosshairType.DEFAULT);
+        defaultCrosshair = buildCrosshair(CrosshairType.DEFAULT,0,0,0);
         currentCrosshair = defaultCrosshair;
         hitmarker = new Hitmarker(assetManager);
 
         onCrosshairChanged = (event, lifecycleManager) -> {
             var type = event.getNewCrosshairType();
             currentCrosshair.removeFromParent();
-            currentCrosshair = buildCrosshair(type);
+            currentCrosshair = buildCrosshair(type, event.getAngleChangePerSec(), event.getMinSpreadAngle(), event.getMaxSpreadAngle());
             crosshairParentNode.attachChild(currentCrosshair);
 
 
@@ -55,7 +52,10 @@ public class CrosshairSystem implements EventSubscriber {
         };
 
         onCrosshairSpread = (event, lifecycleManager) -> {
-            currentCrosshair.spread(4, 15);
+            var estimatedNewAnglePxOffset = angleToPx(event.getNewAngle());
+            System.out.println("estimated "+estimatedNewAnglePxOffset);
+            currentCrosshair.targetSpread(estimatedNewAnglePxOffset);
+
         };
 
         onHitmarkerTrigger = (event, lifecycleManager) -> {
@@ -80,7 +80,7 @@ public class CrosshairSystem implements EventSubscriber {
         eventBus.unsubscribe(HitmarkerTriggerEvent.class, onHitmarkerTrigger);
     }
 
-    private Crosshair buildCrosshair(CrosshairType crosshairType) {
+    private Crosshair buildCrosshair(CrosshairType crosshairType, float angleChangePerSec, float minSpreadAngle, float maxSpreadAngle) {
         var right = crosshairType.getRightTexturePath();
         var center = crosshairType.getCenterTexturePath();
         var left = crosshairType.getLeftTexturePath();
@@ -162,8 +162,13 @@ public class CrosshairSystem implements EventSubscriber {
             }
         }
 
-
-        var crosshair = new Crosshair(rightSideGeom, leftSideGeom);
+        var crosshair = new Crosshair(
+                rightSideGeom,
+                leftSideGeom,
+                angleToPx(angleChangePerSec),
+                angleToPx(minSpreadAngle),
+                angleToPx(maxSpreadAngle)
+        );
 
         if (centerGeom != null) {
             crosshair.attachChild(centerGeom);
@@ -180,5 +185,7 @@ public class CrosshairSystem implements EventSubscriber {
         return crosshair;
     }
 
-
+    private float angleToPx(float angle){
+        return angle*ANGLE_TO_PX_SPREAD_CONVERSION;
+    }
 }

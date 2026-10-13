@@ -6,7 +6,8 @@ import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.SyncEventHandler;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.core.ecs.entity.EntityStore;
-import com.mccurry.game.gameplay.system.attack.component.viewmodel.WeaponViewModelComponent;
+import com.mccurry.game.gameplay.system.attack.core.component.WeaponIdentityComponent;
+import com.mccurry.game.gameplay.system.attack.core.component.viewmodel.WeaponViewModelComponent;
 import com.mccurry.game.gameplay.system.crosshair.component.CrosshairSourceComponent;
 import com.mccurry.game.gameplay.system.crosshair.event.CrosshairChangeRequestEvent;
 import com.mccurry.game.gameplay.system.equipment.core.event.HandEquippedEvent;
@@ -82,7 +83,32 @@ public class FirstPersonEquipSystem implements EventSubscriber {
 
         var crosshairSource = entityStore.getComponent(equipped, CrosshairSourceComponent.class);
         if(crosshairSource != null){
-            eventBus.publish(new CrosshairChangeRequestEvent(crosshairSource.getCrosshairType()), null);
+            float angleChangePerSec = 0;
+            float minAngle = 0;
+            float maxAngle = 0;
+
+            var weaponIdentityComponent = entityStore.getComponent(equipped, WeaponIdentityComponent.class);
+            if(weaponIdentityComponent != null){
+                var spreadData = weaponIdentityComponent.getSpreadData();
+
+                if(spreadData != null){
+                    minAngle = spreadData.getMinimumSpread().getAngle();
+                    maxAngle = spreadData.getMaximumSpread().getAngle();
+
+                    var heat = spreadData.getHeat();
+                    angleChangePerSec = heat.getLevelChangeRatePerSecond() * ((maxAngle - minAngle)/heat.getMaxLevel());
+                }
+            }
+
+            eventBus.publish(
+                    new CrosshairChangeRequestEvent(
+                            crosshairSource.getCrosshairType(),
+                            angleChangePerSec,
+                            minAngle,
+                            maxAngle
+                    ),
+                    null
+            );
         }
 
         System.out.println("attached first person");

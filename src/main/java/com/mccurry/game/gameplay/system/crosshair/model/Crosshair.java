@@ -1,11 +1,8 @@
 package com.mccurry.game.gameplay.system.crosshair.model;
 
 import com.jme3.math.Vector3f;
-import com.jme3.renderer.RenderManager;
-import com.jme3.renderer.ViewPort;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
-import com.jme3.scene.control.AbstractControl;
 import com.mccurry.game.gameplay.system.crosshair.control.CrosshairControl;
 import lombok.Getter;
 import lombok.Setter;
@@ -14,7 +11,6 @@ import org.jetbrains.annotations.Nullable;
 @Getter
 @Setter
 public class Crosshair extends Node {
-    private final float RECOVERY_SPEED = 20f; // px/sec
 
     @Nullable private final Spatial rightSide;
     @Nullable private final Spatial leftSide;
@@ -22,12 +18,21 @@ public class Crosshair extends Node {
     @Nullable private Vector3f initialRightSidePos;
     @Nullable private Vector3f initialLeftSidePos;
 
-    private float currentSpread = 0f;
-    private float targetSpread = 0f;
+    private final float minSpreadPx;
+    private final float maxSpreadPx;
 
-    public Crosshair(@Nullable Spatial rightSide, @Nullable Spatial leftSide) {
+    private float currentSpreadPx = 0f;
+    private float targetSpreadPx = 0f;
+
+    private final float interpolationSpeedPxPerSec;
+
+    public Crosshair(@Nullable Spatial rightSide, @Nullable Spatial leftSide, float interpolationSpeedPxPerSec, float minSpreadPx, float maxSpreadPx) {
         this.rightSide = rightSide;
         this.leftSide = leftSide;
+
+        this.interpolationSpeedPxPerSec = interpolationSpeedPxPerSec;
+        this.minSpreadPx = minSpreadPx;
+        this.maxSpreadPx = maxSpreadPx;
 
         if (rightSide != null) {
             initialRightSidePos = rightSide.getLocalTranslation().clone();
@@ -40,11 +45,8 @@ public class Crosshair extends Node {
         addControl(new CrosshairControl(this));
     }
 
-    public void spread(float spreadAmountPx, float maxSpread) {
-        targetSpread = Math.min(
-                maxSpread,
-                targetSpread + spreadAmountPx
-        );
+    public void targetSpread(float spreadAmountPx) {
+        setTargetSpreadPx(spreadAmountPx);
     }
 
 }

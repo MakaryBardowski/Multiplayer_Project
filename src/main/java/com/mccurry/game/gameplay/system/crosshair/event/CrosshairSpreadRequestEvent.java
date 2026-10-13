@@ -1,10 +1,9 @@
 package com.mccurry.game.gameplay.system.crosshair.event;
 
 import com.mccurry.events.core.Event;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.Nullable;
+import lombok.Data;
 
-@Getter
-@RequiredArgsConstructor
-public class CrosshairSpreadRequestEvent implements Event {}
+@Data
+public class CrosshairSpreadRequestEvent implements Event {
+    float newAngle;
+}

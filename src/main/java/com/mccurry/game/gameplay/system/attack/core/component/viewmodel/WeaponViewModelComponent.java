@@ -1,8 +1,7 @@
-package com.mccurry.game.gameplay.system.attack.component.viewmodel;
+package com.mccurry.game.gameplay.system.attack.core.component.viewmodel;
 
 
 import com.jme3.anim.AnimComposer;
-import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.mccurry.game.gameplay.core.ecs.component.Component;
 import lombok.Builder;
