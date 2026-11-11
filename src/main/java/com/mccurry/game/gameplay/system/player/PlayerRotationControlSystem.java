@@ -10,16 +10,17 @@ import com.mccurry.game.gameplay.system.transform.TransformComponent;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
+
 @RequiredArgsConstructor
 public class PlayerRotationControlSystem implements AnalogListener {
     private final EntityStore entityStore;
 
-    private float yaw = 0;
-    private float pitch = 0;
-
     private final float mouseSensitivity = 90f;
     private final float maxPitch = 89f;
     private final float minPitch = -89f;
+
+    private final float[] tempAngles = new float[3];
 
     @Override
     public void onAnalog(String name, float value, float tpf) {
@@ -28,23 +29,41 @@ public class PlayerRotationControlSystem implements AnalogListener {
             return;
         }
 
-        if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_X_LEFT)) {
-            yaw += value * mouseSensitivity;
-        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_X_RIGHT)) {
-            yaw -= value * mouseSensitivity;
-        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_Y_UP)) {
-            pitch += value * mouseSensitivity;
-            pitch = Math.max(minPitch, Math.min(maxPitch, pitch));
-        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_Y_DOWN)) {
-            pitch -= value * mouseSensitivity;
-            pitch = Math.max(minPitch, Math.min(maxPitch, pitch));
-        }
-
         // Apply rotation to the player's visual node
         var transform = entityStore.getComponent(playerEntity, TransformComponent.class);
         if (transform == null) {
             return;
         }
+
+        var camera = entityStore.getComponent(playerEntity, CameraHolderComponent.class);
+        if (camera == null) {
+            return;
+        }
+
+
+        camera.getCurrentDesiredCameraRotation().toAngles(tempAngles);
+        var currentPitch = FastMath.RAD_TO_DEG * tempAngles[0];
+        var currentYaw = FastMath.RAD_TO_DEG * tempAngles[1];
+
+
+
+
+        float yawDelta = 0;
+        float pitchDelta = 0;
+        if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_X_LEFT)) {
+            yawDelta += value * mouseSensitivity;
+        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_X_RIGHT)) {
+            yawDelta -= value * mouseSensitivity;
+        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_Y_UP)) {
+            pitchDelta += value * mouseSensitivity;
+        } else if (name.equals(KeyMappingRegistry.MAPPING_MOUSE_MOVE_Y_DOWN)) {
+            pitchDelta -= value * mouseSensitivity;
+        }
+
+        var pitch = currentPitch + pitchDelta;
+        pitch = Math.clamp(pitch, minPitch, maxPitch);
+
+        var yaw = currentYaw + yawDelta;
 
         var rotation = new Quaternion();
         rotation.fromAngles(
@@ -54,14 +73,11 @@ public class PlayerRotationControlSystem implements AnalogListener {
 
         transform.getVisualNode().setLocalRotation(rotation);
 
-        var camera = entityStore.getComponent(playerEntity, CameraHolderComponent.class);
-        if (camera == null) {
-            return;
-        }
 
         camera.getCurrentDesiredCameraRotation().fromAngles(
                 FastMath.DEG_TO_RAD * pitch,
                 FastMath.DEG_TO_RAD * yaw,
                 0);
+
     }
 }
