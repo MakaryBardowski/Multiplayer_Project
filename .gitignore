@@ -10,4 +10,5 @@
 /libs/
 /.gradle
 /.gradle
+**/*.probe
 /settings.json
