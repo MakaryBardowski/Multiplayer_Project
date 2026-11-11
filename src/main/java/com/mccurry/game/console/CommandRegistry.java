@@ -85,7 +85,8 @@ public class CommandRegistry {
             var execOutput = executableCommand.run(orchestrationBus,gameEventBus,commandArgs);
             return greenToWhite(execOutput == null ? "Command executed successfully" : execOutput);
         } catch (Exception e){
-            return redToWhite("Exception during command execution: "+e.getMessage());
+            throw e;
+//            return redToWhite("Exception during command execution: "+e.getMessage());
         }
     }
 

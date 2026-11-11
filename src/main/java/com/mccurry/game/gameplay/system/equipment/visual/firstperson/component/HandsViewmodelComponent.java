@@ -6,9 +6,15 @@ import com.mccurry.game.gameplay.core.ecs.component.Component;
 
 public class HandsViewmodelComponent implements Component {
     private final SkinningControl skinningControl;
+    private final Node handsNode;
 
-    public HandsViewmodelComponent(Node humanoidRootNode){
-        this.skinningControl = humanoidRootNode.getChild("Armature").getControl(SkinningControl.class);
+    public HandsViewmodelComponent(Node handsNode){
+        this.skinningControl = handsNode.getChild("Armature").getControl(SkinningControl.class);
+        this.handsNode = handsNode;
+    }
+
+    public Node getRootHandsNode(){
+        return handsNode;
     }
 
     public Node getRightHandAttachmentNode(){

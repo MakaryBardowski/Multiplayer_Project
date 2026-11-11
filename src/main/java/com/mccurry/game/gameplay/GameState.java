@@ -205,9 +205,9 @@ public class GameState extends BaseAppState {
         fpHands.rotate(-FastMath.DEG_TO_RAD * 6, FastMath.DEG_TO_RAD * 4, 0);
         fpHands.getChild("Armature").getControl(AnimComposer.class).setCurrentAction("Hold_SMG_1");
 
-        var fpHandsNode = new Node("FP view node");
-        fpHandsNode.attachChild(fpHands);
-        fpCameraNode.attachChild(fpHandsNode);
+        var fpHandsParentNode = new Node("FP view node");
+        fpHandsParentNode.attachChild(fpHands);
+        fpCameraNode.attachChild(fpHandsParentNode);
 
         // if a node that we want to add to a viewport is not attached to root node, it crashes :) gotta love jme
         firstPersonRootNode.attachChild(fpCameraNode);
@@ -228,8 +228,8 @@ public class GameState extends BaseAppState {
         equipSystem = new EquipSystem(gameEventBus, entityStore);
 
         thirdPersonVisualEquipSystem = new ThirdPersonVisualEquipSystem(entityStore);
-        firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore, gameEventBus);
-        viewmodelSystem = new ViewmodelSystem(fpCameraNode, fpHandsNode, entityStore, ViewmodelSourceComponent.class);
+        firstPersonEquipSystem = new FirstPersonEquipSystem(entityStore, gameEventBus, fpHandsParentNode);
+        viewmodelSystem = new ViewmodelSystem(fpCameraNode, fpHandsParentNode, entityStore, ViewmodelSourceComponent.class);
         intentSystem = new IntentSystem(
                 new IntentSystems(attackSystem, equipSystem),
                 entityStore
@@ -291,7 +291,7 @@ public class GameState extends BaseAppState {
 
         var healthCalculationSystem = new HealthCalculationSystem();
         damageSystem = new DamageSystem(entityStore, healthCalculationSystem);
-        spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(entityStore);
+        spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(gameEventBus, entityStore);
 
 
         // NIE ZMIENIAC KOLEJNOSCI
