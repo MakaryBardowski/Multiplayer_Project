@@ -17,6 +17,8 @@ import com.mccurry.game.shared.settings.service.UserSettingsService;
 import com.mccurry.game.shared.ui.event.MainThreadResizeUiEvent;
 import com.mccurry.game.sound.SoundRegistry;
 import com.mccurry.game.sound.SoundService;
+import com.mccurry.game.threading.GameProcess;
+import com.mccurry.game.threading.ThreadingTools;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
@@ -47,6 +49,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        ThreadingTools.initialize(new GameProcess(this, Thread.currentThread()));
         stateManager.detach(
                 stateManager.getState(FlyCamAppState.class)
         );
@@ -66,8 +69,8 @@ public class Main extends SimpleApplication {
         soundRegistry.subscribe(orchestrationBus);
 
         var soundService = new SoundService(
-                Thread.currentThread(),
-                this,rootNonPositionalSoundNode,
+                this,
+                rootNonPositionalSoundNode,
                 soundRegistry
         );
         this.setSoundService(soundService);

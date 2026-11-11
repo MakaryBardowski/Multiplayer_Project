@@ -22,6 +22,7 @@ import com.mccurry.game.shared.ui.MenuType;
 import com.mccurry.game.shared.ui.event.MainThreadLocaleReloadedEvent;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeInEvent;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
+import com.mccurry.game.threading.ThreadingTools;
 import com.mccurry.game.util.event.EventHandlers;
 import lombok.Builder;
 import lombok.NonNull;
@@ -155,7 +156,7 @@ public class MenuManager implements EventSubscriber, ActionListener {
     }
 
     private synchronized void closeMenu(MenuType menuType) {
-        application.enqueue(() -> {
+        ThreadingTools.smartEnqueue(() -> {
             var menu = menuCache.get(menuType).cachedInstance;
 
             if (menuType.getMenuLayer() == MenuLayer.OVERLAY) {
@@ -167,7 +168,7 @@ public class MenuManager implements EventSubscriber, ActionListener {
     }
 
     private synchronized void openMenu(MenuType menuType) {
-        application.enqueue(() -> { // whole thing is enqueued so possibly creating a menu is on main thread
+        ThreadingTools.smartEnqueue(() -> { // whole thing is enqueued so possibly creating a menu is on main thread
             var menu = menuCache.get(menuType).cachedInstance;
 
             var stateManager = application.getStateManager();

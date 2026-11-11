@@ -5,6 +5,7 @@ import com.jme3.scene.Node;
 import com.mccurry.events.core.EventBus;
 import com.mccurry.events.core.EventSubscriber;
 import com.mccurry.events.core.handler.EventHandler;
+import com.mccurry.game.threading.ThreadingTools;
 import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.game.sound.event.PlayGlobalSoundRequestEvent;
 import com.mccurry.game.sound.event.PlayPositionalSoundRequestEvent;
@@ -14,7 +15,6 @@ import lombok.NonNull;
 public class SoundService implements EventSubscriber {
 //    private Application application;
 //    private AssetManager assetManager;
-//    private Thread mainJmeThread;
 //    private Node rootSoundNode;
 //    private SoundRegistry soundRegistry;
 
@@ -22,7 +22,7 @@ public class SoundService implements EventSubscriber {
     private EventHandler<PlayGlobalSoundRequestEvent> onGlobalSound;
 
     public SoundService(
-            Thread mainJmeThread, Application application,
+            Application application,
             Node rootSoundNode,
             SoundRegistry soundRegistry
     ){
@@ -38,24 +38,16 @@ public class SoundService implements EventSubscriber {
             var y = event.getY();
             var z = event.getZ();
             // unpacking event so when its reused before enqueud plays its all ok
-            if(Thread.currentThread() != mainJmeThread){
-                application.enqueue(()->{
-                    soundToPlay.playAt(x,y,z);
-                });
-                return;
-            }
-            soundToPlay.playAt(x,y,z);
+            ThreadingTools.smartEnqueue(()->{
+                soundToPlay.playAt(x,y,z);
+            });
         });
 
         this.onGlobalSound = EventHandlers.syncEventHandler((event, manager)->{
             var soundToPlay = soundRegistry.getGlobalSound(event.getSoundEntry());
-            if(Thread.currentThread() != mainJmeThread){
-                application.enqueue(()->{
-                    soundToPlay.play();
-                });
-                return;
-            }
-            soundToPlay.play();
+            ThreadingTools.smartEnqueue(()->{
+                soundToPlay.play();
+            });
         });
     }
 

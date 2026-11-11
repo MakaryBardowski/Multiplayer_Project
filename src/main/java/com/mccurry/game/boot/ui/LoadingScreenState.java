@@ -23,6 +23,7 @@ import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
 import com.mccurry.game.shared.settings.model.ResolutionSettings;
 import com.mccurry.game.shared.ui.transition.events.StartScreenFadeOutEvent;
+import com.mccurry.game.threading.ThreadingTools;
 import com.mccurry.game.util.event.EventSubscribers;
 import lombok.NonNull;
 import org.jetbrains.annotations.Nullable;
@@ -41,7 +42,7 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
 
         var orchestrationBus = getStateManager().getState(GameStateOrchestrator.class).getGameOrchestrationBus();
         orchestrationBus.subscribe(InitialBootCompleteEvent.class, this);
-        loadingProgressUpdateSubscriber(orchestrationBus, simpleApplication).subscribe(orchestrationBus);
+        loadingProgressUpdateSubscriber(orchestrationBus).subscribe(orchestrationBus);
 
         var guiNode = simpleApplication.getGuiNode();
 
@@ -148,12 +149,12 @@ public class LoadingScreenState extends BaseAppState implements SyncEventHandler
         );
     }
 
-    private EventSubscriber loadingProgressUpdateSubscriber(EventBus orchestrationBus, SimpleApplication application){
+    private EventSubscriber loadingProgressUpdateSubscriber(EventBus orchestrationBus){
         return EventSubscribers.syncUnsubscribingOnCondition(
                 AssetLoadingPercentAdvanceEvent.class,
                 orchestrationBus,
                 assetLoadingPercentAdvanceEvent -> {
-                    application.enqueue( () -> { // because asset loading happens on other thread
+                    ThreadingTools.enqueue( () -> { // because asset loading happens on other thread
                         var normalizedLoadingPercent = assetLoadingPercentAdvanceEvent.getNormalizedLoadPercent();
                         loadingProgressMaterialVector.setX(normalizedLoadingPercent);
                         if(normalizedLoadingPercent != 1) {

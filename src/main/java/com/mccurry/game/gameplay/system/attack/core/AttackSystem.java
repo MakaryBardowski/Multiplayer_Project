@@ -253,33 +253,6 @@ public class AttackSystem {
         weaponActionIdentity.setLastUsedGameTimeSeconds(gameTimeSeconds);
     }
 
-
-//    private static Vector3f getRandomDirectionInCone(
-//            Quaternion cameraRotation,
-//            float coneAngle
-//    ) {
-//        // Random azimuth around the cone
-//        float theta = FastMath.TWO_PI * FastMath.nextRandomFloat();
-//
-//        // Random point inside the cone.
-//        // This gives a uniform distribution over solid angle.
-//        float cosTheta = FastMath.cos(coneAngle);
-//        float cosPhi = 1.0f - FastMath.nextRandomFloat() * (1.0f - cosTheta);
-//        float sinPhi = FastMath.sqrt(1.0f - cosPhi * cosPhi);
-//
-//        // Direction in local space.
-//        // JME's UNIT_Z is the forward direction used here.
-//        Vector3f localDirection = new Vector3f(
-//                sinPhi * FastMath.cos(theta),
-//                sinPhi * FastMath.sin(theta),
-//                cosPhi
-//        );
-//
-//        // Transform local direction into camera/world space.
-//        return cameraRotation.mult(localDirection);
-//    }
-
-
     private static Vector3f getRandomDirectionInCone(
             Quaternion cameraRotation,
             float coneAngle,
