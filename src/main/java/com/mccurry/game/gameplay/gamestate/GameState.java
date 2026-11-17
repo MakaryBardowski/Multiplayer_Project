@@ -29,8 +29,8 @@ import com.mccurry.game.console.command.spectator.ToggleSpectatorModeEventHandle
 import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.console.model.GameContext;
 import com.mccurry.game.constants.CameraConstants;
+import com.mccurry.game.gameplay.core.ecs.CoreConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
-import com.mccurry.game.gameplay.core.ecs.system.EntitySystem;
 import com.mccurry.game.gameplay.debug.DebugCommandListener;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
 import com.mccurry.game.gameplay.system.animation.component.ManualAnimationControlComponent;
@@ -90,41 +90,48 @@ import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
 import com.mccurry.map.visuals.BlockWorld;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.mccurry.game.gameplay.core.ecs.CoreConstants.BLOCK_SIZE;
+import static com.mccurry.game.gameplay.core.ecs.CoreConstants.CHUNK_SIZE;
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
 
 
 public class GameState extends BaseAppState {
+    // "constants"
     private double gameTimeInSeconds = 0;
-    private EntityStore entityStore = new EntityStore();
+    private final EntityStore entityStore;
+    private final Node gameHudNode = new Node("Game HUD node");
+    private final Node universeNode = new Node();
+    private final Node gameStateNode = new Node();
 
-    private final List<EntitySystem> entitySystems = new ArrayList<>();
+    private final EventBus gameEventBus = new EventBus();
+    private FilterPostProcessor firstPersonBloomPostProcessor;
 
+    private ViewPort fpViewport;
+
+
+    // injected?
     private PlayerInputSystem playerInputSystem;
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
     private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
     private CrosshairSystem crosshairSystem;
     private FirstPersonEquipSystem firstPersonEquipSystem;
+
+    private MovementEntitySystem movementEntitySystem;
     private ViewmodelSystem viewmodelSystem;
+    private CameraSystem cameraSystem;
 
     private AttackSystem attackSystem;
     private DamageSystem damageSystem;
     private EquipSystem equipSystem;
 
-    private final EventBus gameEventBus = new EventBus();
-
-    private final Node gameHudNode = new Node("Game HUD node");
 
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
-    private ViewPort fpViewport;
 
-    private final Node universeNode = new Node();
-    private final Node gameStateNode = new Node();
-
+    private DebugCommandListener debugCommandListener;
     private final SyncEventHandler<GameplayChangePauseStateRequest> onPauseRequest = EventHandlers.syncEventHandler(
             (event, elm) -> {
                 switch (event.getDesiredNewState()) {
@@ -134,45 +141,22 @@ public class GameState extends BaseAppState {
             }
     );
 
-    private DebugCommandListener debugCommandListener;
 
-    private FilterPostProcessor firstPersonBloomPostProcessor;
 
-    GameState(){}
+
+
+
+
+
+    GameState(EntityStore entityStore) {
+        this.entityStore = entityStore;
+    }
 
 
     @Override
     protected void initialize(Application app) {
         var blockWorldNode = new Node();
-        int mapX = 40;
-        int mapY = 10;
-        int mapZ = 40;
-        var lm = new byte[mapX * mapY * mapZ];
-        var m = new Map(lm, mapX, mapY, mapZ, 3);
-
-        for (int x = 0; x < mapX; x++) {
-            for (int z = 0; z < mapZ; z++) {
-                m.setBlockIdAtPosition(x, 0, z, BlockType.DIRT.blockId);
-            }
-        }
-        for (int x = 0; x < mapX; x++) {
-            for (int z = 0; z < mapZ; z++) {
-                m.setBlockIdAtPosition(x, 1, z, BlockType.OFFICE_FLOOR.blockId);
-            }
-        }
-        for (int x = 1; x < mapX - 1; x++) {
-            for (int z = 1; z < mapZ - 1; z++) {
-                m.setBlockIdAtPosition(x, 1, z, BlockType.AIR.blockId);
-            }
-        }
-
-        m.setBlockIdAtPosition(1, 0, 1, BlockType.STONE.blockId);
-        m.setBlockIdAtPosition(0, 0, 1, BlockType.STONE.blockId);
-        m.setBlockIdAtPosition(1, 0, 0, BlockType.STONE.blockId);
-        m.setBlockIdAtPosition(11, 1, 11, BlockType.STONE.blockId);
-        m.setBlockIdAtPosition(12, 1, 11, BlockType.STONE.blockId);
-
-        var blockWorld = new BlockWorld(3, 16, mapX, mapY, mapZ, m, app.getAssetManager(), blockWorldNode);
+        var blockWorld = createBlockWorld(blockWorldNode);
 
 
         var assetManager = getApplication().getAssetManager();
@@ -298,13 +282,10 @@ public class GameState extends BaseAppState {
         spectatorModeEventHandler = new ToggleSpectatorModeEventHandler(gameEventBus, entityStore);
 
 
-        // NIE ZMIENIAC KOLEJNOSCI
-        entitySystems.add(new MovementEntitySystem(entityStore));
-        entitySystems.add(viewmodelSystem); // ! must be after movement so theres no 1 frame delay between hands and position of holder
+        movementEntitySystem = new MovementEntitySystem(entityStore);
 
         // todo: clonowac camere + cleanup po wylaczeniu gry
-        entitySystems.add(new CameraSystem(entityStore, app.getCamera()));
-        // NIE ZMIENIAC KOLEJNOSCI
+        cameraSystem = new CameraSystem(entityStore, app.getCamera());
 
         setupState();
         spawnMob(universeNode);
@@ -532,10 +513,10 @@ public class GameState extends BaseAppState {
         intentSystem.processQueued(tpf, gameTimeInSeconds);
 
 
-        for (var system : entitySystems) {
-            system.processEligibleEntities(tpf, gameTimeInSeconds);
-        }
-
+        movementEntitySystem.processEligibleEntities(tpf, gameTimeInSeconds);
+        // ! must be after movement so theres no 1 frame delay between hands and position of holder
+        viewmodelSystem.processEligibleEntities(tpf, gameTimeInSeconds);
+        cameraSystem.processEligibleEntities(tpf, gameTimeInSeconds);
 
         long t2 = System.nanoTime();
         long res = t2 - t1;
@@ -753,7 +734,7 @@ public class GameState extends BaseAppState {
                                 new SpreadData(
                                         new SpreadData.Spread(1f),
                                         new SpreadData.Spread(3f),
-                                        new SpreadData.Heat(10, 3f,-11f)
+                                        new SpreadData.Heat(10, 3f, -11f)
                                 )
                         )
                         .primaryActionIdentity(
@@ -814,7 +795,7 @@ public class GameState extends BaseAppState {
                                 new SpreadData(
                                         new SpreadData.Spread(2),
                                         new SpreadData.Spread(3f),
-                                        new SpreadData.Heat(10, 7.5f,-25.5f)
+                                        new SpreadData.Heat(10, 7.5f, -25.5f)
                                 )
                         )
                         .primaryActionIdentity(
@@ -873,5 +854,37 @@ public class GameState extends BaseAppState {
         );
 
         return weaponEntity1;
+    }
+
+    private BlockWorld createBlockWorld(Node blockWorldNode){
+        int mapX = 40;
+        int mapY = 10;
+        int mapZ = 40;
+        var lm = new byte[mapX * mapY * mapZ];
+        var m = new Map(lm, mapX, mapY, mapZ, 3);
+
+        for (int x = 0; x < mapX; x++) {
+            for (int z = 0; z < mapZ; z++) {
+                m.setBlockIdAtPosition(x, 0, z, BlockType.DIRT.blockId);
+            }
+        }
+        for (int x = 0; x < mapX; x++) {
+            for (int z = 0; z < mapZ; z++) {
+                m.setBlockIdAtPosition(x, 1, z, BlockType.OFFICE_FLOOR.blockId);
+            }
+        }
+        for (int x = 1; x < mapX - 1; x++) {
+            for (int z = 1; z < mapZ - 1; z++) {
+                m.setBlockIdAtPosition(x, 1, z, BlockType.AIR.blockId);
+            }
+        }
+
+        m.setBlockIdAtPosition(1, 0, 1, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(0, 0, 1, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(1, 0, 0, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(11, 1, 11, BlockType.STONE.blockId);
+        m.setBlockIdAtPosition(12, 1, 11, BlockType.STONE.blockId);
+
+        return new BlockWorld(BLOCK_SIZE, CHUNK_SIZE, mapX, mapY, mapZ, m, getApplication().getAssetManager(), blockWorldNode);
     }
 }
