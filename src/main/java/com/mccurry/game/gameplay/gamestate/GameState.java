@@ -1,4 +1,4 @@
-package com.mccurry.game.gameplay;
+package com.mccurry.game.gameplay.gamestate;
 
 import com.epagagames.particles.Emitter;
 import com.jme3.anim.AnimComposer;
@@ -96,6 +96,7 @@ import java.util.function.Consumer;
 
 import static com.mccurry.game.keyBinding.KeyMappingRegistry.*;
 
+
 public class GameState extends BaseAppState {
     private double gameTimeInSeconds = 0;
     private EntityStore entityStore = new EntityStore();
@@ -136,6 +137,8 @@ public class GameState extends BaseAppState {
     private DebugCommandListener debugCommandListener;
 
     private FilterPostProcessor firstPersonBloomPostProcessor;
+
+    GameState(){}
 
 
     @Override

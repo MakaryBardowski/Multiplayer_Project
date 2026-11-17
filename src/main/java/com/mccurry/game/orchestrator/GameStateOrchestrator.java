@@ -10,7 +10,7 @@ import com.mccurry.game.boot.events.AssetLoadingCompleteEvent;
 import com.mccurry.game.boot.events.InitialBootCompleteEvent;
 import com.mccurry.game.console.CheatConsoleLauncher;
 import com.mccurry.game.console.event.AttachConsoleListenerEvent;
-import com.mccurry.game.gameplay.GameState;
+import com.mccurry.game.gameplay.gamestate.GameState;
 import com.mccurry.game.gameplay.event.CloseGameEvent;
 import com.mccurry.game.menu.MenuManager;
 import com.mccurry.game.orchestrator.service.OnAssetLoadingDoneMainMenuLauncher;
