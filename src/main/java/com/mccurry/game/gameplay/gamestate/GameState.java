@@ -111,27 +111,29 @@ public class GameState extends BaseAppState {
 
     private ViewPort fpViewport;
 
+    // "constants"?
+    private CameraSystem cameraSystem;
+    private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
+    private FirstPersonEquipSystem firstPersonEquipSystem;
+    private CrosshairSystem crosshairSystem;
+    private ViewmodelSystem viewmodelSystem;
+    private DamageSystem damageSystem;
+
 
     // injected?
     private PlayerInputSystem playerInputSystem;
     private PlayerRotationControlSystem playerRotationControlSystem;
     private IntentSystem intentSystem;
-    private ThirdPersonVisualEquipSystem thirdPersonVisualEquipSystem;
-    private CrosshairSystem crosshairSystem;
-    private FirstPersonEquipSystem firstPersonEquipSystem;
 
     private MovementEntitySystem movementEntitySystem;
-    private ViewmodelSystem viewmodelSystem;
-    private CameraSystem cameraSystem;
 
     private AttackSystem attackSystem;
-    private DamageSystem damageSystem;
     private EquipSystem equipSystem;
 
-
     private ToggleSpectatorModeEventHandler spectatorModeEventHandler;
-
     private DebugCommandListener debugCommandListener;
+
+
     private final SyncEventHandler<GameplayChangePauseStateRequest> onPauseRequest = EventHandlers.syncEventHandler(
             (event, elm) -> {
                 switch (event.getDesiredNewState()) {
