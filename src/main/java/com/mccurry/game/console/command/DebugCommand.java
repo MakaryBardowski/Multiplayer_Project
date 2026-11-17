@@ -2,6 +2,7 @@ package com.mccurry.game.console.command;
 
 import com.mccurry.events.core.EventBus;
 import com.mccurry.game.console.event.ToggleHitboxDebugEvent;
+import com.mccurry.game.console.event.ToggleMapDebugEvent;
 import com.mccurry.game.console.event.ToggleRotationDebugEvent;
 import com.mccurry.game.console.exception.CommandParsingException;
 import lombok.NonNull;
@@ -27,7 +28,7 @@ public class DebugCommand extends ConsoleCommand {
                     false
             };
         }
-        if(trimmedArgumentsPart.equals("rotation -g")){
+        if(trimmedArgumentsPart.equals("attachments")){
             return new Object[]{
                     DebugType.ROTATION,
                     true
@@ -40,21 +41,33 @@ public class DebugCommand extends ConsoleCommand {
             };
         }
 
-        throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['rotation', 'rotation -g', 'hitbox']".formatted(trimmedArgumentsPart));
+        if(trimmedArgumentsPart.equals("chunk")){
+            return new Object[]{DebugType.MAP, ToggleMapDebugEvent.MapDebugType.CHUNK};
+        }
+
+        throw new CommandParsingException("Invalid debug argument '%s'. Valid values are: ['rotation', 'attachments', 'hitbox', 'chunk']".formatted(trimmedArgumentsPart));
     }
 
     @Override
     public @Nullable String run(EventBus orchestrationBus,@Nullable EventBus gameEventBus,  Object[] executionArgs) {
-        if(DebugType.ROTATION.equals(executionArgs[0])){
+        var targetDebugType = executionArgs[0];
+        if(DebugType.ROTATION.equals(targetDebugType)){
             if(gameEventBus != null) {
                 gameEventBus.publish(new ToggleRotationDebugEvent((boolean)executionArgs[1]), null);
                 return "Toggled rotation debug";
             }
             return "Cannot run command. Not currently in game.";
-        } else if(DebugType.HITBOX.equals(executionArgs[0])){
+        } else if(DebugType.HITBOX.equals(targetDebugType)){
             if(gameEventBus != null) {
                 gameEventBus.publish(ToggleHitboxDebugEvent.builder().build(), null);
                 return "Toggled hitbox debug";
+            }
+            return "Cannot run command. Not currently in game.";
+        } else if(DebugType.MAP.equals(targetDebugType)){
+            if(gameEventBus != null) {
+                var mapDebugType = (ToggleMapDebugEvent.MapDebugType) executionArgs[1];
+                gameEventBus.publish(ToggleMapDebugEvent.builder().mapDebugType(mapDebugType).build(), null);
+                return "Toggled %s debug".formatted(mapDebugType.toString().toLowerCase());
             }
             return "Cannot run command. Not currently in game.";
         }
@@ -63,6 +76,7 @@ public class DebugCommand extends ConsoleCommand {
 
     private enum DebugType{
         ROTATION,
-        HITBOX
+        HITBOX,
+        MAP
     }
 }

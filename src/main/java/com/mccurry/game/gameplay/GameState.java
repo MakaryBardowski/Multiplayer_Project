@@ -288,6 +288,7 @@ public class GameState extends BaseAppState {
 
 
         debugCommandListener = new DebugCommandListener(entityStore, assetManager);
+        universeNode.attachChild(debugCommandListener.getDebugNode());
 
         var healthCalculationSystem = new HealthCalculationSystem();
         damageSystem = new DamageSystem(entityStore, healthCalculationSystem);

@@ -4,6 +4,7 @@ import static dirty.client.ClientSynchronizationUtils.interpolateGrenadePosition
 import static dirty.client.ClientSynchronizationUtils.interpolateMobPosition;
 
 import dirty.client.appStates.ClientGameAppState;
+import dirty.debugging.DebugUtils;
 import dirty.game.map.Level;
 import com.jme3.app.state.AppStateManager;
 import com.jme3.asset.AssetManager;
