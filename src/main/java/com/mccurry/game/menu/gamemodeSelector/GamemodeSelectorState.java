@@ -36,7 +36,7 @@ public class GamemodeSelectorState extends MenuState {
         assetManager = application.getAssetManager();
 
         var singlePlayer = newGamemodeButton(LOCALE_KEY_SINGLEPLAYER, null, true);
-        var hostMultiplayer = newGamemodeButton(LOCALE_KEY_HOST_MULTIPLAYER, null, false);
+        var hostMultiplayer = newGamemodeButton(LOCALE_KEY_HOST_MULTIPLAYER, null, true);
         var joinMultiplayer = newGamemodeButton(LOCALE_KEY_JOIN_MULTIPLAYER, null, false);
 
         var baseResolution = ResolutionSettings.R_640x360;
@@ -59,6 +59,14 @@ public class GamemodeSelectorState extends MenuState {
 
         joinMultiplayer.setLocalTranslation(new Vector3f(buttonX, 190,1));
         hostMultiplayer.setLocalTranslation(new Vector3f(buttonX, 140,1));
+        hostMultiplayer.addClickCommands(button -> {
+            orchestrationBus.publish(
+                    OpenMenuRequestEvent.builder()
+                            .menuType(MenuType.LOBBY_HOST)
+                            .build(),
+                    null
+            );
+        });
 
 
         stateGuiNode.attachChild(singlePlayer);

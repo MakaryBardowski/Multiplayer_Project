@@ -13,6 +13,7 @@ public enum MenuType {
     SETTINGS(OVERLAY),
     GAMEMODE_SELECTOR(ROOT),
     LOBBY_SINGLEPLAYER(ROOT),
+    LOBBY_HOST(ROOT),
     PAUSE_MENU(OVERLAY);
 ;
     private final MenuLayer menuLayer;
