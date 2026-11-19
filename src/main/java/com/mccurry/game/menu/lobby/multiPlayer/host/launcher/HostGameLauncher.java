@@ -2,7 +2,6 @@ package com.mccurry.game.menu.lobby.multiPlayer.host.launcher;
 
 
 import com.jme3.app.state.AppStateManager;
-import com.mccurry.game.gameplay.gamestate.GameState;
 import com.mccurry.game.gameplay.gamestate.GameStateFactory;
 import com.mccurry.game.menu.main.event.CloseMenuRequestEvent;
 import com.mccurry.game.orchestrator.GameStateOrchestrator;
@@ -27,7 +26,7 @@ public class HostGameLauncher {
                     );
 
 
-                    var gameState = GameStateFactory.host();
+                    var gameState = GameStateFactory.host(launchParams.getRunningServer());
                     appStateManager.attach(gameState);
 
                     orchestrationBus.publish(new StartScreenFadeOutEvent(1), null);

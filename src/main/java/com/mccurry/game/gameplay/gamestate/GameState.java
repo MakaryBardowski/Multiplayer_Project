@@ -29,10 +29,10 @@ import com.mccurry.game.console.command.spectator.ToggleSpectatorModeEventHandle
 import com.mccurry.game.console.event.ToggleSpectatorModeEvent;
 import com.mccurry.game.console.model.GameContext;
 import com.mccurry.game.constants.CameraConstants;
-import com.mccurry.game.gameplay.core.ecs.CoreConstants;
 import com.mccurry.game.gameplay.core.ecs.entity.Entity;
 import com.mccurry.game.gameplay.debug.DebugCommandListener;
 import com.mccurry.game.gameplay.menu.pausemenu.event.GameplayChangePauseStateRequest;
+import com.mccurry.game.gameplay.network.NetworkService;
 import com.mccurry.game.gameplay.system.animation.component.ManualAnimationControlComponent;
 import com.mccurry.game.gameplay.system.animation.control.ManualAnimationControl;
 import com.mccurry.game.gameplay.system.attack.core.AttackSystem;
@@ -89,6 +89,8 @@ import com.mccurry.game.util.event.EventHandlers;
 import com.mccurry.map.model.BlockType;
 import com.mccurry.map.model.Map;
 import com.mccurry.map.visuals.BlockWorld;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.function.Consumer;
@@ -120,6 +122,10 @@ public class GameState extends BaseAppState {
     private DamageSystem damageSystem;
 
 
+    // injected.
+    @NotNull
+    private final NetworkService networkService;
+
     // injected?
     private PlayerInputSystem playerInputSystem;
     private PlayerRotationControlSystem playerRotationControlSystem;
@@ -150,8 +156,9 @@ public class GameState extends BaseAppState {
 
 
 
-    GameState(EntityStore entityStore) {
+    GameState(EntityStore entityStore, @NotNull NetworkService networkService) {
         this.entityStore = entityStore;
+        this.networkService = networkService;
     }
 
 
@@ -529,6 +536,7 @@ public class GameState extends BaseAppState {
     @Override
     protected void cleanup(Application app) {
         cleanupState();
+        networkService.destroy();
 
         System.out.println("Game event bus:");
         gameEventBus._debug_getSubscribers().forEach(

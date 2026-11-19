@@ -49,6 +49,7 @@ public class Main extends SimpleApplication {
 
     @Override
     public void simpleInitApp() {
+        setPauseOnLostFocus(false);
         ThreadingTools.initialize(new GameProcess(this, Thread.currentThread()));
         stateManager.detach(
                 stateManager.getState(FlyCamAppState.class)

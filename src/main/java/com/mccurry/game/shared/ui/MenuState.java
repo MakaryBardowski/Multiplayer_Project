@@ -15,6 +15,7 @@ public abstract class MenuState extends BaseAppState implements MenuService {
             "%s-$%s-stateGuiNode".formatted(this.getClass().getSimpleName(),System.identityHashCode(this))
     );
 
+    @Getter
     private final Node stateSceneNode = new Node(
             "%s-$%s-stateSceneNode".formatted(this.getClass().getSimpleName(),System.identityHashCode(this))
     );
