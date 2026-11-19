@@ -11,6 +11,7 @@ import com.mccurry.game.console.event.MainThreadConsoleCallbackEvent;
 import com.mccurry.game.gameplay.menu.pausemenu.PauseMenuState;
 import com.mccurry.game.keyBinding.KeyMappingRegistry;
 import com.mccurry.game.menu.gamemodeSelector.GamemodeSelectorState;
+import com.mccurry.game.menu.lobby.multiPlayer.client.ClientLobbyState;
 import com.mccurry.game.menu.lobby.multiPlayer.host.HostLobbyState;
 import com.mccurry.game.menu.lobby.singlePlayer.SinglePlayerLobbyState;
 import com.mccurry.game.menu.main.MainMenuState;
@@ -153,6 +154,13 @@ public class MenuManager implements EventSubscriber, ActionListener {
                         .build()
         );
 
+        menuCache.put(LOBBY_CLIENT,
+                CachedMenu.builder()
+                        .cachedInstance(null)
+                        .supplier(() -> new ClientLobbyState())
+                        .build()
+        );
+
         menuCache.put(PAUSE_MENU,
                 CachedMenu.builder()
                         .cachedInstance(null)
@@ -274,6 +282,9 @@ public class MenuManager implements EventSubscriber, ActionListener {
                 openMenu(GAMEMODE_SELECTOR);
                 return;
             } else if(currentRootMenuType.equals(LOBBY_HOST)){
+                openMenu(GAMEMODE_SELECTOR);
+                return;
+            }  else if(currentRootMenuType.equals(LOBBY_CLIENT)){
                 openMenu(GAMEMODE_SELECTOR);
                 return;
             } else if(currentRootMenuType.equals(GAMEMODE_SELECTOR)){

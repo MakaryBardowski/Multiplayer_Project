@@ -38,9 +38,8 @@
   "GAMEMODE_SELECTOR_JOIN_MP": "Join Game",
 
   "LOBBY_SP_CONFIRM": "Confirm",
-
-
   "LOBBY_HOST_START": "Start",
+  "LOBBY_CLIENT_READY": "Ready",
 
   "PAUSE_MENU_CONTINUE": "Continue",
   "PAUSE_MENU_MAIN_MENU": "Main menu",

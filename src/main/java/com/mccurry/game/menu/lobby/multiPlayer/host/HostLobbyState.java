@@ -58,7 +58,7 @@ import static com.mccurry.game.shared.ui.util.TextureUtil.toGrayscale;
 
 public class HostLobbyState extends MenuState implements ConnectionListener {
     private Server server;
-    private ClientRegistry clientRegistry;
+    private ClientRegistry clientRegistry = new ClientRegistry(3);
     private EventBus orchestrationBus;
     private final HostGameLauncher launcher = new HostGameLauncher();
     private boolean gameStartedByButton;
@@ -366,17 +366,17 @@ public class HostLobbyState extends MenuState implements ConnectionListener {
             if(ssr != null){
                 services.removeService(ssr);
             }
+
+            server.addConnectionListener(this);
         } catch (IOException e) {
-            System.err.println("Failed to start a server: " + e.getMessage());
-            confirmButton.setEnabled(false);
-            confirmButton.setText(e.getMessage());
+            throw new RuntimeException("Failed to start a server: " + e.getMessage());
         }
 
         // assert server.isClosed()
         try {
             server.start();
         } catch (KernelException e){
-            //handle port occupied
+            // todo: handle port occupied
             throw e;
         }
 
@@ -390,11 +390,16 @@ public class HostLobbyState extends MenuState implements ConnectionListener {
     }
 
 
+
     @Override
     protected void onDisable() {
         super.onDisable();
-        if (server != null && !gameStartedByButton) {
-            server.close();
+        if (server != null) {
+            server.removeConnectionListener(this);
+
+            if(!gameStartedByButton) {
+                server.close();
+            }
         }
         CameraConstants.applyDefaultTransform(getApplication().getCamera());
         getApplication().getViewPort().setBackgroundColor(ColorRGBA.Black);
@@ -520,12 +525,18 @@ public class HostLobbyState extends MenuState implements ConnectionListener {
     @Override
     public synchronized void connectionAdded(Server server, HostedConnection conn) {
         var index = clientRegistry.registerClient(conn);
+
+        if(index == null){
+            conn.close("Maximum player count reached. Ciao!");
+            return;
+        }
+
         var soldier = createSoldier(assetManager);
         soldier.setName("player_"+index);
-        
+        System.out.println("player_"+index+" joined!");
         ThreadingTools.enqueue(()->{
             getStateSceneNode().attachChild(soldier);
-            soldier.move(-6+index*2,5,0);
+            soldier.move(-2+index*4f,0,1);
         });
     }
 
@@ -536,6 +547,7 @@ public class HostLobbyState extends MenuState implements ConnectionListener {
         if(index == null){ // i.e the client got kicked because it tried to be the 5th player
             return;
         }
+        System.out.println("player_"+index+" left!");
 
         clientRegistry.deregisterClient(conn);
 

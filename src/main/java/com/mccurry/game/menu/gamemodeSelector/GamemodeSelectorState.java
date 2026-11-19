@@ -37,7 +37,7 @@ public class GamemodeSelectorState extends MenuState {
 
         var singlePlayer = newGamemodeButton(LOCALE_KEY_SINGLEPLAYER, null, true);
         var hostMultiplayer = newGamemodeButton(LOCALE_KEY_HOST_MULTIPLAYER, null, true);
-        var joinMultiplayer = newGamemodeButton(LOCALE_KEY_JOIN_MULTIPLAYER, null, false);
+        var joinMultiplayer = newGamemodeButton(LOCALE_KEY_JOIN_MULTIPLAYER, null, true);
 
         var baseResolution = ResolutionSettings.R_640x360;
         var buttonSize = singlePlayer.getPreferredSize();
@@ -58,6 +58,15 @@ public class GamemodeSelectorState extends MenuState {
         );
 
         joinMultiplayer.setLocalTranslation(new Vector3f(buttonX, 190,1));
+        joinMultiplayer.addClickCommands(button -> {
+            orchestrationBus.publish(
+                    OpenMenuRequestEvent.builder()
+                            .menuType(MenuType.LOBBY_CLIENT)
+                            .build(),
+                    null
+            );
+        });
+
         hostMultiplayer.setLocalTranslation(new Vector3f(buttonX, 140,1));
         hostMultiplayer.addClickCommands(button -> {
             orchestrationBus.publish(

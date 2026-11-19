@@ -16,8 +16,11 @@ public class ClientRegistry {
         this.clients = new HashMap<>(this.maxClientCount);
     }
 
-    public Integer registerClient(HostedConnection connection){
+    public @Nullable Integer registerClient(HostedConnection connection){
         var playerIndex = findAvailableClientIndex();
+        if(playerIndex == null){
+            return null;
+        }
         clients.put(playerIndex,connection);
         return playerIndex;
     }
@@ -48,13 +51,13 @@ public class ClientRegistry {
         return null;
     }
 
-    private Integer findAvailableClientIndex(){
+    private @Nullable Integer findAvailableClientIndex(){
         for(int i = MINIMUM_CLIENT_INDEX; i < maxClientCount; i++){
             if(!clients.containsKey(i)){
                 return i;
             }
         }
 
-        throw new RuntimeException("nice. Theres a bug in client index calculation ;d");
+        return null;
     }
 }

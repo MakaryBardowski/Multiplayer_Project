@@ -14,6 +14,7 @@ public enum MenuType {
     GAMEMODE_SELECTOR(ROOT),
     LOBBY_SINGLEPLAYER(ROOT),
     LOBBY_HOST(ROOT),
+    LOBBY_CLIENT(ROOT),
     PAUSE_MENU(OVERLAY);
 ;
     private final MenuLayer menuLayer;
